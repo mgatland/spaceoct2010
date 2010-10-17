@@ -1,0 +1,58 @@
+﻿Classic draworder
+
+
+       //classic draworder: under: cannon, double, rapid, spike, height, mega, cannon
+        // over: speed, bubble
+
+        public void DrawUnder(int xOff, int yOff, ScreenManager screenManager)
+        {
+            if (hasCannon && cannonWarmth > 0)
+            {
+                drawCannon((int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+            }
+
+            if (hasDouble)
+            {
+                drawImage(DoubleImage, (int)p.Position.X + xOff + 2, (int)p.Position.Y + yOff + 11, screenManager);
+            }
+
+            if (hasRapid)
+            {
+                drawImage(RapidImage, (int)p.Position.X + xOff - 3, (int)p.Position.Y + yOff + 22, screenManager);
+            }
+
+            if (hasSpike)
+            {
+                //add spikexoff, spikeyoff
+                drawImage(SpikeImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+            }
+
+            if (hasHeight)
+            {
+                drawImage(HeightImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff + 45, screenManager);
+            }
+
+            if (hasMega)
+            {
+                drawImage(MegaImage, (int)p.Position.X + xOff - 1, (int)p.Position.Y + yOff + 35, screenManager);
+            }
+
+            if (hasCannon)
+            {
+                drawImage(CannonImage, (int)p.Position.X + xOff + 4, (int)p.Position.Y + yOff + 1, screenManager);
+            }
+        }
+
+
+        public void DrawOver(int xOff, int yOff, ScreenManager screenManager)
+        {
+            if (hasSpeed)
+            {
+                drawImage(FastImage, (int)p.Position.X + xOff + 4, (int)p.Position.Y + yOff + 25, screenManager);
+            }
+
+            if (hasBubble)
+            {
+                drawImage(BubbleImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager, 1, p);
+            }
+        }

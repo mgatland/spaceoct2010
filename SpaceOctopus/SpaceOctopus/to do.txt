@@ -1,0 +1,301 @@
+PHASE 1 complete!
+PHASE 2 is Code Complete!
+
+PHASE 2.5
+[ ] Improve my tombstoning\resuming - I should resume to exactly where I was. At the least, I should capture player data at the moment of exiting
+tweak particle size and energy and duration.
+[ ] 2 player: when one player is dead, make all powerups 'revive' powerups that bring them back
+[ ] test the hell out of the serialization code
+[ ] collectable unlockable art sets!
+	- make all enemy navigation logic + spawning based on the _default_ character size
+	- make the background color part of the artset
+	- make the swipe-to-transition code
+
+better powerup icons make more sense
+
+PHASE 3 - really really want but don't need
+[ ] allow names on high scores.
+[ ] display score during singleplayer - on tap at the top of the screen? or on score change.
+[ ] during a special stage, your score increases constantly
+[ ] re-enable 4-way movement in the menu. Add a health\death system to support 4 way movement.
+[ ] further improve special stage performance - it feels jumpy.
+
+PHASE 4
+- player2's upgrades appear in player 1's colours
+- fix particle pushing, it's not hardly noticable.
+- special stage with rocks moving at different speeds - gives an awesome fo-parallax effect.
+- unit test powerup serialization!
+- fix serialization of powerups - right now some second-level upgrades are not serialized.
+- improve early level variety
+- upgrades are unlockable - once unlocked, aliens can drop them
+- menu transitions should use particlefx
+- temporary invulnerability powerup
+- make an upgrade come half way through each 'avoid' level
+- tweak stars & monks timings - once all visible stars are dead, the next wave must emerge immediately?
+- smoke trail behind the player ship? to give a sense of motion
+- sideways thrusters on the player ship
+- make the sound option actually work, and uncomment it to add to the options menu
+[ ] disable idle detection, if i add acceleromter support http://msdn.microsoft.com/en-us/library/microsoft.phone.shell.phoneapplicationservice.applicationidledetectionmode(VS.92).aspx
+- known issue - if after losing, you exit before the high score screen appears, your new high score will not be saved.
+
+- monks - spawn height difference is too close together.
+- background image! or particles, something. gradually darkening background?
+- use larger particles and make them last longer. For some weapons\enemy types anyway.
+
+Slightly later:
+- experiment with larger particles
+[ ] more colourful! art changes?
+- powerup: freeze time (with awesome visuals)
+- powerup: kill everything (including shots)
+
+- do some profiling!
+- make the 2 player live kills display not eat memory every frame.
+- transition from menu screen to gameplay screen and back.
+- fix all the 'New Color(...) needless instantiations.
+- big block aliens that fly in, sit near the front, and absorb several shots.
+- only drop powerups that the player needs
+- new powerup - a gun turret that sits in place, firing (or bounces left and right, perhaps)
+- 1 player + BOT
+- NO: recode to suit the fixed framerate - at least, make shots always happen every n frames.
+
+Later:
+- tombstoning? restoring? yes i need it...
+- main menu - you slide '1 player' item sideways to change the number of players? that's cooler. and there's a 'new game' option above it.
+- fix all memory allocation - no garbage collection in my game!
+- a solution for scaling up graphics and setting the particle size to match.
+- special level where you 'collect' instead of avoid
+- consider - instead of particles disappearing, they become part of the background - paint a picture.
+- when player is 'damaged', draw a line showing the height that the player is flying back up to.
+- now that particles are huge, they can be animated - i.e. spin horizontally in 3d by getting thinner and fatter.
+- freaking cool - instead of 'score' being a number, display all the creatures killed as tiny icons across the bottom of the screen.
+	at the end of each level, collapse them into a score number.
+- let users create their own artsets using in in-game pixel art editor.
+
+CHANGE LOG ================================================
+
+2010-10-11
+[x] fix icons having seen how bad they look in the unlocked emulator (thanks, unlocking hackers!)
+[x] the very first avoid level is far too hard. It should be brain-dead easy. The second one is probably ok.
+[x] fix shading bug! in two player, some shots appear grey
+[x] redo (some) screenshots now that monks look awesometastic.
+[x]	panoramic background 1000x800
+[x] disable cheats
+
+PHASE 2 - before submission
+[x] Test! Test for the hills!
+[x] 30 make a website with support information. (Google App Engine?)
+
+2010-10-10
+[x]	replace game.ico
+[x] redraw monks, boy they suck. (Yay, they look awesome now! pity I already took the screenshots :/   )
+[x] changed pixel size from 13 times to 12 times, to make it split evenly into 4x4 subpixels.
+[x] remove height boost powerup - it's confusing and lame.
+
+[x] trial mode
+[x]	 - limit to playing 30 levels. Don't count level 1
+[x]	 - display "TRIAL VERSION - 30 LEVELS LEFT" in the top right corner.
+[x]	 - when levels are all used up, display an upsell screen instead of progressing the level. This screen is a child screen of the main menu.
+[x]	 - clicking 'continue' after resuming lets you replay the level you got up to, then you see the upsell again. (You do NOT get to go one level higher each time you continue!)
+	  (note, the rational for this is that once the player buys the game, they can continue from their last trial version game.)
+[x]	 - starting a new game will top you up to 4 levels left, and then the upsell.
+
+2010-10-09
+
+[x] 20 improve drawing of joystick - it looks square and lame.
+[x] 10 make special stages a little shorter
+[x] decreased split screen stage difficulty a tiny bit.
+[=] 15 (can't reproduce) sometimes a star comes out too late, i.e. in level 13
+[x] 30 improve special stage performance - pool special bullets. 
+[x] 15 don't create bullets inside the shot loop + make bullets update consistently on first frame.
+[x] set a maximum lightwave cannon ammo (two pickups worth)
+[x] don't clear a special stage until all enemies are destroyed (fixed a bug where the enemies vanished on level end)
+[x] when you lose, clear the saved game.
+[x] serialize the player's powerups and score
+[x] serialize if a player is dead!
+[x] allow player to 'continue' from a saved game
+[x] made the game full screen, fixing a scaling issue i didn't know i had.
+[x] stop firing when there are no enemies.
+
+- arts:
+[x]	background.png 173x173 (maybe the player ship with a bubble)
+[x]	gamethumbnail 62x62 (optional for games?)
+[x]	Device Icon 99x99, 173x173
+[x]	Desktop icon 200x200
+[x]	1 - 8 screenshots
+
+[x] disallow 4-way movement
+
+I've decided, instead of true tombstoning, I will have a 'continue' button that works whether the game was reactivated or started afresh.
+The game won't tombstone properly and the player will have to start from the start of their current level.
+This is OK since each level is only 10 seconds long - but later, I might add true tombstoning to give a better experience after an interruption.
+
+Woo, Microsoft have given me a slot in the first submission set :) although this means I only have two days to finish :o
+
+2010-10-07
+[x] Apply for early submission! (I didn't make the game look too amazing though, I'm anxious that they won't prioritise me...)
+[x] 10 min rip out accelerometer entirely - because i can't test it, and it's not important, so it's a big risk with little reward.
+[x] 30 min fixed-in-place joystick control. Can't test this for usability :{ but it ought to work.
+[x] 20 persist options
+[x] 20 display application name, version information, and technical support contact information
+[x] 10 add a file format version number to the two high score files.
+
+2010-10-06
+(I performed the second test on a real device today)
+[x] 2 player: if there is a touch on the dead player's side, somehow communicate that it won't do anything (big cross displays on that half)
+[x] Music options are _required_ - SOUND ON\OFF, MUSIC ON\OFF
+[x] reset player height when 4 way movement is disabled (or make him drift downwards)
+[x] replace 'kills' with 'score'
+- used y axis not z axis. still kinda doesn't work. tweaked accelerometer stuff. Fixed some accelerometer crash bugs.
+
+
+
+2010-10-05
+- special levels show their variety right from the start.
+
+2010-10-04
+- (very crudely done) make player 2 look different (and her shots, too)
+
+2010-10-03
+* accelerometer control scheme (totally untested)
+* relative control scheme (totally untested)
+
+* show instructions <- -> for single and two player
+
+* two player mode
+** controls
+** menu option
+** seperate high scores
+** two player HUD with kills
+
+* created a crude art scaler - scales up tiny pixel art.
+* created crude art for all ship upgrades and pickups
+
+* sped up player movement - made the whole game easier and more fun.
+
+Decided to abandon the button control scheme.
+I already have relative control and accelerometer control. No need for buttons as well. Probably.
+
+2010-10-02
+* fix loading so all assets load during the loading screen.
+* a crude credits page.
+* crude high scores screen, with persistence.
+* show 'resume' when the game is paused (only if the game is still active, not lost.)
+
+2010-10-01
+* start of back button support - returns to menu, game can be resumed, but the menu does not say 'resume'
+
+kinda already done: make sure particles never\rarely exceed 5000
+
+2010-09-29
+* fixed particles failing when there are too many particle groups
+
+2010-09-27
+* got to try the game on a real prototype device!
+fun facts:
+	it slowed down at 5000 particles. Not horrifically
+	note, that was without music playing :/
+	garbage collection is not noticable
+	when a lot is going on, there was some framerate dropping (see: lightwave cannon!)
+	I'm still using the tutorial game icon
+	the accelerometer would be a better way to control it. (i might not get it the settings right though :/)
+	No clues on when the marketplace opens - although perhaps not the first week of october?
+
+2010-09-26
+* um, something useful?
+* messed with performance but i need a real test to know anything.
+* removed all old fonts, all new fonts now!
+* trying a different art style.
+* added music
+* readded projectiles pushing particles, made it fastish
+* fixed: controls stopped responding after respawning player
+* prioritised remaining work! 7 steps to release!
+
+2010-09-25
+* all sounds (i think...)
+* removed most of the old 'Alien Game' tutorial code.
+* scaled up to a full screen resolution - no idea if the game will perform at this resolution :/
+* crudely scaled up images and gameplay math so most things work as before.
+
+2010-09-24
+* all power ups work. power ups are drawn on the player.
+
+2010-09-21
+* power up objects spawn and may be collected
+
+2010-09-20
+
+* started a changelog!
+* added Stars - I now have all enemies from Space Octopus 1.0!
+
+RANDOM TIPS ================================================
+
+2010-10-10
+
+wondered why my screenshots were coming out at the wrong size. Here's the answer:
+http://www.robmiles.com/journal/2010/8/17/xna-games-and-windows-phone-screens.html
+if you leave the status bar active, [...] The game will be scaled to the display size minus the status bar area, and you'll get letterboxing 
+if you try to use the full 800x480 screen resolution. To make things a little harder, the bar size seems to be slightly larger in landscape than it is in portrait
+
+graphics.IsFullScreen = true;
+
+2010-10-05
+
+To see it in the menu, change Genre="Apps.Games" to Genre="EmptyScreen" - dont' forget to change it back!
+
+recolouring the same art set differently was a feature I was keen on, but now I don't want it
+It's easy to make a whole new art set, and recolouring the same one could lead to player disappointment. Each custom artset should feel special.
+
+2010-10-04
+
+Thinking on art-sets:
+
+I want very pixelly enemies to break into their base particles
+hand drawn enemies should use smaller particles (never smaller than 4x4)
+so each art set or each image must hold:
+- the image
+- the maximum particle size (from 4 to 13)
+some attacks break things into smaller or larger particles i guess.
+
+Are art sets just art or do they affect gameplay? This is the big awkward question.
+If they affect gameplay they are much richer.
+
+Maybe yes, but only in tiny ways.
+	Gold art set - more powerups.
+	fast art set, for skipping easy levels
+etc.
+
+Changing art sets on the fly - simple if creatures don't resize, etc.
+I wold like creatures to resize but it's pretty gorram crazy now that i use the size for all the logic
+so: logic off of the base size, and allow resizing.
+or: each creature knows how to reconfigure itself (to some extent) so octos don't get their rows too confused.
+or: just let things go crazy when you mess with art styles. That's fair.
+
+2010-10-03
+
+unlockables:
+
+1. classic art style
+2. golden art style
+3. powerups
+	start with speed, boost, rapidfire. Unlock these:
+	* lightwave
+	* bubble
+	* spirit shots
+
+
+2010-09-19
+
+on my 17" monitors, 1280x1024, set the emulator scale to 40% for almost perfect sizing.
+
+Graphic themes:
+
+1. comic book
+2. watercolour drawings
+3. pencil sketch with soft pencil shading
+4. papercraft
+
+Scaling the game up to a new resolution will be a challenge.
+	I should make all of the variables scale to screen size - player speed, shot speed, etc.
+
+ElapsedGameTime = time since last Update (could be called "ElapsedUpdateTime")
+ElapsedRealTime = time since last Draw (could be called "ElapsedDrawTime")
