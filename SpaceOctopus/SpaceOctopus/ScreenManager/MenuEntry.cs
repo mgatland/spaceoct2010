@@ -105,9 +105,11 @@ namespace AlienGameSample
         public virtual void Draw(MenuScreen screen, Vector2 position,
                                  bool isSelected, GameTime gameTime)
         {
-            // Draw the selected entry in yellow, otherwise white.
-            //matthew modified - this is not a touchscreen concept! Color color = isSelected ? Color.Yellow : Color.White;
+#if WINDOWS_PHONE
             Color color = Color.White;
+#else
+            Color color = isSelected ? new Color(255, 243, 155) : Color.White;
+#endif
             float scale = 1.0f;
 
             // Modify the alpha to fade text out during transitions.

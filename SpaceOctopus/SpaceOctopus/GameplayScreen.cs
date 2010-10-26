@@ -12,7 +12,9 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Media;
+#if WINDOWS_PHONE
 using Microsoft.Devices.Sensors;
+#endif
 using Microsoft.Xna.Framework.GamerServices;
 
 
@@ -34,10 +36,6 @@ namespace SpaceOctopus
     class GameplayScreen : GameScreen
     {
 
-        // Level changes, nighttime transitions, etc
-        float transitionFactor; // 0.0f == day, 1.0f == night
-        float transitionRate; // > 0.0f == day to night
-
         //Screen dimension consts
         const float screenScaleFactor = 1.0f;
         const float screenHeight = 800.0f * screenScaleFactor; // Real screen is 800.0f x 480.0f
@@ -50,8 +48,10 @@ namespace SpaceOctopus
         Player player2;
 
         //input stuff that should move to Inputs
+#if WINDOWS_PHONE
         AccelerometerReadingEventArgs accelState = null;
 //        Accelerometer Accelerometer;
+#endif
 
         //arg tight coupling
         MainMenuScreen menuScreen;
@@ -96,7 +96,11 @@ namespace SpaceOctopus
             }
             else
             {
+#if WINDOWS_PHONE
                 Core.Instance.Input.HandleInputs(input, accelState, player, player2);
+#else
+                Core.Instance.Input.HandleInputs(input, player, player2);
+#endif
                 if (Core.Instance.InTrialLimbo)
                 {
                     if (Core.Instance.Input.UpsellAction.Equals(UpsellAction.BUY))
@@ -297,7 +301,7 @@ EndType
             {
                 if (s.isNew)
                 {
-                    a = (byte)(highlightAlpha * 255f);
+                    a = (byte)(highlightAlpha * 255f * 0.75f + 255f * 0.25f);
                 }
                 else
                 {
@@ -419,7 +423,7 @@ EndType
         float xV;
         float yV;
 
-        public const int PowerUpTypesCount = 8; //sigh, remove this when i understand c#. Enum.GetValues()
+        public const int PowerUpTypesCount = 9; //sigh, remove this when i understand c#. Enum.GetValues()
         public const int DOUBLEFIRE = 0;
         public const int RAPIDFIRE = 1;
         public const int SPIKEWINGS = 2;
@@ -428,24 +432,23 @@ EndType
         public const int CANNON = 5;
         public const int FASTMOVE = 6;
         public const int BUBBLE = 7;
-        //no. public static enum PowerUpType { BUBBLE = 0, DOUBLEFIRE = 1, RAPIDFIRE = 2, SPIKEWINGS = 3, HEIGHTBOOST = 4, MEGASHOT = 5, CANNON = 6, FASTMOVE = 7};
+        public const int REVIVE_IMMEDIATE = 8; //immediate means it's not held and stored.
 
-        static int LastPowerType = -1;
-
-        private const float DefaultFallSpeed = Window.Height / 7142f; //0.07f  
+        private const float DefaultFallSpeed = Window.Height / 7142f;
 
         PowerUp NextP;
         PowerUp PrevP;
         int type;
 
-        static Texture2D DoubleImage;
-        static Texture2D RapidImage;
-        static Texture2D FastImage;
-        static Texture2D SpikeImage;
-        static Texture2D HeightImage;
-        static Texture2D MegaImage;
-        static Texture2D CannonImage;
-        static Texture2D BubbleImage;
+        static Sprite DoubleImage;
+        static Sprite RapidImage;
+        static Sprite FastImage;
+        static Sprite SpikeImage;
+        static Sprite HeightImage;
+        static Sprite MegaImage;
+        static Sprite CannonImage;
+        static Sprite BubbleImage;
+        static Sprite ReviveImage;
 
         public static void LoadImages(ScreenManager screenManager)
         {
@@ -457,6 +460,7 @@ EndType
             MegaImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrmega"), 6, screenManager.GraphicsDevice);
             CannonImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrcannon"), 6, screenManager.GraphicsDevice);
             BubbleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrbubble"), 6, screenManager.GraphicsDevice);
+            ReviveImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrrevive"), 6, screenManager.GraphicsDevice);
         }
 
         public void add(PowerUp other)
@@ -477,8 +481,15 @@ EndType
         {
             while (type < 0 || type >= PowerUpTypesCount)
             {
-                type = Core.Instance.Random.Next(PowerUpTypesCount);
-                if (type == SPIKEWINGS || type == HEIGHTBOOST) type = -1; //hacky disable spikewings and height boost.
+                if (Core.Instance.P2 != null && (!Core.Instance.P2.IsAlive || !Core.Instance.P.IsAlive) && Core.Instance.PowerUps == null) {
+                    //hack: you always get a revive powerup first when one player dies in a two player game.
+                    type = REVIVE_IMMEDIATE;
+                } else {
+                    type = Core.Instance.Random.Next(PowerUpTypesCount);
+                    if (type == SPIKEWINGS || type == HEIGHTBOOST) type = -1; //hacky disable spikewings and height boost.
+                    if (type == REVIVE_IMMEDIATE && (Core.Instance.P2 == null || (Core.Instance.P2.IsAlive && Core.Instance.P.IsAlive))) type = -1; //revive is only allowed in two player mode when one player is dead.
+                }
+
             }
 
             //Set our picture, which we didn't do in base()
@@ -492,6 +503,7 @@ EndType
                 case FASTMOVE: Picture = FastImage; break;
                 case CANNON: Picture = CannonImage; break;
                 case BUBBLE: Picture = BubbleImage; break;
+                case REVIVE_IMMEDIATE: Picture = ReviveImage; break;
             }
 
             this.type = type;
@@ -537,15 +549,40 @@ EndType
             }
         }
 
-        public void TestPickedUp(Player p)
+        public void TestPickedUp(Player p, Player p2)
         {
-            if (NextP != null) NextP.TestPickedUp(p);
+            if (NextP != null) NextP.TestPickedUp(p, p2);
             if (!IsAlive) return;
-            if (testCollision(p))
+            bool touchP1 = p != null && p.IsAlive && testCollision(p);
+            bool touchP2 = p2 != null && p2.IsAlive && testCollision(p2);
+            if (touchP1 && !touchP2)
+            {
+                giveTo(p);
+            }
+            if (!touchP1 && touchP2)
+            {
+                giveTo(p2);
+            }
+            if (touchP1 && touchP2)
             {
                 IsAlive = false;
-                p.Upgrade(type);
+                int dist1 = Math.Abs(centerX() - p.centerX());
+                int dist2 = Math.Abs(centerX() - p2.centerX());
+                if (dist1 <= dist2) //p1 gets a 1-pixel advantage :p
+                {
+                    giveTo(p);
+                }
+                else
+                {
+                    giveTo(p2);
+                }
             }
+        }
+
+        private void giveTo(Player p)
+        {
+            IsAlive = false;
+            p.Upgrade(type);
         }
 
         public override void Draw(int xOff, int yOff, ScreenManager screenManager)
@@ -553,6 +590,42 @@ EndType
             if (NextP != null) NextP.Draw(xOff, yOff, screenManager);
             base.Draw(xOff, yOff, screenManager);
         }
+    }
+
+    public class Sprite
+    {
+        public Texture2D Texture;
+        public Color[] ExplosionMap;
+        public int ExpWidth;
+        public int ExpHeight;
+
+        //useful globals
+        public static int LargestExpWidth = -1;
+        public static int LargestExpHeight = -1;
+
+        public Sprite(Texture2D texture) : this(texture, texture) { }
+
+        public Sprite(Texture2D texture, Texture2D explosionTexture)
+        {
+            this.Texture = texture;
+            if (explosionTexture != null) {
+                SetExplosionMapFrom(explosionTexture);
+            }
+        }
+
+        public void SetExplosionMapFrom(Texture2D texture)
+        {
+            ExplosionMap = new Color[texture.Width * texture.Height];
+            texture.GetData<Color>(ExplosionMap);
+            ExpWidth = texture.Width;
+            ExpHeight = texture.Height;
+            if (ExpWidth > LargestExpWidth) LargestExpWidth = ExpWidth;
+            if (ExpHeight > LargestExpHeight) LargestExpHeight = ExpHeight;
+
+        }
+
+        public int Width {get {return Texture.Width;}}
+        public int Height {get {return Texture.Height;}}
     }
 
     public abstract class Drawable
@@ -569,12 +642,9 @@ EndType
         private Color color = new Color(255, 255, 255, 255);
 
         public bool IsAlive; //bLive
-        public Texture2D Picture;
-        private Color[] ExplosionMap; //FIXME: Must be static or shared! at the moment there's one per enemy.
-        private int expWidth; //dimensions of the explosion map.
-        private int expHeight;
+        public Sprite Picture;
 
-        public Drawable(Texture2D picture)
+        public Drawable(Sprite picture)
         {
             this.Picture = picture;
             if (picture != null)
@@ -594,7 +664,7 @@ EndType
             if (!IsAlive) return;
             if (Picture != null)
             {
-                screenManager.SpriteBatch.Draw(Picture, new Rectangle((int)Position.X + xOff, (int)Position.Y + yOff, (int)Width, (int)Height), color);
+                screenManager.SpriteBatch.Draw(Picture.Texture, new Rectangle((int)Position.X + xOff, (int)Position.Y + yOff, (int)Width, (int)Height), color);
             }
             else
             {
@@ -604,14 +674,14 @@ EndType
             }
         }
 
-        public void ClearExplosionMap()
+ /*       public void ClearExplosionMap()
         {
             ExplosionMap = null;
             expWidth = 0;
             expHeight = 0;
         }
 
-        public void GetExplosionMap(Texture2D texture)
+        public void SetExplosionMapFrom(Texture2D texture)
         {
             if (ExplosionMap != null) return;
             ExplosionMap = new Color[texture.Width * texture.Height];
@@ -620,10 +690,10 @@ EndType
             expHeight = texture.Height;
         }
 
-        public void GetExplosionMap()
+        public void SetExplosionMapFrom()
         {
-            GetExplosionMap(Picture);
-        }
+            SetExplosionMapFrom(Picture);
+        }*/
 
         #region HelperMethods
 
@@ -669,6 +739,7 @@ EndType
 
         public bool testCollision(Drawable o)
         {
+            if (o == null) return false;
             int x = (int)Position.X;
             int y = (int)Position.Y;
             int oX = (int)o.Position.X;
@@ -681,26 +752,32 @@ EndType
             return false;
         }
 
-        public void MakeIntoParticles(ParticleType expType, int xOff, int yOff)
+        //TODO: move into Sprite.
+        public void MakeIntoParticles(Sprite picture, ParticleType expType, int xOff, int yOff)
         {
-            Debug.Assert(ExplosionMap != null);
+            Debug.Assert(picture.ExplosionMap != null);
 
-            ParticleGroup pGroup = Core.Instance.CreateParticleGroup(expWidth, expHeight, expType);
+            ParticleGroup pGroup = Core.Instance.CreateParticleGroup(picture.ExpWidth, picture.ExpHeight, expType);
             if (pGroup == null) return; //must have run out of particle groups.
             int pos = 0;
-            for (int y = 0; y < expHeight; y++)
+            for (int y = 0; y < picture.ExpHeight; y++)
             {
-                for (int x = 0; x < expWidth; x++)
+                for (int x = 0; x < picture.ExpWidth; x++)
                 {
                     //Debug.WriteLine(ExplosionMap[pos].B);
-                    Color color = ExplosionMap[pos];
+                    Color color = picture.ExplosionMap[pos];
                     if (color.A > 64 && y % Tweaking.particleSize == 0 && x % Tweaking.particleSize == 0)
                     {
-                        pGroup.AddParticle((int)(Position.X + x + xOff), (int)(Position.Y + y + yOff), color, expType, (float)x / (float)expWidth, (float)y / (float)expHeight);
+                        pGroup.AddParticle((int)(Position.X + x + xOff), (int)(Position.Y + y + yOff), color, expType, (float)x / (float)picture.ExpWidth, (float)y / (float)picture.ExpHeight);
                     }
                     pos++;
                 }
             }
+        }
+
+        public void MakeIntoParticles(ParticleType expType, int xOff, int yOff)
+        {
+            MakeIntoParticles(Picture, expType, xOff, yOff);
         }
 
         public void MakeIntoParticles(ParticleType expType)
@@ -717,7 +794,7 @@ EndType
         public int ROF; //Rate Of Fire
         public SoundEffect ShootSound;
         public ArtSet Art;
-        public Creature(Texture2D texture)
+        public Creature(Sprite texture)
             : base(texture)
         {
         }
@@ -730,7 +807,7 @@ EndType
         public SoundEffect DieSound;
         public int Points;
 
-        public Enemy(Texture2D texture, int defaultROF, float speed)
+        public Enemy(Sprite texture, int defaultROF, float speed)
             : base(texture)
         {
             Debug.Assert(texture != null);
@@ -745,7 +822,6 @@ EndType
             ROF = defaultROF;
             RefireTimer = Core.Instance.Random.Next(0, ROF); //random start so we don't fire in unison.
             Speed = speed;
-            GetExplosionMap();
         }
 
         public virtual void Shoot()
@@ -775,7 +851,8 @@ EndType
             Core core = Core.Instance;
             foreach (Shot s in core.shotArray)
             {
-                if (s != null)
+                //the next line checks out OWN IsAlive bool. That's because a previous shot may have killed us - we don't want to interact with any further shots if we're dead
+                if (IsAlive && s != null) 
                 {
                     if (s.IsAlive && s.HurtsEnemy > 0 && testCollision(s))
                     {
@@ -952,9 +1029,6 @@ EndType
             left = true;
             right = true;
             ShootSound = DefaultShootSound;
-            //slight performance waste - we get the explosion map twice for monk, once in Enemy() but it's wrong, then once in Monk()
-            ClearExplosionMap();
-            GetExplosionMap(Art.MonkSpecialPicture[2]);
         }
 
         public override void Explode(ParticleType expType)
@@ -1143,6 +1217,31 @@ EndType
 
     }
 
+    //Only instantiate during the loading phase, this loads art assets.
+    public class PlayerUpgradesArt
+    {
+        public Sprite DoubleImage;
+        public Sprite RapidImage;
+        public Sprite FastImage;
+        public Sprite SpikeImage;
+        public Sprite HeightImage;
+        public Sprite MegaImage;
+        public Sprite CannonImage;
+        public Sprite BubbleImage;
+
+        public PlayerUpgradesArt(ScreenManager screenManager, string playerSuffix)
+        {
+            DoubleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partdouble" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+            RapidImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partrapid" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+            FastImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partfast" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+            SpikeImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partspikes" + playerSuffix), 1, screenManager.GraphicsDevice);
+            HeightImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partheight" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+            MegaImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partmega" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+            CannonImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partcannon" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+            BubbleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partbubble" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
+        }
+    }
+
     public class PlayerUpgrades
     {
         const int boostShotCount = 1;
@@ -1176,23 +1275,17 @@ EndType
 
         public int AnyBonus; //number of bonuses we have.
 
-        static Texture2D DoubleImage;
-        static Texture2D RapidImage;
-        static Texture2D FastImage;
-        static Texture2D SpikeImage;
-        static Texture2D HeightImage;
-        static Texture2D MegaImage;
-        static Texture2D CannonImage;
-        static Texture2D BubbleImage;
+        public PlayerUpgradesArt Art;
 
         public static SoundEffect DefaultBeamSound;
         private SoundEffectInstance BeamSoundInstance;
 
 
-        public PlayerUpgrades(Player p)
+        public PlayerUpgrades(Player p, PlayerUpgradesArt art)
         {
             Debug.Assert(DefaultBeamSound != null);
             this.p = p;
+            this.Art = art;
             this.BeamSoundInstance = DefaultBeamSound.CreateInstance();
             BeamSoundInstance.IsLooped = true;
         }
@@ -1242,18 +1335,6 @@ EndType
             }
         }
 
-        public static void LoadImages(ScreenManager screenManager)
-        {
-            DoubleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partdouble"), Gfx.StandardScale, screenManager.GraphicsDevice);
-            RapidImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partrapid"), Gfx.StandardScale, screenManager.GraphicsDevice);
-            FastImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partfast"), Gfx.StandardScale, screenManager.GraphicsDevice);
-            SpikeImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partspikes"), 1, screenManager.GraphicsDevice);
-            HeightImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partheight"), Gfx.StandardScale, screenManager.GraphicsDevice);
-            MegaImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partmega"), Gfx.StandardScale, screenManager.GraphicsDevice);
-            CannonImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partcannon"), Gfx.StandardScale, screenManager.GraphicsDevice);
-            BubbleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partbubble"), Gfx.StandardScale, screenManager.GraphicsDevice);
-        }
-
         //note all parameters are by reference!
         //this is a mutator kind of thing.
         public void PushDown(ref float impact, ref double shakeImpact, ref bool loseUpgrades)
@@ -1270,11 +1351,25 @@ EndType
             }
         }
 
-        private void drawImage(Texture2D image, int x, int y, ScreenManager screenManager)
+        private void drawImage(Sprite image, int x, int y, ScreenManager screenManager)
         {
-            int xBack = (image.Width - p.Picture.Width) / 2;
-            int yBack = (image.Height - p.Picture.Height) / 2;
-            screenManager.SpriteBatch.Draw(image, new Rectangle(x - xBack, y - yBack, (int)(image.Width), (int)(image.Height)), Color.White);
+            int xBack = XBack(image);
+            int yBack = YBack(image);
+
+            screenManager.SpriteBatch.Draw(image.Texture, new Rectangle(x - xBack, y - yBack, (int)(image.Width), (int)(image.Height)), Color.White);
+        }
+
+        private int XBack(Sprite image)
+        {
+            return (image.Width - p.Picture.Width) / 2; ;
+        }
+
+        private int YBack(Sprite image)
+        {
+            //Hack to deal with unusually sized player 2
+            int pHeight = p.Picture.Height;
+            if (pHeight / Gfx.StandardScale % 2  == 0) pHeight -= Gfx.StandardScale;
+            return (image.Height - pHeight) / 2;
         }
 
         private Color beamColor = new Color(255, 255, 255, 0);
@@ -1299,7 +1394,7 @@ EndType
             if (hasSpike)
             {
                 //add spikexoff, spikeyoff
-                drawImage(SpikeImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.SpikeImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
         }
@@ -1309,37 +1404,37 @@ EndType
         {
             if (hasDouble)
             {
-                drawImage(DoubleImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.DoubleImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
             if (hasCannon)
             {
-                drawImage(CannonImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.CannonImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
             if (hasSpeed)
             {
-                drawImage(FastImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.FastImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
             if (hasHeight)
             {
-                drawImage(HeightImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.HeightImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
             if (hasRapid)
             {
-                drawImage(RapidImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.RapidImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
             if (hasMega)
             {
-                drawImage(MegaImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.MegaImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
             if (hasBubble)
             {
-                drawImage(BubbleImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
+                drawImage(Art.BubbleImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
         }
 
@@ -1368,7 +1463,7 @@ EndType
                 }
                 if (bubbleHealth <= 0)
                 {
-                    ExplodeComponent(true, BubbleImage);
+                    ExplodeComponent(true, Art.BubbleImage);
                     hasBubble = false;
                     AnyBonus--;
                 }
@@ -1624,6 +1719,27 @@ EndType
                         text = "Upgrade not needed";
                     }
                     break;
+                case PowerUp.REVIVE_IMMEDIATE:
+                    if (Core.Instance.P2 != null)
+                    {
+                        if (!Core.Instance.P.IsAlive)
+                        {
+                            text = "Rescued Player 1!";
+                            Core.Instance.P.IsAlive = true;
+                            Core.Instance.P.Position.Y = Window.Height - 1;
+                        }
+                        else if (!Core.Instance.P2.IsAlive)
+                        {
+                            text = "Rescued Player 2!";
+                            Core.Instance.P2.IsAlive = true;
+                            Core.Instance.P2.Position.Y = Window.Height - 1;
+                        }
+                        else
+                        {
+                            text = "Upgrade not needed";
+                        }
+                    }
+                    break;
                 default:
                     text = "Unrecognised upgrade " + type;
                     Debug.WriteLine("Unrecognised upgrade " + type);
@@ -1649,14 +1765,14 @@ EndType
             bubbleHealth = 0; //unneccessary
             bubbleTime = 0; //unneccessary
 
-            ExplodeComponent(hasDouble, DoubleImage);
-            ExplodeComponent(hasRapid, RapidImage);
+            ExplodeComponent(hasDouble, Art.DoubleImage);
+            ExplodeComponent(hasRapid, Art.RapidImage);
             //spike
-            ExplodeComponent(hasHeight, HeightImage);
-            ExplodeComponent(hasMega, MegaImage);
-            ExplodeComponent(hasSpeed, FastImage);
-            ExplodeComponent(hasCannon, CannonImage);
-            ExplodeComponent(hasBubble, BubbleImage);
+            ExplodeComponent(hasHeight, Art.HeightImage);
+            ExplodeComponent(hasMega, Art.MegaImage);
+            ExplodeComponent(hasSpeed, Art.FastImage);
+            ExplodeComponent(hasCannon, Art.CannonImage);
+            ExplodeComponent(hasBubble, Art.BubbleImage);
 
             hasDouble = false;
             hasRapid = false;
@@ -1669,14 +1785,11 @@ EndType
             AnyBonus = 0;
         }
 
-        private void ExplodeComponent(bool hasComponent, Texture2D texture)
+        private void ExplodeComponent(bool hasComponent, Sprite texture)
         {
             if (hasComponent)
             {
-                //Haxx, relies on the fact that the player never explodes so we can abuse its explosionmap.
-                p.ClearExplosionMap();
-                p.GetExplosionMap(texture);
-                p.MakeIntoParticles(ParticleType.SCATTER, p.Width / 2 - texture.Width / 2, p.Height / 2 - texture.Height / 2);
+                p.MakeIntoParticles(texture, ParticleType.FAST_SCATTER, -XBack(texture), -YBack(texture));
             }
         }
     }
@@ -1743,7 +1856,7 @@ EndType
         }
 
         public Player(int id)
-            : base(Core.Instance.Art.Player1)
+            : base(id == 0? Core.Instance.Art.Player1 : Core.Instance.Art.Player2)
         {
             Art = Core.Instance.Art;
             Position.X = Window.Width / 2 - Width / 2;
@@ -1752,28 +1865,21 @@ EndType
             //set keys.
 
             //Base creation (common to all players)
-
-            Upgrades = new PlayerUpgrades(this);
-
             HitSound = DefaultHitSound;
             PowerUpSound = DefaultPowerUpSound;
             ShootSound = Snd.PlayerShotSound;
 
-            IsAlive = true;
-            SuperY = DeathY - (int)Height;
-
-            if (Id == 0)
+            if (id == 0)
             {
-                r = 255;
-                g = 255;
-                b = 255;
+                Upgrades = new PlayerUpgrades(this, Core.Instance.Art.Player1Upgrades);
             }
             else
             {
-                r = 200;
-                g = 200;
-                b = 200;
+                Upgrades = new PlayerUpgrades(this, Core.Instance.Art.Player2Upgrades);
             }
+
+            IsAlive = true;
+            SuperY = DeathY - (int)Height;
 
             isAI = false;
             resetAbilities();
@@ -1789,19 +1895,6 @@ EndType
             Upgrades.MegaShots = 0;
             DesiredY = DefaultDesiredY;
         }
-
-        /*Function create2:playerType()
-                Local p:playerType = New playerType         
-                p.image = LoadImage("resources\gfx\fighter2.png")           
-                baseCreate(p)
-                p.x = windowType.width / 2 - p.width / 2
-                p.y = 400           
-                p.leftKey = KEY_A
-                p.rightKey = KEY_D
-                p.fireKey = KEY_W
-                p.id = 1            
-                Return p
-            EndFunction*/
 
         private void PushDown(float impact, double shakeImpact, bool loseUpgrades)
         {
@@ -1910,10 +2003,6 @@ EndType
                     //note, the player never explodes.
                 }
             }
-
-            PowerUp powerUp = core.PowerUps;
-            if (powerUp != null) powerUp.TestPickedUp(this);
-
         }
 
         /*collide with enemies, if we have spikes     
@@ -2122,7 +2211,7 @@ EndType
         }
     }
 
-    public enum ParticleType { SCATTER, FAST_SCATTER, FLASH, STILL };
+    public enum ParticleType { SCATTER_UNUSED, FAST_SCATTER, FLASH, STILL };
 
     public class PlayerData
     {
@@ -2216,45 +2305,25 @@ EndType
 
         private SavedGame()
         {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            Action<StreamReader> handler = delegate(StreamReader reader)
             {
-                if (isf.FileExists(filename))
+                int version = IOUtil.ReadInt(reader);
+                if (version == 1)
                 {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Open, isf))
+                    level = IOUtil.ReadInt(reader);
+                    if (level == -1)
                     {
-                        using (StreamReader reader = new StreamReader(isfs))
-                        {
-                            try
-                            {
-                                int version = IOUtil.ReadInt(reader);
-                                if (version == 1)
-                                {
-                                    level = IOUtil.ReadInt(reader);
-                                    if (level == -1)
-                                    {
-                                        isAlive = false;
-                                        return;
-                                    }
-                                    P = PlayerData.Deserialize(reader);
-                                    P2 =  PlayerData.Deserialize(reader);
-                                    isAlive = true;
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                Debug.WriteLine("Error in saved game file.");
-                                Debug.WriteLine(reader.ReadToEnd());
-                                isAlive = false;
-                            }
-                            finally
-                            {
-                                if (reader != null)
-                                    reader.Close();
-                            }
-                        }
+                        isAlive = false;
+                        return;
                     }
+                    P = PlayerData.Deserialize(reader);
+                    P2 = PlayerData.Deserialize(reader);
+                    isAlive = true;
                 }
-            }
+            };
+            Action<int> onFailure = delegate(int i) { isAlive = false; };
+
+            IOUtil.ReadFile(filename, handler, onFailure);
         }
 
         public void Delete()
@@ -2273,28 +2342,16 @@ EndType
             P2 = ( player2 == null) ? new PlayerData() : player2.GetPlayerData();
 
             //persist.
-            try
+
+            Action<StreamWriter> handler = delegate(StreamWriter writer)
             {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Create, isf))
-                    {
-                        using (StreamWriter writer = new StreamWriter(isfs))
-                        {
-                            writer.WriteLine(version);
-                            writer.WriteLine(level);
-                            P.Serialize(writer);
-                            P2.Serialize(writer);
-                            writer.Flush();
-                            writer.Close();
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                Debug.WriteLine("Error while saving game.");
-            }
+                writer.WriteLine(version);
+                writer.WriteLine(level);
+                P.Serialize(writer);
+                P2.Serialize(writer);
+            };
+
+            IOUtil.WriteFile(filename, handler, IOUtil.NothingOnError);
             if (Tweaking.DebugFileStuff) DebugFileStuff.DisplayFileContents(filename);
         }
 
@@ -2312,39 +2369,21 @@ EndType
     {
         public static void DisplayFileContents(string filename)
         {
-            Debug.WriteLine("Displaying file " + filename);
-            Debug.WriteLine("--- file begins ---");
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            Action<StreamReader> handler = delegate(StreamReader reader)
             {
-                if (isf.FileExists(filename))
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Open, isf))
-                    {
-                        using (StreamReader reader = new StreamReader(isfs))
-                        {
-                            try
-                            {
-                                Debug.WriteLine(reader.ReadToEnd());
-                                Debug.WriteLine("--- file ends ---");
-                            }
-                            catch (Exception)
-                            {
-                                Debug.WriteLine("Error reading file.");
-                            }
-                            finally
-                            {
-                                if (reader != null)
-                                    reader.Close();
-                            }
-                        }
-                    }
-                }
-            }
+                Debug.WriteLine("Displaying file " + filename);
+                Debug.WriteLine("--- file begins ---");
+                Debug.WriteLine(reader.ReadToEnd());
+                Debug.WriteLine("--- file ends ---");
+            };
+            IOUtil.ReadFile(filename, handler,IOUtil.NothingOnError);
         }
     }
 
     public static class IOUtil
     {
+        public static Action<int> NothingOnError = delegate(int i) { };
+
         public static int ReadInt(StreamReader reader)
         {
             string s = reader.ReadLine();
@@ -2356,6 +2395,141 @@ EndType
             string s = reader.ReadLine();
             return bool.Parse(s);
         }
+
+#if WINDOWS_PHONE
+        public static void WriteFile(string filename, Action<StreamWriter> handler, Action<int> onFailure)
+        {
+            try
+            {
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Create, isf))
+                    {
+                        using (StreamWriter writer = new StreamWriter(isfs))
+                        {
+                            handler.Invoke(writer);
+                            writer.Flush();
+                            writer.Close();
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                onFailure.Invoke(0);
+            }
+        }
+
+        public static void ReadFile(string filename, Action<StreamReader> handler, Action<int> onFailure)
+        {
+            bool success = false;
+            try
+            {
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    if (isf.FileExists(filename))
+                    {
+                        using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Open, isf))
+                        {
+                            using (StreamReader reader = new StreamReader(isfs))
+                            {
+                                try
+                                {
+                                    handler.Invoke(reader);
+                                    success = true;
+                                }
+                                finally
+                                {
+                                    if (reader != null)
+                                        reader.Close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                success = false;
+            }
+            if (success == false)
+            {
+                onFailure(0);
+            }
+        }
+
+        public static bool FileExists(string filename) {
+           try
+            {
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    if (isf.FileExists(filename))
+                    {
+                        return true;
+                    }
+                }
+            } catch (Exception) {
+            }
+            return false;
+        }
+#else
+        public static void WriteFile(string filename, Action<StreamWriter> handler, Action<int> onFailure)
+        {
+            bool success = false;
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(filename))
+                {
+                    handler.Invoke(writer);
+                    writer.Flush();
+                    writer.Close();
+                    success = true;
+                }
+            }
+            catch (Exception)
+            {
+                success = false;
+            }
+            if (!success)
+            {
+                onFailure(0);
+            }
+        }
+
+        public static void ReadFile(string filename, Action<StreamReader> handler, Action<int> onFailure)
+        {
+            bool success = false;
+            try
+            {
+                if (File.Exists(filename))
+                {
+                    using (StreamReader reader = new StreamReader(filename))
+                    {
+                        handler.Invoke(reader);
+                        reader.Close();
+                        success = true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                success = false;
+            }
+            if (!success)
+            {
+                onFailure(0);
+            }
+        }
+
+        public static bool FileExists(string filename)
+        {
+            if (File.Exists(filename))
+            {
+                return true;
+            }
+            return false;
+        }
+#endif
     }
 
     public class Options
@@ -2416,63 +2590,30 @@ EndType
 
         private void Save()
         {
-            try
+            Action<StreamWriter> handler = delegate(StreamWriter writer)
             {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Create, isf))
-                    {
-                        using (StreamWriter writer = new StreamWriter(isfs))
-                        {
-                            writer.WriteLine(version);
-                            writer.WriteLine(enableSound);
-                            writer.WriteLine(enableMusic);
-                            writer.WriteLine(verticalMotion);
-                            writer.Flush();
-                            writer.Close();
-                        }
-                    }
-                }
-            }
-            catch (Exception) //eww catch all
-            {
-                Debug.WriteLine("Error while saving options.");
-            }
+                writer.WriteLine(version);
+                writer.WriteLine(enableSound);
+                writer.WriteLine(enableMusic);
+                writer.WriteLine(verticalMotion);
+            };
+            Action<int> onFailure = delegate(int i) { };
+
+            IOUtil.WriteFile(filename, handler, onFailure);
         }
 
         private Options()
         {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            Action<StreamReader> handler = delegate(StreamReader reader)
             {
-                if (isf.FileExists(filename))
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Open, isf))
-                    {
-                        using (StreamReader reader = new StreamReader(isfs))
-                        {
-                            try
-                            {
-                                int version = IOUtil.ReadInt(reader);
-                                enableSound = IOUtil.ReadBool(reader);
-                                enableMusic = IOUtil.ReadBool(reader);
-                                verticalMotion = IOUtil.ReadBool(reader);
-                            }
-                            catch (FormatException)
-                            {
-                                Debug.WriteLine("Error in options file.");
-                                Debug.WriteLine(reader.ReadToEnd());
-                            }
-                            finally
-                            {
-                                if (reader != null)
-                                    reader.Close();
-                            }
-                        }
-                    }
-                }
-            }
+                int version = IOUtil.ReadInt(reader);
+                enableSound = IOUtil.ReadBool(reader);
+                enableMusic = IOUtil.ReadBool(reader);
+                verticalMotion = IOUtil.ReadBool(reader);
+            };
+            Action<int> onFailure = delegate(int i) { };
+            IOUtil.ReadFile(filename, handler, onFailure);
         }
-
     }
 
     //TODO: split out persistent options into the Options class
@@ -2501,12 +2642,39 @@ EndType
 
         public static bool ShowPerfStats = false; //false
         public const bool ParticleStressTest = false; //false makes particles last forever
-        public const int particleSize = 4; //4 is the minimum OK value.
+        public const int particleSize = 4; //4 is the minimum OK value. 12 gives you 1-to-1 particles to Big Pixels.
         public const bool AllowParticlePushing = true; //true - this drops the particle limit on my PC from 13,360 to 10,000
     }
 
     public class ParticleGroup : Drawable
     {
+        #region pooling
+        public const int PoolSize = 50; // in testing, 20 was the max in single player
+        private static Pool<ParticleGroup> Pool;
+
+        public static ParticleGroup Create(ParticleType expType)
+        {
+            Debug.Assert(Pool != null, "Pool not initialized");
+            ParticleGroup p = Pool.Fetch();
+            p.Initialize(expType);
+            return p;
+        }
+
+        private static void Release(ParticleGroup p)
+        {
+            Debug.Assert(Pool != null, "Pool not initialized");
+            //TODO: check that the object has not already been released. That could get weird.
+            Pool.Release(p);
+        }
+
+        public static void CreatePool()
+        {
+            if (Pool != null) return;
+            Pool = new Pool<ParticleGroup>(PoolSize);
+        }
+        #endregion
+
+
         float normalAlphaDrain;
         float alpha; //duplicates int a;
         Particle[] ptArray;
@@ -2514,28 +2682,39 @@ EndType
         Core core;
         ParticleType expType;
 
-        public ParticleGroup(int size, ParticleType expType)
+        //Should only be called by the pool
+        public ParticleGroup()
             : base(null)
         {
-            IsAlive = true;
             core = Core.Instance;
+            IsAlive = false; //Create me properly with Initialize
+            //This will only work if all artsets have already been loaded, so that we know the max size.
+            Debug.Assert(Sprite.LargestExpHeight > 0);
+            Debug.Assert(Sprite.LargestExpWidth > 0);
+            ptArray = new Particle[Sprite.LargestExpHeight*Sprite.LargestExpWidth/Tweaking.particleSize/Tweaking.particleSize];
+        }
+
+        public void Initialize(ParticleType expType)
+        {
+            IsAlive = true;
             alpha = 1.0f;
-            ptArray = new Particle[size];
             a = (byte)(alpha * 255f);
             this.expType = expType;
-            if (expType == ParticleType.SCATTER)
+            if (expType == ParticleType.SCATTER_UNUSED)
             {
                 normalAlphaDrain = 1f;
             }
             else if (expType == ParticleType.FAST_SCATTER)
             {
-                normalAlphaDrain = 1.75f;
+                normalAlphaDrain = 1f;
             }
             else
             {
                 normalAlphaDrain = 0.5f;
-            }
-            //normalAlphaDrain *= 0.5f;
+            }       
+            
+            //All of our particles from our last lifetime should have already been released
+            Debug.Assert(ptFirstEmpty == 0);
         }
 
         public void AddParticle(int x, int y, Color color, ParticleType expType, float relX, float relY)
@@ -2553,8 +2732,9 @@ EndType
         public override void Draw(int xOff, int yOff, ScreenManager screenManager)
         {
             if (!IsAlive) return;
-            foreach (Particle pt in ptArray) //we could stop at ptFirstEmpty-1
+            for (int i = 0; i < ptFirstEmpty; i++)
             {
+                Particle pt = ptArray[i];
                 if (pt != null)
                 {
                     pt.Draw(xOff, yOff, screenManager); //pass in color, alpha
@@ -2576,7 +2756,6 @@ EndType
             if (alpha < 0) alpha = 0;
             a = (byte)(alpha * 255f);
             bool canBePushed = Tweaking.AllowParticlePushing;
-            List<Shot> shots = new List<Shot>(10); //lame performance hack - recycle a shots list instead of creating one per particle.
             Core core = Core.Instance; //another unverified performance tweak. Pass it in so it doesn't have to be looked up. Can't think it makes a difference.
             for (int i = 0; i < ptFirstEmpty; i++)
             {
@@ -2584,14 +2763,13 @@ EndType
                 if (pt != null)
                 {
                     core.ActiveParticleCounter++;
-                    pt.Move(delta, a, canBePushed, expType, core, shots);
-                    if (shots.Count > 0) { shots.Clear(); }
+                    pt.Move(delta, a, canBePushed, core);
                 }
                 //We don't delete dead particles. They all disappear when the ParticleGroup does.
             }
         }
 
-        public void ReleaseParticles()
+        public void ReleaseToPool()
         {
             for (int i = 0; i < ptFirstEmpty; i++)
             {
@@ -2602,6 +2780,8 @@ EndType
                     ptArray[i] = null;
                 }
             }
+            ptFirstEmpty = 0;
+            ParticleGroup.Release(this);
         }
     }
 
@@ -2663,6 +2843,7 @@ EndType
         float xV;
         float yV;
         const float speed = 0.2f;
+        private ParticleType expType;
 
         public override void Move(int delta)
         {
@@ -2714,14 +2895,15 @@ EndType
             p.Position.Y = y;
             p.Width = Tweaking.particleSize;
             p.Height = Tweaking.particleSize;
+            p.expType = type;
             p.IsAlive = true;
             Core core = Core.Instance;
 
             switch (type)
             {
-                case ParticleType.SCATTER:
-                    p.xV = (float)(core.Random.NextDouble() * randomBetween(-0.7, 0.7));
-                    p.yV = (float)(core.Random.NextDouble() * randomBetween(-0.7, 0.7));
+                case ParticleType.SCATTER_UNUSED:
+                    p.xV = (float)(core.Random.NextDouble() * randomBetween(-1.5, 1.5));
+                    p.yV = (float)(core.Random.NextDouble() * randomBetween(-1.5, 1.5));
                     break;
                 case ParticleType.FAST_SCATTER:
                     p.xV = (float)(core.Random.NextDouble() * randomBetween(-1.5, 1.5));
@@ -2734,6 +2916,8 @@ EndType
                     p.r = 255;
                     p.g = 255;
                     p.b = 255;
+                    //p.xV = (float)(core.Random.NextDouble() * randomBetween(-1.5, 1.5));
+                    //p.yV = (float)(core.Random.NextDouble() * randomBetween(-1.5, 1.5));
                     break;
             }
         }
@@ -2765,10 +2949,8 @@ EndType
 
         }
 
-        //Hacks here: shots should always be passed in empty. It should be an instance variable, it's only passed in to save allocating an object (does it matter?)
-        public void Move(int delta, byte a, bool canBePushed, ParticleType expType, Core core, List<Shot> shots)
+        public void Move(int delta, byte a, bool canBePushed, Core core)
         {
-            Debug.Assert(shots.Count == 0, "the shots array should be empty. It's only passed in as a lame untested performance tweak.");
             Position.X += xV;
             Position.Y += yV;
 
@@ -2778,55 +2960,66 @@ EndType
             xV *= 0.98f;
             yV *= 0.98f;
 
+            //gravity:
+            if (expType==ParticleType.FAST_SCATTER) {
+                yV += 0.2f;
+            }
+
             //collisions
             if (canBePushed)
             {
                 //Find all shots that are vertically near us.
                 int cell = Core.PositionToIndex(Position);
-
                 List<Shot> shots1;
-                if (core.shotLookup.TryGetValue(cell, out shots1)) { shots.AddRange(shots1); }
+                if (core.shotLookup.TryGetValue(cell, out shots1)) 
+                {
+                    TryGettingPushedByShots(delta, shots1);
+                }
                 //check the cell above as well, in case we are near the edge of a cell.
                 List<Shot> shots2;
-                if (core.shotLookup.TryGetValue(cell - 1, out shots2)) { shots.AddRange(shots2); };
+                if (core.shotLookup.TryGetValue(cell - 1, out shots2)) {
+                    TryGettingPushedByShots(delta, shots2);
+                };
+            }
+        }
 
-                //Loop through the shots.
-                if (shots != null && shots.Count > 0)
+        private void TryGettingPushedByShots(int delta, List<Shot> shots)
+        {
+            //Loop through the shots.
+            if (shots != null && shots.Count > 0)
+            {
+
+                for (int i = 0; i < shots.Count(); i++)
                 {
-
-                    for (int i = 0; i < shots.Count(); i++)
+                    Shot s = shots[i];
+                    if (s.IsAlive)
                     {
-                        Shot s = shots[i];
-                        if (s.IsAlive)
+                        //Check if it is horizontally near us.
+                        double yDist = Math.Abs(s.centerX() - centerX()) / (s.Width * 2.5);
+                        if (yDist < 1d)
                         {
-                            //Check if it is horizontally near us.
-                            if (Math.Abs(s.centerX() - Position.X) < s.Width * 2.5)
+                            //check that it vertically passed us this frame.
+                            float heightDiff = s.Position.Y - Position.Y;
+                            int dir = Math.Sign(s.Speed);
+                            heightDiff *= dir;
+                            int deltaDist = (int)(dir * s.Speed * delta * 1.5); //the distance the shot moves per frame ( plus half a frame to be safe)
+                            if (heightDiff > 0 && heightDiff < deltaDist)
                             {
-                                //check that it vertically passed us this frame.
-                                float heightDiff = s.Position.Y - Position.Y;
-                                int dir = Math.Sign(s.Speed);
-                                heightDiff *= dir;
-                                int deltaDist = (int)(dir * s.Speed * delta * 1.5); //the distance the shot moves per frame ( plus half a frame to be safe)
-                                if (heightDiff > 0 && heightDiff < deltaDist)
-                                {
-                                    float multi = 4;
-                                    //if (expType == ParticleType.FAST_SCATTER) multi = 4;
-                                    int direction = Math.Sign(Position.X - s.centerX());
-                                    if (direction == 0) direction = 1; //we must be on one side of the shot or the other.
-                                    xV = xV + 0.0009f * multi * delta * direction;
-                                    //HAXX:
-                                    //r = Core.Instance.Random.Next(0, 255);
-                                    // g = Core.Instance.Random.Next(0, 255);
-                                    // b = Core.Instance.Random.Next(0, 255);
-                                    // }
-                                }
-
+                                float multi = Math.Min(4f, 6f - ((float)yDist * 6f)); // from distance 0-2 speed = 4f, after that there's a linear decline.
+                                int direction = Math.Sign(Position.X - s.centerX());
+                                if (direction == 0) direction = 1; //we must be on one side of the shot or the other.
+                                xV = xV + 0.005f * multi * delta * direction;
+                                //HAXX:
+                                /*r = (byte)Core.Instance.Random.Next(0, 255);
+                                g = (byte)Core.Instance.Random.Next(0, 255);
+                                b = (byte)Core.Instance.Random.Next(0, 255);//*/
                             }
 
                         }
-                    }
 
+                    }
                 }
+
             }
         }
 
@@ -2885,7 +3078,7 @@ EndType
         public const int PoolSize = 50;
         private static Pool<Shot> Pool;
 
-        public static Shot Create(Texture2D texture)
+        public static Shot Create(Sprite texture)
         {
             Debug.Assert(Pool != null, "Pool not initialized");
             Shot s = Pool.Fetch();
@@ -2923,7 +3116,7 @@ EndType
             IsAlive = false; //You must Initialize a shot to make it alive.
         }
 
-        public virtual void Initialize(Texture2D texture)
+        public virtual void Initialize(Sprite texture)
         {
             IsAlive = true;
             Picture = texture;
@@ -2965,7 +3158,7 @@ EndType
             s.HurtsPlayer = 30;
             s.Pierce = 0;
             s.Owner = -1;
-            s.expType = ParticleType.SCATTER;
+            s.expType = ParticleType.FAST_SCATTER;
             s.Position.X = s.offCenterX(x);
             s.Position.Y = y;
             s.Speed *= speedMulti;
@@ -2980,7 +3173,7 @@ EndType
             s.HurtsPlayer = 30;
             s.Pierce = 1; //difference from CreateHeart
             s.Owner = -1;
-            s.expType = ParticleType.SCATTER;
+            s.expType = ParticleType.FAST_SCATTER;
             s.Position.X = s.offCenterX(x);
             s.Position.Y = y;
             s.Speed *= speedMulti;
@@ -2995,7 +3188,7 @@ EndType
             s.HurtsPlayer = 30;
             s.Pierce = 0;
             s.Owner = -1;
-            s.expType = ParticleType.SCATTER;
+            s.expType = ParticleType.FAST_SCATTER;
             s.Position.X = x; //not off centered!
             s.Position.Y = y;
             s.Speed *= speedMulti;
@@ -3009,7 +3202,7 @@ EndType
             Shot s = Shot.Create(null); //we set the texture, height and width manually so we can pass null here.
             if (type == ShotType.Normal)
             {
-                s.Picture = Core.Instance.Art.PlayerShotBase; //should be different for player 1 and player 2.
+                s.Picture = playerId == 0?  Core.Instance.Art.PlayerShotBase1 :  Core.Instance.Art.PlayerShotBase2;
                 s.Pierce = 0;
                 s.expType = ParticleType.FAST_SCATTER;
                 s.Speed = -StandardShotSpeed;
@@ -3017,7 +3210,7 @@ EndType
             else
             {
                 s.Speed = -StandardShotSpeed * .83f;
-                s.expType = ParticleType.SCATTER;
+                s.expType = ParticleType.FAST_SCATTER;
                 s.Picture = Core.Instance.Art.PlayerShotMega;
                 s.Pierce = 1;
             }
@@ -3031,18 +3224,9 @@ EndType
             s.Speed *= SpeedMultiplier;
             s.Owner = playerId;
 
-            if (s.Owner == 0)
-            {
-                s.r = 255;
-                s.g = 255;
-                s.b = 255;
-            }
-            else
-            {
-                s.r = 100;
-                s.g = 100;
-                s.b = 100;
-            }
+            s.r = 255;
+            s.g = 255;
+            s.b = 255;
             return s;
         }
     }
@@ -3156,6 +3340,8 @@ EndType
         int spawnPeriod;
         int spawned;
         int spawnStart;
+        int scoreIncPeriod = 66;
+        int lastScoreInc = 0;
         Core core;
         int stage;
         float speedMulti;
@@ -3257,6 +3443,12 @@ EndType
                 {
                     spawnWallBlocks();
                 }
+            }
+            while (time > spawnStart + lastScoreInc + scoreIncPeriod)
+            {
+                lastScoreInc += scoreIncPeriod;
+                if (core.P.IsAlive) core.P.Score++;
+                if (core.P2 != null && core.P2.IsAlive) core.P2.Score++;
             }
         }
 
@@ -3453,8 +3645,7 @@ EndType*/
         public Player P;
         public Player P2;
         public List<Enemy> AlienList;
-        const int maxParticleGroups = 50; // in testing, 20 was the max in single player
-        ParticleGroup[] ptArray = new ParticleGroup[maxParticleGroups];
+        ParticleGroup[] ptArray = new ParticleGroup[ParticleGroup.PoolSize + 30]; //the +30 is kinda for no reason, to handle pool overflows, idontknow
 
         public ArtSet Art;
 
@@ -3652,8 +3843,8 @@ EndType*/
                 }
                 if (!pt.IsAlive)
                 {
-                    //Release my particles
-                    pt.ReleaseParticles();
+                    //Release the particle group and its particles
+                    pt.ReleaseToPool();
                     //swap me out of the active set.
                     if (i == ptFirstEmpty - 1)
                     {
@@ -3683,6 +3874,7 @@ EndType*/
             if (!Tweaking.isCheatsEnabled) return;
             cheatManyPowerUps = val;
             CreateMessage("extra powerups " + val, 0);
+            cheatTimer = 10;
         }
 
         int resetDelay = 3000;
@@ -3751,7 +3943,7 @@ EndType*/
                     {
                         scores.AddScoreAndSave(new Score(P.Score, P2.Score, level, GetRank(level, P.Kills), "", true));
                     }
-                    CreateMessage("Tap to restart", 7, 0);
+                    CreateMessage("Tap to restart", 6, 0);
                     lostMessage = true;
                 }
 
@@ -3795,6 +3987,10 @@ EndType*/
                         CreateDeathMessage("You are destroyed!");
                         SetLost();
                     }
+                    if (P2 != null && P2.IsAlive)
+                    {
+                        CreateMessage("Player 1 is lost!", 0);
+                    }
                 }
             }
 
@@ -3803,6 +3999,10 @@ EndType*/
                 if (P2.IsAlive)
                 {
                     P2.IsAlive = false;
+                    if (P.IsAlive)
+                    {
+                        CreateMessage("Player 2 is lost!", 0);
+                    }
                 }
             }
 
@@ -3863,7 +4063,6 @@ EndType*/
                     }
                     if (cheatManyPowerUps)
                     {
-                        cheatTimer = 10;
                         PowerUpChance = 0.5f;
                     }
                 }
@@ -3894,7 +4093,8 @@ EndType*/
 
             if (PowerUps != null)
             {
-                PowerUps.Move(delta);
+                PowerUps.TestPickedUp(P, P2);
+                PowerUps.Move(delta); //warning, PowerUps may become Null in this line.
             }
 
 
@@ -4134,40 +4334,54 @@ EndType*/
             }
             DrawThings(messageList.ToArray(), xOff, yOff, screenManager);
 
-
             if (Tweaking.ShowPerfStats)
             {
                 if (gameTime.IsRunningSlowly)
                 {
                     screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, 0, 45, 45), Color.RoyalBlue);
                 }
-                screenManager.SpriteBatch.DrawString(Message.GameFont, String.Format("Mem: {0:00000}KB", GC.GetTotalMemory(false) / 1024), new Vector2(10, 10), Color.Tomato);
-                screenManager.SpriteBatch.DrawString(Message.GameFont, "particles: " + ActiveParticleCounter, new Vector2(10, 50), Color.Tomato);
+                screenManager.SpriteBatch.DrawString(Message.GameFont, String.Format("Mem: {0:00000}KB", GC.GetTotalMemory(false) / 1024), new Vector2(10, 10), Color.DarkGray);
+                screenManager.SpriteBatch.DrawString(Message.GameFont, "particles: " + ActiveParticleCounter, new Vector2(10, 50), Color.DarkGray);
             }
 
             if (scores != null)
             {
                 scores.Draw(xOff, yOff, screenManager);
             }
-
+            
             if (P2 != null)
             {
                 //FIXME: uses memory every frame!
                 string msg1 = "Score: " + P.Score;
                 string msg2 = "Score: " + P2.Score;
                 drawString(msg2, 30, Window.Height - 30, 0, 0, screenManager);
-                drawString(msg1, Window.Width - 160, Window.Height - 30, 0, 0, screenManager);
+                drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
 
                 //display a cross when trying to move a dead player (if there is also an alive player)
                 if (!hasLost && !P2.IsAlive && Input.P2HasFingerDown)
                 {
-                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, 0, Window.Width/2, Window.Height), CrossColor);
+                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, 0, Window.Width / 2, Window.Height), CrossColor);
                 }
                 if (!hasLost && !P.IsAlive && Input.P1HasFingerDown)
                 {
                     screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(Window.Width / 2, 0, Window.Width / 2, Window.Height), CrossColor);
                 }
             }
+            else
+            {
+                //FIXME: uses memory every frame!
+                string msg1 = "Score: " + P.Score;
+                drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
+            }
+
+            if (Tweaking.isCheatsEnabled)
+            {
+                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(45, 0, 45, 20), Color.Coral);
+            }
+
+#if PROFILING
+            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(45, 20, 45, 20), Color.AliceBlue);
+#endif
 
             //draw touchanchors
             if (Tweaking.DrawTouchAnchors)
@@ -4392,14 +4606,14 @@ EndType*/
 
         public ParticleGroup CreateParticleGroup(int width, int height, ParticleType expType)
         {
-            if (ptFirstEmpty == maxParticleGroups - 1)
+            if (ptFirstEmpty == ptArray.Length - 1)
             {
-                DebugLog("Overload - too many particle groups"); //i don't recycle them yet so this always happens after 60 kills.
+                DebugLog("Overload - too many particle groups");
                 return null;
             }
             else
             {
-                ParticleGroup ptg = new ParticleGroup(width * height, expType);
+                ParticleGroup ptg = ParticleGroup.Create(expType);
                 ptArray[ptFirstEmpty] = ptg;
                 ptFirstEmpty++;
                 return ptg;
@@ -4821,7 +5035,11 @@ EndType*/
             }
         }
 
+#if WINDOWS_PHONE
         public void HandleInputs(InputState input, AccelerometerReadingEventArgs accelState, Player player, Player player2)
+#else
+        public void HandleInputs(InputState input, Player player, Player player2)
+#endif
         {
                 //Vector2 touchPos1 = new Vector2(-1, -1);
                 //Vector2 touchPos2 = new Vector2(-1, -1);
@@ -4839,6 +5057,8 @@ EndType*/
                 P2HasFingerDown = false;
 
                 UpsellAction = UpsellAction.NONE;
+
+                KeyboardState keyState = Keyboard.GetState();
 
                 //interpret touch screen presses
                 foreach (TouchLocation location in touchState)
@@ -4891,6 +5111,11 @@ EndType*/
                      }
                     
 
+                }
+
+                if (keyState.IsKeyDown(Keys.Space) || keyState.IsKeyDown(Keys.Enter))
+                {
+                    HasFingerDown = true;
                 }
 
                 if (HasFingerDown && !wasFingerDown)
@@ -4977,7 +5202,6 @@ EndType*/
                 if (player2 != null) ProcessTouchMovement(player2, touchXChange2, touchYChange2, touchAnchor2);
 
                 //use keyboard for cheats
-                KeyboardState keyState = Keyboard.GetState();
                 if (keyState.IsKeyDown(Keys.D1)) Core.Instance.CheatSkipLevelTo(1);
                 if (keyState.IsKeyDown(Keys.D2)) Core.Instance.CheatSkipLevelTo(2);
                 if (keyState.IsKeyDown(Keys.D3)) Core.Instance.CheatSkipLevelTo(3);
@@ -5017,6 +5241,30 @@ EndType*/
                 {
                     player.up = false;
                     player.down = true;
+                }
+
+                if (player2 != null)
+                {
+                    if (keyState.IsKeyDown(Keys.D))
+                    {
+                        player2.right = true;
+                        player2.left = false;
+                    }
+                    else if (keyState.IsKeyDown(Keys.A))
+                    {
+                        player2.right = false;
+                        player2.left = true;
+                    }
+                    if (keyState.IsKeyDown(Keys.W))
+                    {
+                        player2.up = true;
+                        player2.down = false;
+                    }
+                    else if (keyState.IsKeyDown(Keys.S))
+                    {
+                        player2.up = false;
+                        player2.down = true;
+                    }
                 }
 
                 //if (input.CurrentGamePadStates[0].DPad.Left == ButtonState.Pressed
@@ -5169,34 +5417,24 @@ EndType*/
         /// </summary>
         public static void SaveScores(ScoreSet set)
         {
-            try
+            Action<StreamWriter> handler = delegate(StreamWriter writer)
             {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                writer.WriteLine(fileFormatVersion);
+                for (int i = 0; i < set.Scores.Count() && i < 5; i++)
                 {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(set.ScoreFile, FileMode.Create, isf))
-                    {
-                        using (StreamWriter writer = new StreamWriter(isfs))
-                        {
-                            writer.WriteLine(fileFormatVersion);
-                            for (int i = 0; i < set.Scores.Count() && i < 5; i++)
-                            {
-                                Score s = set.Scores[i];
-                                writer.WriteLine(s.score.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                                writer.WriteLine(s.score2.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                                writer.WriteLine(s.level.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                                writer.WriteLine(s.rank.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                                writer.WriteLine(s.name.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                            }
-                            writer.Flush();
-                            writer.Close();
-                        }
-                    }
+                    Score s = set.Scores[i];
+                    writer.WriteLine(s.score.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    writer.WriteLine(s.score2.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    writer.WriteLine(s.level.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    writer.WriteLine(s.rank.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    writer.WriteLine(s.name.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 }
-            }
-            catch (Exception)
-            {
-                Debug.WriteLine("Error while saving highscores.");
-            }
+            };
+
+            Action<int> onError = delegate(int i) { Debug.WriteLine("Error while saving highscores."); };
+
+            IOUtil.WriteFile(set.ScoreFile, handler, onError);
+
             if (Tweaking.DebugFileStuff) DebugFileStuff.DisplayFileContents(set.ScoreFile);
         }
 
@@ -5205,42 +5443,26 @@ EndType*/
         /// </summary>
         public static void Populate(ScoreSet set)
         {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            Action<StreamReader> handler = delegate(StreamReader reader)
             {
-                if (isf.FileExists(set.ScoreFile))
+                int version = ReadInt(reader);
+                while (!reader.EndOfStream)
                 {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(set.ScoreFile, FileMode.Open, isf))
-                    {
-                        using (StreamReader reader = new StreamReader(isfs))
-                        {
-                            try
-                            {
-                                int version = ReadInt(reader);
-                                while (!reader.EndOfStream)
-                                {
-                                    int score1 = ReadInt(reader);
-                                    int score2 = ReadInt(reader);
-                                    int level = ReadInt(reader);
-                                    string rank = reader.ReadLine();
-                                    string name = reader.ReadLine();
-                                    Score score = new Score(score1, score2, level, rank, name, false);
-                                    set.AddScore(score);
-                                }
-                            }
-                            catch (FormatException)
-                            {
-                                Debug.WriteLine("Error in high scores");
-                                Debug.WriteLine(reader.ReadToEnd());
-                            }
-                            finally
-                            {
-                                if (reader != null)
-                                    reader.Close();
-                            }
-                        }
-                    }
+                    int score1 = ReadInt(reader);
+                    int score2 = ReadInt(reader);
+                    int level = ReadInt(reader);
+                    string rank = reader.ReadLine();
+                    string name = reader.ReadLine();
+                    Score score = new Score(score1, score2, level, rank, name, false);
+                    set.AddScore(score);
                 }
-            }
+            };
+
+            Action<int> onError = delegate(int i) {
+                Debug.WriteLine("Error in high scores."); 
+            };
+
+            IOUtil.ReadFile(set.ScoreFile, handler, onError);
         }
 
         private static int ReadInt(StreamReader reader)
@@ -5267,14 +5489,15 @@ EndType*/
                 grey.Octo = Gfx.Scale(c.Load<Texture2D>("gfx/octo"), Gfx.StandardScale, gd);
                 grey.Monk = Gfx.Scale(c.Load<Texture2D>("gfx/monk"), Gfx.StandardScale, gd);
                 grey.Player1 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter"), Gfx.StandardScale, gd);
-                grey.Player2 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter"), Gfx.StandardScale, gd);
+                grey.Player2 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter2"), Gfx.StandardScale, gd);
                 //grey.Pixel = Gfx.Scale(c.Load<Texture2D>("gfx/px"), Gfx.StandardScale, gd);
                 //grey.Cross = Gfx.Scale(c.Load<Texture2D>("gfx/cross"), Window.Width / 2, gd);
                 //grey.Joystick = Gfx.Scale(c.Load<Texture2D>("gfx/joystick"), Gfx.StandardScale, gd);
                 //grey.JoystickBase = Gfx.Scale(c.Load<Texture2D>("gfx/joystickbase"), Gfx.StandardScale, gd);
                 grey.Star = Gfx.Scale(c.Load<Texture2D>("gfx/star"), Gfx.StandardScale, gd);
 
-                grey.PlayerShotBase = Gfx.Scale(c.Load<Texture2D>("gfx/shot02"), Gfx.StandardScale, gd);
+                grey.PlayerShotBase1 = Gfx.Scale(c.Load<Texture2D>("gfx/shot01"), Gfx.StandardScale, gd);
+                grey.PlayerShotBase2 = Gfx.Scale(c.Load<Texture2D>("gfx/shot02"), Gfx.StandardScale, gd);
                 grey.PlayerShotMega = Gfx.Scale(c.Load<Texture2D>("gfx/shotmega"), Gfx.StandardScale, gd);
 
                 grey.ShotHeartPicture = Gfx.Scale(c.Load<Texture2D>("gfx/heart"), Gfx.StandardScale, gd);
@@ -5285,6 +5508,15 @@ EndType*/
                 grey.MonkSpecialPicture[0] = Gfx.Scale(c.Load<Texture2D>("gfx/monk01"), Gfx.StandardScale, gd);
                 grey.MonkSpecialPicture[1] = Gfx.Scale(c.Load<Texture2D>("gfx/monk10"), Gfx.StandardScale, gd);
                 grey.MonkSpecialPicture[2] = Gfx.Scale(c.Load<Texture2D>("gfx/monk00"), Gfx.StandardScale, gd);
+                
+                //Every variation of the monk should use the explosion of the ammoless monk.
+                //This is a a hack, but it _is_ a special case.
+                grey.Monk.SetExplosionMapFrom(grey.MonkSpecialPicture[2].Texture);
+                grey.MonkSpecialPicture[0].SetExplosionMapFrom(grey.MonkSpecialPicture[2].Texture);
+                grey.MonkSpecialPicture[1].SetExplosionMapFrom(grey.MonkSpecialPicture[2].Texture);
+
+                grey.Player1Upgrades = new PlayerUpgradesArt(screenManager, "");
+                grey.Player2Upgrades = new PlayerUpgradesArt(screenManager, "2");
             }
         }
 
@@ -5294,17 +5526,21 @@ EndType*/
         //public Texture2D Cross;
         //public Texture2D Joystick;
        // public Texture2D JoystickBase;
-        public Texture2D Star;
-        public Texture2D PlayerShotBase;
-        public Texture2D PlayerShotMega;
-        public Texture2D ShotHeartPicture;
-        public Texture2D ShotHeartBigPicture;
-        public Texture2D MonkShot;
-        public Texture2D Octo;
-        public Texture2D Monk;
-        public Texture2D[] MonkSpecialPicture = new Texture2D[3];
-        public Texture2D Player1;
-        public Texture2D Player2;
+        public Sprite Star;
+        public Sprite PlayerShotBase1;
+        public Sprite PlayerShotBase2;
+        public Sprite PlayerShotMega;
+        public Sprite ShotHeartPicture;
+        public Sprite ShotHeartBigPicture;
+        public Sprite MonkShot;
+        public Sprite Octo;
+        public Sprite Monk;
+        public Sprite[] MonkSpecialPicture = new Sprite[3];
+        public Sprite Player1;
+        public Sprite Player2;
+
+        public PlayerUpgradesArt Player1Upgrades;
+        public PlayerUpgradesArt Player2Upgrades;
 
         private ArtSet()
         {
@@ -5323,7 +5559,14 @@ EndType*/
 
         public const int StandardScale = 12;
 
-        public static Texture2D Scale(Texture2D source, int scale, GraphicsDevice graphicsDevice)
+        public static Sprite Scale(Texture2D source, int scale, GraphicsDevice graphicsDevice)
+        {
+            Texture2D scaled = ScaleTexture(source, scale, graphicsDevice);
+            Sprite s = new Sprite(scaled, scaled);
+            return s;
+        }
+
+        public static Texture2D ScaleTexture(Texture2D source, int scale, GraphicsDevice graphicsDevice)
         {
             if (scale == 1) return source;
 
@@ -5363,7 +5606,11 @@ EndType*/
 
         public static void UpdateFullVersionStatus()
         {
+#if WINDOWS
+            isTrialMode = false;
+#else
             isTrialMode = Guide.IsTrialMode;
+#endif
         }
     }
 
@@ -5399,40 +5646,24 @@ EndType*/
         }
         private TrialLimits()
         {
-            //load limit from file
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            if (!IOUtil.FileExists(filename))
             {
-                if (isf.FileExists(filename))
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Open, isf))
-                    {
-                        using (StreamReader reader = new StreamReader(isfs))
-                        {
-                            try
-                            {
-                                int version = IOUtil.ReadInt(reader);
-                                Debug.Assert(version == FILE_VERSION);
-                                LevelsLeft = IOUtil.ReadInt(reader);
-                            }
-                            catch (FormatException)
-                            {
-                                Debug.WriteLine("Error in trial limits file.");
-                                levelsLeft = 0;
-                                Debug.WriteLine(reader.ReadToEnd());
-                            }
-                            finally
-                            {
-                                if (reader != null)
-                                    reader.Close();
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    levelsLeft = LEVEL_LIMIT;
-                }
+                levelsLeft = LEVEL_LIMIT;
+                return;
             }
+
+            Action<StreamReader> handler = delegate(StreamReader reader)
+            {
+                int version = IOUtil.ReadInt(reader);
+                Debug.Assert(version == FILE_VERSION);
+                LevelsLeft = IOUtil.ReadInt(reader);
+            };
+
+            Action<int> onError = delegate(int i)
+            {
+                Debug.WriteLine("Error in trial limits file.");
+                levelsLeft = 0;
+            };
         }
 
         public void Decrement()
@@ -5456,26 +5687,12 @@ EndType*/
 
         private void Save()
         {
-            try
+            Action<StreamWriter> handler = delegate(StreamWriter writer)
             {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Create, isf))
-                    {
-                        using (StreamWriter writer = new StreamWriter(isfs))
-                        {
-                            writer.WriteLine(FILE_VERSION);
-                            writer.WriteLine(levelsLeft);
-                            writer.Flush();
-                            writer.Close();
-                        }
-                    }
-                }
-            }
-            catch (Exception) //eww catch all
-            {
-                Debug.WriteLine("Error while saving trial limits.");
-            }
+                writer.WriteLine(FILE_VERSION);
+                writer.WriteLine(levelsLeft);
+            };
+            IOUtil.WriteFile(filename, handler, delegate(int i) { Debug.WriteLine("Error while saving trial limits."); });
         }
     }
 
@@ -5493,12 +5710,11 @@ EndType*/
             Octo.RowHeight = (int)(ArtSet.grey.Octo.Height * 1.09);
 
             PowerUp.LoadImages(ScreenManager);
-            PlayerUpgrades.LoadImages(ScreenManager);
 
-            Gfx.Pixel = Gfx.Scale(c.Load<Texture2D>("gfx/px"), Gfx.StandardScale, gd);
-            Gfx.Cross = Gfx.Scale(c.Load<Texture2D>("gfx/cross"), Window.Width / 2, gd);
-            Gfx.Joystick = Gfx.Scale(c.Load<Texture2D>("gfx/joystick"), Gfx.StandardScale, gd);
-            Gfx.JoystickBase = Gfx.Scale(c.Load<Texture2D>("gfx/joystickbase"), Gfx.StandardScale, gd);
+            Gfx.Pixel = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/px"), Gfx.StandardScale, gd);
+            Gfx.Cross = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/cross"), Window.Width / 2, gd);
+            Gfx.Joystick = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/joystick"), Gfx.StandardScale, gd);
+            Gfx.JoystickBase = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/joystickbase"), Gfx.StandardScale, gd);
 
             Snd.PlayerShotSound = c.Load<SoundEffect>("snd/EugenSopot/menu_select22_edited");
             Snd.AlienDieSound = c.Load<SoundEffect>("snd/space sound jiggled");
@@ -5513,6 +5729,7 @@ EndType*/
             Message.GameFont = c.Load<SpriteFont>("fonts/leaguegothic");
             Particle.CreatePool();
             Shot.CreatePool();
+            ParticleGroup.CreatePool();
         }
     }
 }

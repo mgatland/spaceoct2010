@@ -39,6 +39,9 @@ namespace AlienGameSample
         public readonly GamePadState[] CurrentGamePadStates;
         public readonly GamePadState[] LastGamePadStates;
 
+        public readonly KeyboardState[] CurrentKeyboardStates;
+        public readonly KeyboardState[] LastKeyboardStates;
+
         /// <summary>
         /// Constructs a new input state.
         /// </summary>
@@ -46,6 +49,9 @@ namespace AlienGameSample
         {
             CurrentGamePadStates = new GamePadState[MaxInputs];
             LastGamePadStates = new GamePadState[MaxInputs];
+
+            CurrentKeyboardStates = new KeyboardState[MaxInputs];
+            LastKeyboardStates = new KeyboardState[MaxInputs];
         }
 
         /// <summary>
@@ -56,7 +62,7 @@ namespace AlienGameSample
         {
             get
             {
-                return IsNewButtonPress(Buttons.DPadUp);
+                return IsNewButtonPress(Buttons.DPadUp) || IsNewKeyPress(Keys.Up); 
             }
         }
 
@@ -68,7 +74,7 @@ namespace AlienGameSample
         {
             get
             {
-                return IsNewButtonPress(Buttons.DPadDown);
+                return IsNewButtonPress(Buttons.DPadDown) || IsNewKeyPress(Keys.Down);
             }
         }
 
@@ -80,7 +86,7 @@ namespace AlienGameSample
         {
             get
             {
-                return IsNewButtonPress(Buttons.A);
+                return IsNewButtonPress(Buttons.A) || IsNewKeyPress(Keys.Space) || IsNewKeyPress(Keys.Enter);
             }
         }
 
@@ -92,7 +98,7 @@ namespace AlienGameSample
         {
             get
             {
-                return IsNewButtonPress(Buttons.Back);
+                return IsNewButtonPress(Buttons.Back) || IsNewKeyPress(Keys.Escape);
             }
         }
 
@@ -105,7 +111,7 @@ namespace AlienGameSample
             get
             {
                 return IsNewButtonPress(Buttons.Back) ||
-                       IsNewButtonPress(Buttons.Start);
+                       IsNewButtonPress(Buttons.Start) || IsNewKeyPress(Keys.Escape);
             }
         }
 
@@ -116,8 +122,11 @@ namespace AlienGameSample
         {
             for (int i = 0; i < MaxInputs; i++)
             {
+                LastKeyboardStates[i] = CurrentKeyboardStates[i];
                 LastGamePadStates[i] = CurrentGamePadStates[i];
+
                 CurrentGamePadStates[i] = GamePad.GetState((PlayerIndex)i,GamePadDeadZone.IndependentAxes);
+                CurrentKeyboardStates[i] = Keyboard.GetState((PlayerIndex)i);
             }
         }
 
@@ -147,11 +156,32 @@ namespace AlienGameSample
         }
 
         /// <summary>
+        /// Helper for checking if a key was newly pressed during this update,
+        /// by the specified player.
+        /// </summary>
+        public bool IsNewKeyPress(Keys key, PlayerIndex playerIndex)
+        {
+            return (CurrentKeyboardStates[(int)playerIndex].IsKeyDown(key) &&
+                    LastKeyboardStates[(int)playerIndex].IsKeyUp(key));
+        }
+
+        /// <summary>
+        /// Helper for checking if a key was newly pressed during this update
+        /// </summary>
+        public bool IsNewKeyPress(Keys key)
+        {
+            return IsNewKeyPress(key, PlayerIndex.One);
+        }
+
+
+        /// <summary>
         /// Checks for a "menu select" input action from the specified player.
         /// </summary>
         public bool IsMenuSelect(PlayerIndex playerIndex)
         {
-            return IsNewButtonPress(Buttons.A, playerIndex) ||
+            return IsNewKeyPress(Keys.Space, playerIndex) ||
+                   IsNewKeyPress(Keys.Enter, playerIndex) || 
+                   IsNewButtonPress(Buttons.A, playerIndex) ||
                    IsNewButtonPress(Buttons.Start, playerIndex);
         }
 
@@ -160,7 +190,8 @@ namespace AlienGameSample
         /// </summary>
         public bool IsMenuCancel(PlayerIndex playerIndex)
         {
-            return IsNewButtonPress(Buttons.B, playerIndex) ||
+            return IsNewKeyPress(Keys.Escape, playerIndex) || 
+                   IsNewButtonPress(Buttons.B, playerIndex) ||
                    IsNewButtonPress(Buttons.Back, playerIndex);
         }
     }

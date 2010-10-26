@@ -54,7 +54,7 @@ namespace SpaceOctopus
         {
             SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
             int yOff = (int)(TransitionPosition * 160);
-            spriteBatch.DrawString(ScreenManager.Font, "SPACE OCTOPUS MONO       VERSION 1.0.0", new Vector2(10, Window.Height - 80 + yOff), Color.White, 0,
+            spriteBatch.DrawString(ScreenManager.Font, "SPACE OCTOPUS MONO       VERSION 1.1", new Vector2(10, Window.Height - 80 + yOff), Color.White, 0,
                                     new Vector2(0, 0), 0.6f, SpriteEffects.None, 0);
             spriteBatch.DrawString(ScreenManager.Font, "SUPPORT: WWW.NEWNORTHROAD.COM", new Vector2(10, Window.Height - 40 + yOff), Color.White, 0,
                     new Vector2(0, 0), 0.6f, SpriteEffects.None, 0);

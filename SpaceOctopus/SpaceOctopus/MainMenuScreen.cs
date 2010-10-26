@@ -5,6 +5,7 @@ using System.Text;
 using AlienGameSample;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace SpaceOctopus
 {
@@ -23,17 +24,12 @@ namespace SpaceOctopus
             MenuEntry onePlayerMenuEntry = new MenuEntry("1 PLAYER");
             MenuEntry twoPlayerMenuEntry = new MenuEntry("2 PLAYER");
             MenuEntry optionsMenuEntry = new MenuEntry("OPTIONS");
-            //MenuEntry creditsMenuEntry = new MenuEntry("CREDITS");
-            //MenuEntry exitMenuEntry = new MenuEntry("QUIT");
 
             // Hook up menu event handlers.
             startGameMenuEntry.Selected += StartGameMenuEntrySelected;
             onePlayerMenuEntry.Selected += StartOnePlayerGame;
             twoPlayerMenuEntry.Selected += StartTwoPlayerGame;
             optionsMenuEntry.Selected += OptionsMenuEntrySelected;
-            //creditsMenuEntry.Selected += CreditsMenuEntrySelected;
-
-            //exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
             if (withResume) MenuEntries.Add(startGameMenuEntry);
@@ -50,9 +46,23 @@ namespace SpaceOctopus
 
             MenuEntries.Add(optionsMenuEntry);
             //MenuEntries.Add(new MenuEntry("1 PLAYER + AI"));
-            //MenuEntries.Add(creditsMenuEntry);
-            //MenuEntries.Add(exitMenuEntry);
+
+#if WINDOWS
+            MenuEntry exitMenuEntry = new MenuEntry("QUIT");
+            exitMenuEntry.Selected += OnCancel;
+            MenuEntries.Add(exitMenuEntry);
+#endif
         }
+
+//#if WINDOWS
+//        public override void DrawExtraThings()
+//        {
+//            SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
+//            int yOff = (int)(TransitionPosition * 160);
+//            spriteBatch.DrawString(ScreenManager.Font, "BETA", new Vector2(400, 70 - yOff * 2), Color.White, 0,
+//                                    new Vector2(0, 0), 0.6f, SpriteEffects.None, 0);
+//        }
+//#endif
 
         void StartGameMenuEntrySelected(object sender, EventArgs e)
         {
@@ -93,11 +103,6 @@ namespace SpaceOctopus
             GameplayScreen screen = new GameplayScreen(this);
             ScreenManager.AddScreen(screen);
         }
-
-        //void CreditsMenuEntrySelected(object sender, EventArgs e)
-        //{
-        //    ScreenManager.AddScreen(new CreditsScreen());
-        //}
 
         void OptionsMenuEntrySelected(object sender, EventArgs e)
         {

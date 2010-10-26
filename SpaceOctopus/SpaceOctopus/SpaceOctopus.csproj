@@ -20,7 +20,8 @@
     <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
     <XnaWindowsPhoneManifestTemplate>Properties\WMAppManifest.xml</XnaWindowsPhoneManifestTemplate>
     <TileImage>Background.png</TileImage>
-    <TileTitle> </TileTitle>
+    <TileTitle>
+    </TileTitle>
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <GameStartupType>SpaceOctopus.SpaceOctGame</GameStartupType>
@@ -47,6 +48,19 @@
     <NoStdLib>true</NoStdLib>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <XnaCompressContent>false</XnaCompressContent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profiling|Windows Phone'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Windows Phone\Profiling\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;WINDOWS_PHONE PROFILING</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Devices.Sensors, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
@@ -83,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackgroundScreen.cs" />
+    <Compile Include="Profiling.cs" />
     <Compile Include="OptionsMenuScreen.cs" />
     <Compile Include="CreditsMenuScreen.cs" />
     <Compile Include="GameplayScreen.cs" />
@@ -102,6 +117,7 @@
     </None>
     <Compile Include="Program.cs" />
     <Compile Include="SpaceOctGame.cs" />
+    <None Include="Windows Copy of SpaceOctopus_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="GameThumbnail.png" />

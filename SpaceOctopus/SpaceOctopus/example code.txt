@@ -1,4 +1,4 @@
-﻿
+﻿foo
         /// <summary>
         /// Draw the grass, hills, mountains, and sun/moon. Handle transitioning
         /// between day and night as well.

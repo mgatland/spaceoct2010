@@ -1,77 +1,156 @@
-PHASE 1 complete!
-PHASE 2 is Code Complete!
+RELEASE 1.1
+- git commit
 
-PHASE 2.5
-[ ] Improve my tombstoning\resuming - I should resume to exactly where I was. At the least, I should capture player data at the moment of exiting
-tweak particle size and energy and duration.
-[ ] 2 player: when one player is dead, make all powerups 'revive' powerups that bring them back
-[ ] test the hell out of the serialization code
-[ ] collectable unlockable art sets!
-	- make all enemy navigation logic + spawning based on the _default_ character size
-	- make the background color part of the artset
-	- make the swipe-to-transition code
+RELEASE 1.2
+- change the title to 'Space Octopus Fever'?
+[ ] p2, when she has doublefire, her shots appear visibly beneath her gunbits :(
+[ ] when a shot is destroyed it should become particles like everything else.
+[ ] spirit shots death particles should float upwards
 
-better powerup icons make more sense
+Art Sets:
+[ ] support different art sets (hard coded, no transitions)
+[ ] crude artset transitions - transition forward every 10 levels
+[ ] make art sets affect the menus too
+[ ] draw Art Set 2: classic white & black invaders
+[ ] art set 3: gold
+[ ] art set 4: winter
+[ ] art set 5: pencil sketch
+[ ] art set 6: original SOM graphics
 
-PHASE 3 - really really want but don't need
-[ ] allow names on high scores.
-[ ] display score during singleplayer - on tap at the top of the screen? or on score change.
-[ ] during a special stage, your score increases constantly
-[ ] re-enable 4-way movement in the menu. Add a health\death system to support 4 way movement.
-[ ] further improve special stage performance - it feels jumpy.
 
-PHASE 4
-- player2's upgrades appear in player 1's colours
-- fix particle pushing, it's not hardly noticable.
-- special stage with rocks moving at different speeds - gives an awesome fo-parallax effect.
-- unit test powerup serialization!
-- fix serialization of powerups - right now some second-level upgrades are not serialized.
-- improve early level variety
-- upgrades are unlockable - once unlocked, aliens can drop them
-- menu transitions should use particlefx
-- temporary invulnerability powerup
-- make an upgrade come half way through each 'avoid' level
-- tweak stars & monks timings - once all visible stars are dead, the next wave must emerge immediately?
+- [maybe] art - make all enemy navigation logic + spawning based on the _default_ character size
+- [later] art - make the swipe-to-transition code
+- [later] art - make particle physics art-set-dependent
+
+
+========================
+You are not allowed to do anything below here until you have the new artsets.
+========================
+
+PHASE 2
 - smoke trail behind the player ship? to give a sense of motion
-- sideways thrusters on the player ship
+- when player is 'damaged', draw a line showing the height that the player is flying back up to.
+	-alternately, the engine glow effect could communicate this
+- menu transitions should use particlefx - particles must persist from menu to gameplay.
+[ ] make player temporarily invulnerable after being revived
+
+PHASE 3
+
+PHASE 2.4
+[ ] CPU profiling
+[?] crazy random occurances: rainbow particles, invisible level, bosses.
+- new 'hard' difficulty, unlockable.
+[ ] rationalise special stage generation code so i can tell what's going on.
+- improve early level variety
+[ ] big block aliens that fly in, sit near the front, and absorb several shots.
+	- need a flash-when-damaged system.
+	- Make a copy of the sprite with all pixels white
+	- when damaged, draw it at full-bright, and fade it out
+
+
+PHASE MAYBE
+[ ] make movement analogue, not binary. I need a real phone to test this on.
+- (may already be fixed) special stage performance - it feels jumpy
+[ ] a whole wave of 5 special stages in a row - SPACE OCTOPUS MONO: SPECIAL EDITION
+- bug: if 'Aliens got past you!', it says 'tap to restart' but the player may want to continue playing.
+[ ] single player score should fade in and out - when you got a multiple of 100, or when you're in a special stage.
+- improve high score boards - base on score, not level - level is extraoneous information
+- special stage with rocks moving at different speeds - gives an awesome fo-parallax effect.
+- temporary invulnerability powerup
+- sideways thruster particle effect on the player ship
+- powerup: freeze time (with awesome visuals)
+- powerup: kill everything (including shots)
+- make the score display not eat memory every frame.
+[ ] lightwave cannon particles should have less gravity\be lighter
+- new powerup - a gun turret that sits in place, firing (or bounces left and right, perhaps)
+- 1 player + BOT
+- special level where you 'collect' instead of avoid
+- performance: make particles larger when there are too many particles. can happen with lightwave cannon.
+[ ] allow names on high scores.
+[ ] consider using a noise overly as a transition effect, or when players are damaged, or just to generally noise things up
+- rainbow particles at some point, somewhere.
+
+Unimportant memory leaks:
+the drawStrings may be leaking memory.
+shooting may be leaking memory.
+
+PHASE NOT LIKELY
+[ ] test the hell out of the serialization code
+[ ] re-enable 4-way movement in the menu. Add a health\death system to support 4 way movement.
+- known issue - if after losing, you exit before the high score screen appears, your new high score will not be saved.
+- fix serialization of powerups - right now some second-level upgrades are not serialized.
+- upgrades are unlockable - once unlocked, aliens can drop them
+- make an upgrade come half way through each 'avoid' level
+- tweak stars & monks timings - once all visible stars are dead, the next wave must emerge immediately.
 - make the sound option actually work, and uncomment it to add to the options menu
 [ ] disable idle detection, if i add acceleromter support http://msdn.microsoft.com/en-us/library/microsoft.phone.shell.phoneapplicationservice.applicationidledetectionmode(VS.92).aspx
-- known issue - if after losing, you exit before the high score screen appears, your new high score will not be saved.
-
 - monks - spawn height difference is too close together.
 - background image! or particles, something. gradually darkening background?
 - use larger particles and make them last longer. For some weapons\enemy types anyway.
-
-Slightly later:
-- experiment with larger particles
-[ ] more colourful! art changes?
-- powerup: freeze time (with awesome visuals)
-- powerup: kill everything (including shots)
-
-- do some profiling!
-- make the 2 player live kills display not eat memory every frame.
-- transition from menu screen to gameplay screen and back.
-- fix all the 'New Color(...) needless instantiations.
-- big block aliens that fly in, sit near the front, and absorb several shots.
-- only drop powerups that the player needs
-- new powerup - a gun turret that sits in place, firing (or bounces left and right, perhaps)
-- 1 player + BOT
-- NO: recode to suit the fixed framerate - at least, make shots always happen every n frames.
-
-Later:
-- tombstoning? restoring? yes i need it...
 - main menu - you slide '1 player' item sideways to change the number of players? that's cooler. and there's a 'new game' option above it.
+
+
+PHASE NEVER
+- experiment with larger particles
+- fix all the 'New Color(...) needless instantiations.
+- only drop powerups that the player needs
+- NO: recode to suit the fixed framerate - at least, make shots always happen every n frames.
+[ ] Improve my tombstoning\resuming - I should resume to exactly where I was. At the least, I should capture player data at the moment of exiting
 - fix all memory allocation - no garbage collection in my game!
-- a solution for scaling up graphics and setting the particle size to match.
-- special level where you 'collect' instead of avoid
 - consider - instead of particles disappearing, they become part of the background - paint a picture.
-- when player is 'damaged', draw a line showing the height that the player is flying back up to.
 - now that particles are huge, they can be animated - i.e. spin horizontally in 3d by getting thinner and fatter.
 - freaking cool - instead of 'score' being a number, display all the creatures killed as tiny icons across the bottom of the screen.
 	at the end of each level, collapse them into a score number.
 - let users create their own artsets using in in-game pixel art editor.
 
 CHANGE LOG ================================================
+
+-- Release v 1.1
+
+2010-10-26
+[x] two player - redraw some upgrades for player 2 so they fit the different ship design
+[x] bumped version number displayed in options screen to 1.1
+[x] Fix app description to look good with no line breaks - remove the redundant second sentence that comes before the bullet points.
+[x] disable cheats
+
+2010-10-26
+performance: Trying to eliminate all memory allocation during gameplay.
+[x] generate explosion maps once per enemy type, not once per enemy instance! fixes a slow down at the start of large levels
+[x] pool ParticleGroups, pre-create their expensive particle[] arrays. The arrays must all have the maximum size that could be needed.
+[x] protip: (enum.Equals(anEnum)) allocates memory, (enum==enum) doesn't.
+[x] eliminated shot[] memory allocation in Particle.move()
+[x] virtually all memory allocation is now gone! 
+(but have these memory improvements have actually improved the game's smoothness? I'm not sure. I need to test that seperately.)
+
+2010-10-24
+gameplay:
+[x] If both players touch a powerup at the same time, the player who is most directly under it will get it. (Previously, player 1 always got the powerup.)
+[x] score is now displayed in single player.
+[x] during a special stage, your score increases constantly
+[x] in 2 player mode, when one player is lost there is a text message.
+[x] 2 player: when one player is dead, the surving player will get 'revive' powerups that bring them back
+[x] fixed an issue where if two shots hit an enemy at exactly the same time, both were destroyed. Now one hits 'first' and the other passes through.
+
+visuals:
+[x] new sprite for player 2 and player 2 shots.
+[x] layout: move player 1's score a bit left so higher scores can fit on screen
+[x] graphics: pointless changes to powerup art
+[x] graphics: added gravity to particles - maybe it's just me, but i think this looks amazing!
+[x] gravity does not affect lightwave cannon particles (still doesn't look that good though)
+[x] graphics: particles are swept away by passing shots
+[x] graphics: more energetic explosions, longer particle duration.
+[x] layout fix: in two player, the 'tap to restart' text used to appear on top of the players' scores.
+
+2010-10-18
+[x] Windows version, including
+[x] - file reading and writing
+[x] - menu navigation with keyboard
+[x] - 2 player keyboard controls
+[x] - exit button
+[x] - packaged ready to release
+[x] huge improvements to file reading\writing code to facilitate windows version.
+
+-- Release v 1.0!
 
 2010-10-11
 [x] fix icons having seen how bad they look in the unlocked emulator (thanks, unlocking hackers!)
@@ -81,7 +160,7 @@ CHANGE LOG ================================================
 [x]	panoramic background 1000x800
 [x] disable cheats
 
-PHASE 2 - before submission
+PHASE 0.2 - before submission
 [x] Test! Test for the hills!
 [x] 30 make a website with support information. (Google App Engine?)
 

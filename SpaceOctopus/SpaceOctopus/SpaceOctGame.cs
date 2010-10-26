@@ -26,8 +26,12 @@ namespace SpaceOctopus
         public SpaceOctGame()
         {
             graphics = new GraphicsDeviceManager(this);
+#if WINDOWS_PHONE
             graphics.IsFullScreen = true;
-
+#endif
+#if WINDOWS
+            //this.IsMouseVisible = true;
+#endif
             //Set the Windows Phone screen resolution
             graphics.PreferredBackBufferWidth = 480;
             graphics.PreferredBackBufferHeight = 800;
@@ -37,6 +41,11 @@ namespace SpaceOctopus
             #if DEBUG
                 //Guide.SimulateTrialMode = true;
             #endif
+
+#if PROFILING
+            Components.Add(new ProfilerComponent(this));
+#endif
+
             Version.UpdateFullVersionStatus(); //Warning: Expensive!
 
             // Frame rate is 30 fps by default for Windows Phone.
