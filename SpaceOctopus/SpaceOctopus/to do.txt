@@ -1,7 +1,31 @@
-RELEASE 1.1
-- git commit
+fix FIXME CMD
+
+every release:
+check cheats, debugging flags, and version number in Options menu. Check diffs.
+
+2010-11-13
+Goals: improve controls, reduce difficulty.
+
+* new relative-controls similar to other similar games.
+* increased player speed by 50%
+* made special stages easier (slower, more spread out)
+* the special 'split stage' won't spawn seeking blocks along the split
+* the enemy's max simultaneous beams increases more gradually
+* beams take longer to become harmful, and are harmful for less time, delivering less damage overall.
+* added, then removed, a two player control scheme using on-screen buttons. Oops.
+* made two player controls share the screen top-vs-bottom instead of left-vs-right. Much better idea.
+* fixed a bug with player's maximum shake
+
+New:
+3. submit! (check your diffs)
+4. add the good review to the description - also mention controls and updates
 
 RELEASE 1.2
+swap P1 and P2 positions, scores etc in 2player mode. so P1 is the single player player.
+[ ] more the score text to the top! Blog about how foolish I am
+[ ] leave more room for player fingers?
+holy crap i need playtesting. 38% scale on my screen seems to be about right
+
 - change the title to 'Space Octopus Fever'?
 [ ] p2, when she has doublefire, her shots appear visibly beneath her gunbits :(
 [ ] when a shot is destroyed it should become particles like everything else.
@@ -27,16 +51,26 @@ Art Sets:
 You are not allowed to do anything below here until you have the new artsets.
 ========================
 
+off topic: make a simple one-button game like canabalt, but online with everyone connected and seeing each other. Awesomeness.
+
+* alien beams shouldn't just be limited by maxbeams, the firing rate should be global, not per-alien. ish.
+* redo the whole level progression: go level by level, introducing one new challenge per level
+ e.g. the levels that add one to 'max beams' should always be octo-only levels.
+ basically change that method so that it goes level-by-level rather than feature-by-feature.
+ and if (level >= 4) maxbeams++; if (level >= 20) maxbeams++; a better way to do it.
+
 PHASE 2
 - smoke trail behind the player ship? to give a sense of motion
 - when player is 'damaged', draw a line showing the height that the player is flying back up to.
 	-alternately, the engine glow effect could communicate this
 - menu transitions should use particlefx - particles must persist from menu to gameplay.
 [ ] make player temporarily invulnerable after being revived
-
+[ ] monk fire sound starts too late
 PHASE 3
 
 PHASE 2.4
+[ ] ? analytics FTW! That is how I can save my game and conquer the market
+[ ] AI player - and consider making the game _always_ two player. This will help with balance.
 [ ] CPU profiling
 [?] crazy random occurances: rainbow particles, invisible level, bosses.
 - new 'hard' difficulty, unlockable.

@@ -123,6 +123,7 @@
     <Content Include="example code.txt" />
     <Content Include="Game.ico" />
     <Content Include="TextFile1.txt" />
+    <Content Include="touch buttons code.txt" />
     <Content Include="to do.txt" />
   </ItemGroup>
   <ItemGroup>

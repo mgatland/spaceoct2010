@@ -1,0 +1,53 @@
+﻿unused but maybe useful later:
+
+    public class TouchButtons
+    {
+        Vector2 pos;
+        Player owner;
+        Drawable leftButton;
+        Drawable rightButton;
+
+        public void Draw(int xOff, int yOff, ScreenManager screenManager)
+        {
+            leftButton.Draw(xOff, yOff, screenManager);
+            rightButton.Draw(xOff, yOff, screenManager);
+        }
+
+        private const int margin = 15;
+
+        public TouchButtons(int id, Player owner)
+        {
+            this.owner = owner;
+            if (id == 1)
+            {
+                pos = new Vector2(margin, Window.Height - Gfx.ArrowLeft.Height - margin);
+            }
+            else
+            {
+                pos = new Vector2(Window.Width - Gfx.ArrowLeft.Width * 2 - margin, Window.Height - Gfx.ArrowLeft.Height - margin);
+            }
+            leftButton = new Drawable(new Sprite(Gfx.ArrowLeft)); //FIXME: instantiating new Sprites is bad for performance!
+            leftButton.Position.X = pos.X;
+            leftButton.Position.Y = pos.Y;
+            leftButton.IsAlive = true;
+            leftButton.a = 100;
+
+            rightButton = new Drawable(new Sprite(Gfx.ArrowRight)); //FIXME: instantiating new Sprites is bad for performance!
+            rightButton.Position.X = pos.X + margin + Gfx.ArrowLeft.Width;
+            rightButton.Position.Y = pos.Y;
+            rightButton.IsAlive = true;
+            rightButton.a = 100;
+        }
+
+        public void CheckTouch(Vector2 pos)
+        {
+            if (pos == null) return;
+            if (leftButton.testCollision(pos)) {
+                owner.left = true;
+            }
+            if (rightButton.testCollision(pos))
+            {
+                owner.right = true;
+            }
+        }
+    }

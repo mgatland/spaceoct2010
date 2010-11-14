@@ -25,6 +25,7 @@ namespace SpaceOctopus
         public Vector2 Position;
         public Vector2 MovePosition;
         public int Id;
+
         public TouchAnchor(Vector2 position, int id)
         {
             this.Position = position;
@@ -628,7 +629,7 @@ EndType
         public int Height {get {return Texture.Height;}}
     }
 
-    public abstract class Drawable
+    public class Drawable
     {
         public Vector2 Position;
         public int Width;
@@ -746,6 +747,21 @@ EndType
             int oY = (int)o.Position.Y;
             if (oX + o.Width > x && oX < x + Width
                 && oY + o.Height > y && oY < y + Height)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool testCollision(Vector2 pos)
+        {
+            if (pos == null) return false;
+            int x = (int)Position.X;
+            int y = (int)Position.Y;
+            int oX = (int)pos.X;
+            int oY = (int)pos.Y;
+            if (oX >= x && oX < x + Width
+                && oY >= y && oY < y + Height)
             {
                 return true;
             }
@@ -1805,6 +1821,7 @@ EndType
         public int Kills;
         public int Score;
         public double Shake;
+        public const double MaxShake = 200;
         double YSpeed = (Window.Height / 50000d);
         public double DefaultSpeed;
 
@@ -1825,6 +1842,9 @@ EndType
         //  Field soundShoot:TSound
         // Field powerUpSound:TSound
         //   Field hitSound:TSound
+
+        public Vector2 LastPosition; //used by RelativeAnchors
+        public Vector2 LastMove; //used by RelativeAnchors control
 
         //powerup stuff
         const int DefaultShotCount = 1;
@@ -1861,6 +1881,10 @@ EndType
             Art = Core.Instance.Art;
             Position.X = Window.Width / 2 - Width / 2;
             Position.Y = DefaultDesiredY;
+            LastMove.X = 0;
+            LastMove.Y = 0;
+            LastPosition.X = Position.X;
+            LastPosition.Y = Position.Y;
             Id = id;
             //set keys.
 
@@ -1887,7 +1911,7 @@ EndType
 
         public void resetAbilities()
         {
-            DefaultSpeed = 0.2f;
+            DefaultSpeed = 0.3f;
             Speed = (float)DefaultSpeed; //    'horizonal
             ROF = DefaultROF;
             ShotSpeedMulti = DefaultShotSpeedMulti;
@@ -1910,7 +1934,7 @@ EndType
                 Position.Y += (float)(impact * Shield);
             }
             Shake += 6.67 * shakeImpact;
-            if (Shake > 200) Shake = 300;
+            if (Shake > MaxShake) Shake = MaxShake;
 
             if (loseUpgrades)
             {
@@ -2079,6 +2103,11 @@ EndType
                 Position.Y += (float)(YSpeed * delta);
             }
 
+            //calculate how much we moved this frame
+            LastMove.X = Position.X - LastPosition.X;
+            LastMove.Y = Position.Y - LastPosition.Y;
+            LastPosition.X = Position.X; //reset for next frame
+            LastPosition.Y = Position.Y;
         }
         /*Method aiMove(delta:Int)
            Local direction:Float
@@ -2626,7 +2655,8 @@ EndType
         public static bool RecalibrateAccel = true;
         #endregion
 
-        public static bool DraggableAnchors = false;
+        public static float RelativeAnchorsScale = 1f;
+
         //Settings here
         public const bool isCheatsEnabled = false;
         
@@ -2634,7 +2664,7 @@ EndType
 
         //other random stuff
         public static bool EnableSound = true; //true
-        public static bool DrawTouchAnchors = true;
+        public static bool DrawTouchAnchors = false;
         //These must be set correctly before release
 
         public const bool DebugFileStuff = false; // set to false
@@ -3236,7 +3266,7 @@ EndType
         int Timer;
         Enemy Parent;
         const int LifeSpan = 1400;
-        const int GrowSpan = 700;
+        const int GrowSpan = 900;
         const float BeamSpeed = Window.Height * 0.67f / 500;
         const int Width2 = Window.Width * 15 / 300;
         const int InitialWidth = Window.Width * 2 / 300;
@@ -3350,6 +3380,10 @@ EndType
         bool makeCentreBlocks;
         bool makeWallBlocks;
 
+        //awful hacks to make seeking blocks alternate falling on the left and right
+        bool alternateLeftRightSeeking;
+        int lastSeekingX;
+
         public int Creatures;
 
         public Special(int level)
@@ -3363,10 +3397,10 @@ EndType
             {
                 //special divided-screen stage
                 makeCentreBlocks = true;
-
                 makeSeekingBlocks = true;
+                alternateLeftRightSeeking = true;
                 speedMulti = 0.75f; //slow
-                spawnPeriod = 550;
+                spawnPeriod = 400;
                 if (stage <= 3) spawnPeriod = (int)(spawnPeriod * 1.3f); //super slow the first time
                 makeWallBlocks = false;
                 if (stage > 6 && stage % 2 != 0)
@@ -3380,7 +3414,7 @@ EndType
             {
                 //special wall stage
                 makeSeekingBlocks = false;
-                speedMulti = 0.64f;
+                speedMulti = 0.53f;
                 spawnPeriod = (int)(1250 * 1f / 0.7f);
                 makeWallBlocks = true;
                 if (stage > 3) // from the second time, you face monks
@@ -3391,8 +3425,9 @@ EndType
             else // specialType == 1
             {
                 makeSeekingBlocks = true;
-                speedMulti = (float)Math.Min(0.7 + stage * .12, 1.3);
-                spawnPeriod = Math.Max(480 - stage * 40, 220);
+                alternateLeftRightSeeking = false;
+                speedMulti = (float)Math.Min(0.5 + stage * .12, 1.3);
+                spawnPeriod = Math.Max(530 - stage * 40, 220);
                 makeWallBlocks = false;
                 if (stage > 9 && stage % 2 != 0)
                 {
@@ -3455,8 +3490,31 @@ EndType
         private void spawnSeekingBlocks(Player p)
         {
             int x = p.centerX() + core.Random.Next(-130, 130);
+
+            //hacks: if we are already spawning center blocks, don't spawn this in the center.
+            int attempts = 0; //just to make sure an infinte loop never happens due to art changes.
+            while (attempts < 10 && makeCentreBlocks && Math.Abs(x - (Window.Width / 2)) < core.Art.ShotHeartBigPicture.Width)
+            {
+                x += core.Random.Next(-Window.Width / 4, Window.Width / 4);
+                attempts++;
+            }
+            
             if (x < 10) x = core.Random.Next(10, 60);
             if (x > Window.Width) x = Window.Width - core.Random.Next(10, 60);
+
+            //megahax: if this awful hacky flag is set, we alternate between sides of the screen.
+            if (alternateLeftRightSeeking)
+            {
+                bool wasLeftBefore = (lastSeekingX < Window.Width / 2);
+                bool isLeftNow = (x < Window.Width / 2);
+                if (wasLeftBefore == isLeftNow) 
+                {
+                    //flip the x-coordinate around the center of the screen.
+                    x = Window.Width - x;
+                }
+                lastSeekingX = x;
+            }
+
             Shot s = Shot.CreateHeart(x, -200, speedMulti);
             core.AddShot(s);
         }
@@ -4072,6 +4130,7 @@ EndType*/
             if (P2 != null)
             {
                 P.Shake += P2.Shake;
+                if (P.Shake > Player.MaxShake) P.Shake = Player.MaxShake;
                 P2.Shake = 0;
             }
 
@@ -4309,11 +4368,16 @@ EndType*/
                 xOff = (Math.Min(Math.Abs(xOff), Window.Width / 4) - Random.Next(1, 2)) * -Math.Sign(xOff);
             }
 
-
             screenManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
             //screenManager.SpriteBatch.Begin();
 
             screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, 0, Window.Width, Window.Height), Color.Gray);
+
+            //Draw the player control area divider for the first level
+            if (level < 5 && P2 != null)
+            {
+                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, Window.Height/2 -8, Window.Width, 8), CrossColor);
+            }
 
             if (PowerUps != null)
             {
@@ -4360,11 +4424,11 @@ EndType*/
                 //display a cross when trying to move a dead player (if there is also an alive player)
                 if (!hasLost && !P2.IsAlive && Input.P2HasFingerDown)
                 {
-                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, 0, Window.Width / 2, Window.Height), CrossColor);
+                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, 0, Window.Width, Window.Height / 2), CrossColor);
                 }
                 if (!hasLost && !P.IsAlive && Input.P1HasFingerDown)
                 {
-                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(Window.Width / 2, 0, Window.Width / 2, Window.Height), CrossColor);
+                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, Window.Height/2, Window.Width, Window.Height / 2), CrossColor);
                 }
             }
             else
@@ -4672,8 +4736,10 @@ EndType*/
             {
                 if (P2 != null)
                 {
-                    CreateOffCenterMessage("Player 1", 2, (int)(Window.Width / 4), 1f);
-                    CreateOffCenterMessage("Player 2", 2, (int)(Window.Width * 3 / 4), 1f);
+                    CreateOffCenterMessage("Player 1", 1, (int)(Window.Width / 4), 1f);
+                    CreateOffCenterMessage("touch above", 2, (int)(Window.Width / 4), 1f);
+                    CreateOffCenterMessage("Player 2", 1, (int)(Window.Width * 3 / 4), 1f);
+                    CreateOffCenterMessage("touch below", 2, (int)(Window.Width * 3 / 4), 1f);
                     //CreateMessage("Touch for control", 3);
                 }
                 else
@@ -4850,13 +4916,9 @@ EndType*/
             {
                 maxBeams = 0;
             }
-            else if (level - 2 < 9)
-            {
-                maxBeams = ((level - 2) / 3) + 1;
-            }
             else
             {
-                maxBeams = 4;
+                maxBeams = Math.Min(((level - 2) / 7) + 1, 4);
             }
 
             beam = new Beam[maxBeams];
@@ -5041,14 +5103,7 @@ EndType*/
         public void HandleInputs(InputState input, Player player, Player player2)
 #endif
         {
-                //Vector2 touchPos1 = new Vector2(-1, -1);
-                //Vector2 touchPos2 = new Vector2(-1, -1);
-
                 touchState = TouchPanel.GetState();
-                float touchXChange1 = 0;
-                float touchXChange2 = 0;
-                float touchYChange1 = 0;
-                float touchYChange2 = 0;
 
                 bool wasFingerDown = HasFingerDown;
                 HasFingerDown = false;
@@ -5068,15 +5123,42 @@ EndType*/
                        case TouchLocationState.Pressed:
                            UpsellHacksPressed(location.Position);
                            HasFingerDown = true;
-                           if (Core.Instance.P2 != null && location.Position.X < Window.Width / 2)
+                           bool isPlayer2;
+                             //determine if this touch is for player 2
+                           if (Core.Instance.P2 != null)
                            {
-                               Debug.WriteLine("New touch LEFT");
+                               //if one player is already touching, the new touch is the other guy.
+                               if (touchAnchor1 != null && touchAnchor2 == null)
+                               {
+                                   isPlayer2 = true;
+                               }
+                               else if (touchAnchor2 != null && touchAnchor1 == null)
+                               {
+                                   isPlayer2 = false;
+                               }
+                               else //they are both touching, or neither is touching.
+                               {
+                                   if (location.Position.Y < Window.Height/ 2) 
+                                   {
+                                       isPlayer2 = true;
+                                   } else {
+                                       isPlayer2 = false;
+                                   }
+                               }
+
+                           } else {
+                               isPlayer2 = false; //single player game
+                           }
+
+                           if (isPlayer2)
+                           {
+                               Debug.WriteLine("New touch P2");
                                touchAnchor2 = new TouchAnchor(location.Position, location.Id);
                                P2HasFingerDown = true;
                            }
                            else
                            {
-                               Debug.WriteLine("New touch RIGHT");
+                               Debug.WriteLine("New touch P1");
                                touchAnchor1 = new TouchAnchor(location.Position, location.Id);
                                P1HasFingerDown = true;
                            }
@@ -5086,15 +5168,11 @@ EndType*/
                             if (touchAnchor2 != null && location.Id == touchAnchor2.Id)
                             {
                                 touchAnchor2.MovePosition = location.Position;
-                                touchXChange2 = location.Position.X - touchAnchor2.Position.X;
-                                touchYChange2 = location.Position.Y - touchAnchor2.Position.Y;
                                 P2HasFingerDown = true;
                                 
                             } else if (touchAnchor1 != null && location.Id == touchAnchor1.Id)
                             {
                                 touchAnchor1.MovePosition = location.Position;
-                                touchXChange1 = location.Position.X - touchAnchor1.Position.X;
-                                touchYChange1 = location.Position.Y - touchAnchor1.Position.Y;
                                 P1HasFingerDown = true;
                             }
                             else
@@ -5106,6 +5184,14 @@ EndType*/
                             
                             break;
                         case TouchLocationState.Released:
+                            if (touchAnchor2 != null && location.Id == touchAnchor2.Id)
+                            {
+                                touchAnchor2 = null;
+                            }
+                            else if (touchAnchor1 != null && location.Id == touchAnchor1.Id)
+                            {
+                                touchAnchor1 = null;
+                            }
                             break;
 
                      }
@@ -5123,11 +5209,13 @@ EndType*/
                     TappedThisFrame = true;
                 }
 
+                //These are redundant, because I capture the 'release' event above.
+                //they're here because i'm not 100% confident you always get a release event.
+                //as soon as i test on a real phone, i should delete these.
                 if (!P2HasFingerDown)
                 {
                     touchAnchor2 = null;
                 }
-
                 if (!P1HasFingerDown)
                 {
                     touchAnchor1 = null;
@@ -5137,7 +5225,6 @@ EndType*/
                 player.right = false;
                 player.up = false;
                 player.down = false;
-
 
                 if (player2 != null)
                 {
@@ -5198,8 +5285,7 @@ EndType*/
                     }
                 }*/
 
-                ProcessTouchMovement(player, touchXChange1, touchYChange1, touchAnchor1);
-                if (player2 != null) ProcessTouchMovement(player2, touchXChange2, touchYChange2, touchAnchor2);
+                ProcessTouchMovement(player, player2);
 
                 //use keyboard for cheats
                 if (keyState.IsKeyDown(Keys.D1)) Core.Instance.CheatSkipLevelTo(1);
@@ -5275,66 +5361,78 @@ EndType*/
                 //        keyState.IsKeyDown(Keys.Space) || buttonTouched)
         }
 
+        private float pickAbsoluteSmallest(float one, float two)
+        {
+            if (Math.Abs(one) < Math.Abs(two))
+            {
+                return one;
+            }
+            else
+            {
+                return two;
+            }
+        }
+
+        private static int TOUCH_DEAD_DIST = 2;
+
         //TODO: calculate touchXChange and touchYChange in here instead of passing in.
-        private void ProcessTouchMovement(Player p, float touchXChange, float touchYChange, TouchAnchor touchAnchor)
+        private void ProcessTouchMovement(Player player, Player player2)
+        {
+            processTouchInDragMode(player, touchAnchor1);
+            if (player2 != null) processTouchInDragMode(player2, touchAnchor2);
+        }
+
+        private void processTouchInDragMode(Player p, TouchAnchor touchAnchor)
         {
             if (touchAnchor == null) return;
-            Vector2 touchPos = touchAnchor.MovePosition;
+            float touchXChange = touchAnchor.MovePosition.X - touchAnchor.Position.X;
+            float touchYChange = touchAnchor.MovePosition.Y - touchAnchor.Position.Y;
+
+            //update the anchor based on how far the player moved last frame.
+            //Cap the movement so it can't go past the anchorpoint, that would lead to wobbling :o
+            float xMove = p.LastMove.X * Tweaking.RelativeAnchorsScale;
+            float xMoveLimit = touchAnchor.MovePosition.X - touchAnchor.Position.X;
+            touchAnchor.Position.X += pickAbsoluteSmallest(xMove, xMoveLimit);
+
+            float yMove = p.LastMove.Y * Tweaking.RelativeAnchorsScale;
+            float yMoveLimit = touchAnchor.MovePosition.Y - touchAnchor.Position.Y;
+            touchAnchor.Position.Y += pickAbsoluteSmallest(yMove, yMoveLimit);
+
             //touching overrides the accelerometer
-            if (Math.Abs(touchXChange) > 15) //threshhold
+            if (Math.Abs(touchXChange) > TOUCH_DEAD_DIST) //threshhold
             {
-                bool tooFarAway = (Math.Abs(touchXChange) > 30); //drag the anchor after us if we move too far
                 if (touchXChange > 0)
                 {
                     p.right = true;
                     p.left = false;
-                    if (tooFarAway && Tweaking.DraggableAnchors)
-                    { 
-                        touchAnchor.Position.X = touchPos.X - 30; 
-                    }
                 }
                 else
                 {
                     p.left = true;
                     p.right = false;
-                    if (tooFarAway && Tweaking.DraggableAnchors) { touchAnchor.Position.X = touchPos.X + 30; }
                 }
 
-                if (tooFarAway && !Tweaking.DraggableAnchors)
-                {
-                    float x = touchAnchor.Position.X;
-                    float moveX = touchAnchor.MovePosition.X;
-                    touchAnchor.MovePosition.X = Math.Max(Math.Min(moveX, x + 30), x - 30);
-                }
             }
 
             if (Options.Instance.VerticalMotion)
             {
-                if (Math.Abs(touchYChange) > 15) //threshhold
+                if (Math.Abs(touchYChange) > TOUCH_DEAD_DIST) //threshhold
                 {
-                    bool tooFarAway = (Math.Abs(touchYChange) > 30); //drag the anchor after us if we move too far
                     if (touchYChange > 0)
                     {
                         p.down = true;
                         p.up = false;
-                        if (tooFarAway && Tweaking.DraggableAnchors) { touchAnchor.Position.Y = touchPos.Y - 30; }
                     }
                     else
                     {
                         p.up = true;
                         p.down = false;
-                        if (tooFarAway && Tweaking.DraggableAnchors) { touchAnchor.Position.Y = touchPos.Y + 30; }
-                    }
-                    if (tooFarAway && !Tweaking.DraggableAnchors)
-                    {
-                        float y = touchAnchor.Position.Y;
-                        float moveY = touchAnchor.MovePosition.Y;
-                        touchAnchor.MovePosition.Y = Math.Max(Math.Min(moveY, y + 30), y - 30);
                     }
                 }
             }
             else
             {
+                touchAnchor.Position.Y = p.centerY();
                 touchAnchor.MovePosition.Y = touchAnchor.Position.Y;
             }
         }
@@ -5490,10 +5588,6 @@ EndType*/
                 grey.Monk = Gfx.Scale(c.Load<Texture2D>("gfx/monk"), Gfx.StandardScale, gd);
                 grey.Player1 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter"), Gfx.StandardScale, gd);
                 grey.Player2 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter2"), Gfx.StandardScale, gd);
-                //grey.Pixel = Gfx.Scale(c.Load<Texture2D>("gfx/px"), Gfx.StandardScale, gd);
-                //grey.Cross = Gfx.Scale(c.Load<Texture2D>("gfx/cross"), Window.Width / 2, gd);
-                //grey.Joystick = Gfx.Scale(c.Load<Texture2D>("gfx/joystick"), Gfx.StandardScale, gd);
-                //grey.JoystickBase = Gfx.Scale(c.Load<Texture2D>("gfx/joystickbase"), Gfx.StandardScale, gd);
                 grey.Star = Gfx.Scale(c.Load<Texture2D>("gfx/star"), Gfx.StandardScale, gd);
 
                 grey.PlayerShotBase1 = Gfx.Scale(c.Load<Texture2D>("gfx/shot01"), Gfx.StandardScale, gd);
@@ -5522,10 +5616,6 @@ EndType*/
 
         #endregion
 
-        //public Texture2D Pixel;
-        //public Texture2D Cross;
-        //public Texture2D Joystick;
-       // public Texture2D JoystickBase;
         public Sprite Star;
         public Sprite PlayerShotBase1;
         public Sprite PlayerShotBase2;
@@ -5556,6 +5646,8 @@ EndType*/
         public static Texture2D Cross;
         public static Texture2D Joystick;
         public static Texture2D JoystickBase;
+        public static Texture2D ArrowLeft;
+        public static Texture2D ArrowRight;
 
         public const int StandardScale = 12;
 
@@ -5715,6 +5807,8 @@ EndType*/
             Gfx.Cross = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/cross"), Window.Width / 2, gd);
             Gfx.Joystick = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/joystick"), Gfx.StandardScale, gd);
             Gfx.JoystickBase = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/joystickbase"), Gfx.StandardScale, gd);
+            Gfx.ArrowLeft = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/arrowleft"), Gfx.StandardScale, gd);
+            Gfx.ArrowRight = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/arrowright"), Gfx.StandardScale, gd);
 
             Snd.PlayerShotSound = c.Load<SoundEffect>("snd/EugenSopot/menu_select22_edited");
             Snd.AlienDieSound = c.Load<SoundEffect>("snd/space sound jiggled");
