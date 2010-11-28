@@ -1,32 +1,9 @@
-fix FIXME CMD
-
 every release:
 check cheats, debugging flags, and version number in Options menu. Check diffs.
+check tile icon!
 
-2010-11-13
-Goals: improve controls, reduce difficulty.
 
-* new relative-controls similar to other similar games.
-* increased player speed by 50%
-* made special stages easier (slower, more spread out)
-* the special 'split stage' won't spawn seeking blocks along the split
-* the enemy's max simultaneous beams increases more gradually
-* beams take longer to become harmful, and are harmful for less time, delivering less damage overall.
-* added, then removed, a two player control scheme using on-screen buttons. Oops.
-* made two player controls share the screen top-vs-bottom instead of left-vs-right. Much better idea.
-* fixed a bug with player's maximum shake
-
-New:
-3. submit! (check your diffs)
-4. add the good review to the description - also mention controls and updates
-
-RELEASE 1.2
-swap P1 and P2 positions, scores etc in 2player mode. so P1 is the single player player.
-[ ] more the score text to the top! Blog about how foolish I am
-[ ] leave more room for player fingers?
-holy crap i need playtesting. 38% scale on my screen seems to be about right
-
-- change the title to 'Space Octopus Fever'?
+[ ] swap P1 and P2 positions, scores etc in 2player mode. so P1 is the single player player.
 [ ] p2, when she has doublefire, her shots appear visibly beneath her gunbits :(
 [ ] when a shot is destroyed it should become particles like everything else.
 [ ] spirit shots death particles should float upwards
@@ -40,7 +17,6 @@ Art Sets:
 [ ] art set 4: winter
 [ ] art set 5: pencil sketch
 [ ] art set 6: original SOM graphics
-
 
 - [maybe] art - make all enemy navigation logic + spawning based on the _default_ character size
 - [later] art - make the swipe-to-transition code
@@ -139,7 +115,25 @@ PHASE NEVER
 
 CHANGE LOG ================================================
 
+-- Release v 1.2
+
+(improved controls, reduced difficulty.)
+
+2010-11-13
+[x] new relative-controls similar to other similar games.
+[x] increased player speed by 50%
+[x] made special stages easier (slower, more spread out)
+[x] the special 'split stage' won't spawn seeking blocks along the split
+[x] the enemy's max simultaneous beams increases more gradually
+[x] beams take longer to become harmful, and are harmful for less time, delivering less damage overall.
+[x] added, then removed, a two player control scheme using on-screen buttons. Oops.
+[x] made two player controls share the screen top-vs-bottom instead of left-vs-right. Much better idea.
+[x] tried to explain the two player controls better to the players
+[x] fixed a bug with player's maximum shake
+[x] bumped displayed version number to 1.2
+
 -- Release v 1.1
+(improved two player mode)
 
 2010-10-26
 [x] two player - redraw some upgrades for player 2 so they fit the different ship design
@@ -184,7 +178,8 @@ visuals:
 [x] - packaged ready to release
 [x] huge improvements to file reading\writing code to facilitate windows version.
 
--- Release v 1.0!
+-- Release v 1.0
+yay!
 
 2010-10-11
 [x] fix icons having seen how bad they look in the unlocked emulator (thanks, unlocking hackers!)
