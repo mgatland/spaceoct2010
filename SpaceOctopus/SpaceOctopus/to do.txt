@@ -1,6 +1,12 @@
-every release:
-check cheats, debugging flags, and version number in Options menu. Check diffs.
-check tile icon!
+every  release: check these:
+* cheats
+* Tweaking flags 
+* version number in Options menu
+* git diffs
+* tile icon
+* do a release build
+
+stats tracking v1: track first trial run and first purchased run.
 
 
 [ ] swap P1 and P2 positions, scores etc in 2player mode. so P1 is the single player player.
@@ -114,6 +120,15 @@ PHASE NEVER
 - let users create their own artsets using in in-game pixel art editor.
 
 CHANGE LOG ================================================
+
+-- Release v 1.3
+
+(stats tracking)
+
+2010-11-30
+[x] stats tracking - home home on first run trial, first run full version.
+[x] changed title tile to 'Space Octopus' instead of blank - got tired of fixing it as Visual Studio removes the blank title each time you save, annoying.
+[x] added a 'SimulateTrial' flag to Tweaking so I can more easily simulate trial mode.
 
 -- Release v 1.2
 

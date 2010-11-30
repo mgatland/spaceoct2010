@@ -30,27 +30,17 @@ Content\gfx\pwrheight.xnb
 Content\gfx\pwrmega.xnb
 Content\gfx\pwrrapid.xnb
 Content\gfx\pwrspike.xnb
-Content\gfx\shot01.xnb
 Content\gfx\shot02.xnb
+Content\gfx\shot01.xnb
 Content\gfx\shotmega.xnb
 Content\gfx\star.xnb
 Content\fonts\leaguegothic.xnb
 Content\fonts\menufont.xnb
+Content\gfx\fighter2.xnb
 Content\gfx\test.xnb
 Content\gfx\cross.xnb
 Content\gfx\joystick.xnb
 Content\gfx\joystickbase.xnb
-Content\snd\Carpassing.xnb
-Content\snd\EugenSopot\explosion5.xnb
-Content\snd\EugenSopot\menu_select2.xnb
-Content\snd\EugenSopot\menu_select22.xnb
-Content\snd\EugenSopot\menu_select22_edited.xnb
-Content\snd\EugenSopot\new_radio13.xnb
-Content\snd\EugenSopot\new_radio9.xnb
-Content\snd\Gulping.xnb
-Content\snd\space sound jiggled.xnb
-Content\01-BrunoXe-Angustia.xnb
-Content\gfx\fighter2.xnb
 Content\gfx\pwrrevive.xnb
 Content\gfx\partbubble2.xnb
 Content\gfx\partcannon2.xnb
@@ -62,4 +52,14 @@ Content\gfx\partrapid2.xnb
 Content\gfx\partspikes2.xnb
 Content\gfx\arrowright.xnb
 Content\gfx\arrowleft.xnb
+Content\snd\Carpassing.xnb
+Content\snd\EugenSopot\explosion5.xnb
+Content\snd\EugenSopot\menu_select2.xnb
+Content\snd\EugenSopot\menu_select22.xnb
+Content\snd\EugenSopot\menu_select22_edited.xnb
+Content\snd\EugenSopot\new_radio13.xnb
+Content\snd\EugenSopot\new_radio9.xnb
+Content\snd\Gulping.xnb
+Content\snd\space sound jiggled.xnb
+Content\01-BrunoXe-Angustia.xnb
 Content\01-BrunoXe-Angustia.wma

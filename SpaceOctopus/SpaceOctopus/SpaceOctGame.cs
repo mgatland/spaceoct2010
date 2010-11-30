@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Media;
 using AlienGameSample;
 using System.Diagnostics;
+using SpaceOctopus.Data;
 
 
 namespace SpaceOctopus
@@ -39,7 +40,7 @@ namespace SpaceOctopus
             Content.RootDirectory = "Content";
 
             #if DEBUG
-                //Guide.SimulateTrialMode = true;
+                if (Tweaking.SimulateTrial) Guide.SimulateTrialMode = true;
             #endif
 
 #if PROFILING
@@ -58,6 +59,26 @@ namespace SpaceOctopus
             //Add two new screens
             screenManager.AddScreen(new BackgroundScreen());
             screenManager.AddScreen(new LoadingScreen());
+
+            //Collect first-run usage stats
+            bool wasFirstRun = false;
+            if (Version.IsTrialMode)
+            {
+                wasFirstRun = new TrackedEvent("firstrun-trial", "", true).Fire();
+            } else {
+                wasFirstRun = new TrackedEvent("firstrun-full", "", true).Fire();
+            }
+            /*if (!wasFirstRun)
+            {
+                if (Version.IsTrialMode)
+                {
+                    new TrackedEvent("run-trial", "", false).Fire();
+                }
+                else
+                {
+                    new TrackedEvent("run-full", "", false).Fire();
+                }
+            }*/
         }
 
         protected override void OnExiting(object sender, EventArgs args)

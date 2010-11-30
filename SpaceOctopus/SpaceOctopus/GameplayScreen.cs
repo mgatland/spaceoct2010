@@ -2380,7 +2380,7 @@ EndType
                 P2.Serialize(writer);
             };
 
-            IOUtil.WriteFile(filename, handler, IOUtil.NothingOnError);
+            IOUtil.WriteFile(filename, handler, IOUtil.NothingAction);
             if (Tweaking.DebugFileStuff) DebugFileStuff.DisplayFileContents(filename);
         }
 
@@ -2405,13 +2405,13 @@ EndType
                 Debug.WriteLine(reader.ReadToEnd());
                 Debug.WriteLine("--- file ends ---");
             };
-            IOUtil.ReadFile(filename, handler,IOUtil.NothingOnError);
+            IOUtil.ReadFile(filename, handler,IOUtil.NothingAction);
         }
     }
 
     public static class IOUtil
     {
-        public static Action<int> NothingOnError = delegate(int i) { };
+        public static Action<int> NothingAction = delegate(int i) { };
 
         public static int ReadInt(StreamReader reader)
         {
@@ -2424,6 +2424,20 @@ EndType
             string s = reader.ReadLine();
             return bool.Parse(s);
         }
+
+        //because we can't use ASCIIEncoding class
+        public static byte[] StringToAscii(string s)
+        {
+            byte[] retval = new byte[s.Length];
+            for (int ix = 0; ix < s.Length; ++ix)
+            {
+                char ch = s[ix];
+                if (ch <= 0x7f) retval[ix] = (byte)ch;
+                else retval[ix] = (byte)'?';
+            }
+            return retval;
+        }
+
 
 #if WINDOWS_PHONE
         public static void WriteFile(string filename, Action<StreamWriter> handler, Action<int> onFailure)
@@ -2626,9 +2640,8 @@ EndType
                 writer.WriteLine(enableMusic);
                 writer.WriteLine(verticalMotion);
             };
-            Action<int> onFailure = delegate(int i) { };
 
-            IOUtil.WriteFile(filename, handler, onFailure);
+            IOUtil.WriteFile(filename, handler, IOUtil.NothingAction);
         }
 
         private Options()
@@ -2640,8 +2653,7 @@ EndType
                 enableMusic = IOUtil.ReadBool(reader);
                 verticalMotion = IOUtil.ReadBool(reader);
             };
-            Action<int> onFailure = delegate(int i) { };
-            IOUtil.ReadFile(filename, handler, onFailure);
+            IOUtil.ReadFile(filename, handler, IOUtil.NothingAction);
         }
     }
 
@@ -2659,7 +2671,8 @@ EndType
 
         //Settings here
         public const bool isCheatsEnabled = false;
-        
+        public const bool SimulateTrial = false;
+
         // Options menu options     
 
         //other random stuff
