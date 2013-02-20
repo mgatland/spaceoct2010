@@ -105,11 +105,7 @@ namespace AlienGameSample
         public virtual void Draw(MenuScreen screen, Vector2 position,
                                  bool isSelected, GameTime gameTime)
         {
-#if WINDOWS_PHONE
-            Color color = Color.White;
-#else
             Color color = isSelected ? new Color(255, 243, 155) : Color.White;
-#endif
             float scale = 1.0f;
 
             // Modify the alpha to fade text out during transitions.

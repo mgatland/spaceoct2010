@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Media;
 using AlienGameSample;
 using System.Diagnostics;
@@ -27,12 +26,7 @@ namespace SpaceOctopus
         public SpaceOctGame()
         {
             graphics = new GraphicsDeviceManager(this);
-#if WINDOWS_PHONE
-            graphics.IsFullScreen = true;
-#endif
-#if WINDOWS
-            //this.IsMouseVisible = true;
-#endif
+            this.IsMouseVisible = true;
             //Set the Windows Phone screen resolution
             graphics.PreferredBackBufferWidth = 480;
             graphics.PreferredBackBufferHeight = 800;

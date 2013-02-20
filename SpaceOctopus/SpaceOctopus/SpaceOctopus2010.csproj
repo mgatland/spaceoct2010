@@ -98,8 +98,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpaceOctopusContent\SpaceOctopusContent.contentproj">
-      <Name>SpaceOctopusContent</Name>
+      <Name>SpaceOctopusContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
+      <Project>{0F5A690A-0A9E-4566-B8EC-520C05F651C1}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -122,10 +123,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="GameThumbnail.png" />
-    <Content Include="example code.txt" />
     <Content Include="Game.ico" />
-    <Content Include="TextFile1.txt" />
-    <Content Include="touch buttons code.txt" />
+    <Content Include="code for drawing classic graphics.txt" />
     <Content Include="to do.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -192,16 +191,6 @@
     <None Include="Windows Copy of SpaceOctopus_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <PublishFile Include="example code.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
     <PublishFile Include="TextFile1.txt">
       <Visible>False</Visible>
       <Group>

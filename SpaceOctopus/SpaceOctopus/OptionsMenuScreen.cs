@@ -10,11 +10,9 @@ namespace SpaceOctopus
 {
     class OptionsMenuScreen : MenuScreen
     {
-        MenuEntry soundMenuEntry;
+    //    MenuEntry soundMenuEntry;
         MenuEntry musicMenuEntry;
-        MenuEntry motionMenuEntry;
-        MenuEntry AccelSmoothingMenuEntry;
-        MenuEntry RecalibrateMenuEntry;
+   //     MenuEntry motionMenuEntry;
 
         public OptionsMenuScreen()
             : base("options") 
@@ -30,15 +28,6 @@ namespace SpaceOctopus
 //            motionMenuEntry = new MenuEntry(MotionText());
 //            motionMenuEntry.Selected += MotionMenuEntrySelected;
 //            MenuEntries.Add(motionMenuEntry);
-
-           /*Accelerometer disabled
-            AccelSmoothingMenuEntry = new MenuEntry(AccelSmoothingMenuEntryText());
-            AccelSmoothingMenuEntry.Selected += AccelSmoothingMenuEntrySelected;
-            MenuEntries.Add(AccelSmoothingMenuEntry);
-
-            RecalibrateMenuEntry = new MenuEntry("Recalibrate accelerometer");
-            RecalibrateMenuEntry.Selected += RecalibrateMenuEntrySelected;
-            MenuEntries.Add(RecalibrateMenuEntry);*/
 
             MenuEntry creditsMenuEntry = new MenuEntry("CREDITS");
             creditsMenuEntry.Selected += CreditsMenuEntrySelected;
@@ -70,13 +59,6 @@ namespace SpaceOctopus
             return "SOUND " + (Options.Instance.EnableSound ? "ON" : "OFF");
         }
 
-
-        private static string AccelSmoothingMenuEntryText()
-        {
-            return "Accelerometer smoothing: " + (Tweaking.AccelerationSmoothing);
-        }
-        
-
         private static string MotionText()
         {
             return (Options.Instance.VerticalMotion ? "4 WAY MOVEMENT" : "CLASSIC MOVEMENT");
@@ -87,21 +69,11 @@ namespace SpaceOctopus
             ScreenManager.AddScreen(new CreditsScreen());
         }
 
-        void SoundMenuEntrySelected(object sender, EventArgs e)
+     /*   void SoundMenuEntrySelected(object sender, EventArgs e)
         {
             Tweaking.EnableSound = !Tweaking.EnableSound;
             soundMenuEntry.Text = SoundText();
-        }
-
-        void AccelSmoothingMenuEntrySelected(object sender, EventArgs e)
-        {
-            Tweaking.AccelerationSmoothing++;
-            if (Tweaking.AccelerationSmoothing > Tweaking.MaxAccelerationSmoothing)
-            {
-                Tweaking.AccelerationSmoothing = 1;
-            }
-            AccelSmoothingMenuEntry.Text = AccelSmoothingMenuEntryText();
-        }
+        }*/
 
         void MusicMenuEntrySelected(object sender, EventArgs e)
         {
@@ -109,16 +81,11 @@ namespace SpaceOctopus
             musicMenuEntry.Text = MusicText();
         }
 
-        void MotionMenuEntrySelected(object sender, EventArgs e)
+    /*    void MotionMenuEntrySelected(object sender, EventArgs e)
         {
             Options.Instance.VerticalMotion = !Options.Instance.VerticalMotion;
             motionMenuEntry.Text = MotionText();
-        }
-
-        void RecalibrateMenuEntrySelected(object sender, EventArgs e)
-        {
-            Tweaking.RecalibrateAccel = true;
-        }
+        }*/
 
     }
 }

@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010 Express for Windows Phone
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceOctopus", "SpaceOctopus\SpaceOctopus\SpaceOctopus.csproj", "{380DE114-9268-4C2E-906F-4B23A3AAC11C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceOctopusContent", "SpaceOctopus\SpaceOctopusContent\SpaceOctopusContent.contentproj", "{0F5A690A-0A9E-4566-B8EC-520C05F651C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows Copy of SpaceOctopus", "SpaceOctopus\SpaceOctopus\Windows Copy of SpaceOctopus.csproj", "{B3026D35-8142-468C-B0D1-7EC197DF2FE8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceOctopus2010", "SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj", "{B3026D35-8142-468C-B0D1-7EC197DF2FE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,32 +21,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Any CPU.ActiveCfg = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Mixed Platforms.ActiveCfg = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Mixed Platforms.Build.0 = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Mixed Platforms.Deploy.0 = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Windows Phone.ActiveCfg = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Windows Phone.Build.0 = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|Windows Phone.Deploy.0 = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|x86.ActiveCfg = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Debug|x86.Build.0 = Debug|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Any CPU.ActiveCfg = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Mixed Platforms.ActiveCfg = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Mixed Platforms.Build.0 = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Mixed Platforms.Deploy.0 = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Windows Phone.ActiveCfg = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Windows Phone.Build.0 = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|Windows Phone.Deploy.0 = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Profiling|x86.ActiveCfg = Profiling|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Any CPU.ActiveCfg = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Mixed Platforms.ActiveCfg = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Mixed Platforms.Build.0 = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Mixed Platforms.Deploy.0 = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Windows Phone.ActiveCfg = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Windows Phone.Build.0 = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|Windows Phone.Deploy.0 = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|x86.ActiveCfg = Release|Windows Phone
-		{380DE114-9268-4C2E-906F-4B23A3AAC11C}.Release|x86.Build.0 = Release|Windows Phone
 		{0F5A690A-0A9E-4566-B8EC-520C05F651C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F5A690A-0A9E-4566-B8EC-520C05F651C1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{0F5A690A-0A9E-4566-B8EC-520C05F651C1}.Debug|Windows Phone.ActiveCfg = Debug|Any CPU

@@ -9,30 +9,13 @@ using Microsoft.Xna.Framework.Audio;
 using System.IO.IsolatedStorage;
 using System.IO;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Media;
-#if WINDOWS_PHONE
-using Microsoft.Devices.Sensors;
-#endif
 using Microsoft.Xna.Framework.GamerServices;
 
 
 namespace SpaceOctopus
 {
-    public class TouchAnchor
-    {
-        public Vector2 Position;
-        public Vector2 MovePosition;
-        public int Id;
-
-        public TouchAnchor(Vector2 position, int id)
-        {
-            this.Position = position;
-            this.MovePosition = position;
-            this.Id = id;
-        }
-    }
 
     class GameplayScreen : GameScreen
     {
@@ -48,12 +31,6 @@ namespace SpaceOctopus
         Player player;
         Player player2;
 
-        //input stuff that should move to Inputs
-#if WINDOWS_PHONE
-        AccelerometerReadingEventArgs accelState = null;
-//        Accelerometer Accelerometer;
-#endif
-
         //arg tight coupling
         MainMenuScreen menuScreen;
 
@@ -63,17 +40,6 @@ namespace SpaceOctopus
             this.menuScreen = menuScreen;
             TransitionOnTime = TimeSpan.FromSeconds(0.0);
             TransitionOffTime = TimeSpan.FromSeconds(0.0);
-
-  /*          Accelerometer = new Accelerometer();
-            if (Accelerometer.State == SensorState.Ready)
-            {
-                Accelerometer.ReadingChanged += (s, e) =>
-                {
-                    accelState = e;
-
-                };
-                Accelerometer.Start();
-            }*/
         }
 
         #region Input
@@ -97,11 +63,7 @@ namespace SpaceOctopus
             }
             else
             {
-#if WINDOWS_PHONE
-                Core.Instance.Input.HandleInputs(input, accelState, player, player2);
-#else
                 Core.Instance.Input.HandleInputs(input, player, player2);
-#endif
                 if (Core.Instance.InTrialLimbo)
                 {
                     if (Core.Instance.Input.UpsellAction.Equals(UpsellAction.BUY))
@@ -120,8 +82,6 @@ namespace SpaceOctopus
 
         private void finishCurrentGame()
         {
-            //foreach (GameScreen screen in ScreenManager.GetScreens())
-            //    screen.ExitScreen();
 
             if (menuScreen != null)
             {
@@ -129,9 +89,6 @@ namespace SpaceOctopus
                 menuScreen.CreateMenus();
             }
             this.ExitScreen();
-
-            //ScreenManager.AddScreen(new BackgroundScreen());
-            //ScreenManager.AddScreen(new MainMenuScreen());
         }
 
         public override void LoadContent()
@@ -189,10 +146,6 @@ namespace SpaceOctopus
         public override void Draw(GameTime gameTime)
         {
             Core.Instance.Draw(gameTime, ScreenManager);
-            //float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-         //   ScreenManager.SpriteBatch.Begin();
-         //   ScreenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle((int)(touchAnchor.X - 5), (int)(touchAnchor.Y - 5), 10, 10), Color.Aqua);
-         //   ScreenManager.SpriteBatch.End();
         }
 
     }
@@ -204,29 +157,6 @@ namespace SpaceOctopus
         public const int Width = 480; //300 in original SOM
         public const int Height = 800; //500 in original SOM
     }
-
-    // Classes that won't be ported:
-
-    /*Initialization code:
-     * 
-    Global core:CoreType = New CoreType 
-    core.startUp() 
-    
-      and there's this from WindowType:
- 
-    Method SetWindow()
-        AppTitle = "Space Octopus Mono"
-        Graphics WIDTH, HEIGHT
-        SetClsColor(128,128,128)
-        SetBlend ALPHABLEND
-        Local myfont:TImageFont=LoadImageFont("resources\fonts\DejaVuSans.ttf",15)
-        SetImageFont myfont
-        
-    EndMethod
-
-EndType
-     
-     */
 
     public class HighScores : Drawable
     {
@@ -266,7 +196,6 @@ EndType
                 alphaCycle = -alphaCycle;
                 highlightAlpha = Math.Max(Math.Min(1f, highlightAlpha), 0);
             }
-            //a = (int)(alpha * 255f);
         }
 
         private void drawString(string text, int x, int y, int xOff, int yOff, ScreenManager screenManager)
@@ -279,9 +208,7 @@ EndType
         //Note: ignores xOff and yOff.
         public override void Draw(int xOff, int yOff, ScreenManager screenManager)
         {
-            //base.Draw(xOff, yOff, screenManager);
             if (!IsAlive) return;
-            //if (Core.Instance.isTwoPlayer ....
 
             //ignore offset.
             xOff = 0;
@@ -400,7 +327,6 @@ EndType
             }
             else
             {
-                //screenManager.SpriteBatch.DrawString(GameFont, text, Position, Color.Black, 0, new Vector2(0, GameFont.LineSpacing / 2), fontScale, SpriteEffects.None, 0);
                 screenManager.SpriteBatch.DrawString(GameFont, text, Position, new Color(r, g, b, a), 0, new Vector2(0, GameFont.LineSpacing / 2), fontScale, SpriteEffects.None, 0);
             }
         }
@@ -417,6 +343,7 @@ EndType
          p.row = -99 'images don't use row. Won't be mistaken for a real value.
          Return p
      EndFunction*/
+
     }
 
     public class PowerUp : Drawable
@@ -671,30 +598,8 @@ EndType
             {
                 //Draw a rectangle in the specified color.
                 screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle((int)Position.X + xOff, (int)Position.Y + yOff, (int)Width, (int)Height), color);
-                //screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle((int)Position.X + xOff, (int)Position.Y + yOff, (int)Width, (int)Height), Color.White);
             }
         }
-
- /*       public void ClearExplosionMap()
-        {
-            ExplosionMap = null;
-            expWidth = 0;
-            expHeight = 0;
-        }
-
-        public void SetExplosionMapFrom(Texture2D texture)
-        {
-            if (ExplosionMap != null) return;
-            ExplosionMap = new Color[texture.Width * texture.Height];
-            texture.GetData<Color>(ExplosionMap);
-            expWidth = texture.Width;
-            expHeight = texture.Height;
-        }
-
-        public void SetExplosionMapFrom()
-        {
-            SetExplosionMapFrom(Picture);
-        }*/
 
         #region HelperMethods
 
@@ -1839,10 +1744,6 @@ EndType
 
         int Id; //for 2 player
 
-        //  Field soundShoot:TSound
-        // Field powerUpSound:TSound
-        //   Field hitSound:TSound
-
         public Vector2 LastPosition; //used by RelativeAnchors
         public Vector2 LastMove; //used by RelativeAnchors control
 
@@ -2029,27 +1930,8 @@ EndType
             }
         }
 
-        /*collide with enemies, if we have spikes     
-'       If bSpike Then
-'       Local x:Int = x + spikeXOff          - 10 'extra wide enemy killing
-'       Local width:Int = spikeImage.width   + 20
-'       Local y:Int = y + spikeYOff
-'       Local height:Int = spikeImage.height        
-'         For Local a:enemyType = EachIn coreType.getInstance().alienList
-'               If a.bLive = True And a.x + a.width > x And a.x < x + width And  a.y + a.height > y And a.y < y + height Then
-'                   a.die(particleType.SMALLSCATTER)
-'                 kills:+1
-'               EndIf
-'           Next
-'       EndIf   */
-
         public override void Move(int delta)
         {
-            //  if (!isOnScreen())
-            //  {
-            //      IsAlive = false;
-            //  } no, this check is done in the Core. FIXME...
-
             if (!IsAlive) return;
             DoCollisions();
             if (isAI)
@@ -2076,7 +1958,10 @@ EndType
 
                 if (Position.X < 0) Position.X = 0;
                 if (Position.X + Width > Window.Width) Position.X = Window.Width - Width;
-                if (Core.Instance.EnemyCount > 0 || Upgrades.hasCannon || Core.Instance.InTrialLimbo) //the player is firing
+
+
+                //if (Core.Instance.EnemyCount > 0 || Upgrades.hasCannon || Core.Instance.InTrialLimbo) //the player is firing
+                if (up)
                 {
                     if (RefireTimer == 0)
                     {
@@ -2439,83 +2324,6 @@ EndType
         }
 
 
-#if WINDOWS_PHONE
-        public static void WriteFile(string filename, Action<StreamWriter> handler, Action<int> onFailure)
-        {
-            try
-            {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Create, isf))
-                    {
-                        using (StreamWriter writer = new StreamWriter(isfs))
-                        {
-                            handler.Invoke(writer);
-                            writer.Flush();
-                            writer.Close();
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                onFailure.Invoke(0);
-            }
-        }
-
-        public static void ReadFile(string filename, Action<StreamReader> handler, Action<int> onFailure)
-        {
-            bool success = false;
-            try
-            {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    if (isf.FileExists(filename))
-                    {
-                        using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(filename, FileMode.Open, isf))
-                        {
-                            using (StreamReader reader = new StreamReader(isfs))
-                            {
-                                try
-                                {
-                                    handler.Invoke(reader);
-                                    success = true;
-                                }
-                                finally
-                                {
-                                    if (reader != null)
-                                        reader.Close();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                success = false;
-            }
-            if (success == false)
-            {
-                onFailure(0);
-            }
-        }
-
-        public static bool FileExists(string filename) {
-           try
-            {
-                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    if (isf.FileExists(filename))
-                    {
-                        return true;
-                    }
-                }
-            } catch (Exception) {
-            }
-            return false;
-        }
-#else
         public static void WriteFile(string filename, Action<StreamWriter> handler, Action<int> onFailure)
         {
             bool success = false;
@@ -2572,7 +2380,6 @@ EndType
             }
             return false;
         }
-#endif
     }
 
     public class Options
@@ -2660,15 +2467,6 @@ EndType
     //TODO: split out persistent options into the Options class
     public class Tweaking
     {
-        #region Accelerometer controls
-        public static double AccelDefaultY = -1.0;
-        public static int AccelerationSmoothing = 3;
-        public const int MaxAccelerationSmoothing = 10;
-        public static bool RecalibrateAccel = true;
-        #endregion
-
-        public static float RelativeAnchorsScale = 1f;
-
         //Settings here
         public const bool isCheatsEnabled = false;
         public const bool SimulateTrial = false;
@@ -2677,7 +2475,6 @@ EndType
 
         //other random stuff
         public static bool EnableSound = true; //true
-        public static bool DrawTouchAnchors = false;
         //These must be set correctly before release
 
         public const bool DebugFileStuff = false; // set to false
@@ -4382,15 +4179,8 @@ EndType*/
             }
 
             screenManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-            //screenManager.SpriteBatch.Begin();
 
             screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, 0, Window.Width, Window.Height), Color.Gray);
-
-            //Draw the player control area divider for the first level
-            if (level < 5 && P2 != null)
-            {
-                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, Window.Height/2 -8, Window.Width, 8), CrossColor);
-            }
 
             if (PowerUps != null)
             {
@@ -4459,21 +4249,6 @@ EndType*/
 #if PROFILING
             screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(45, 20, 45, 20), Color.AliceBlue);
 #endif
-
-            //draw touchanchors
-            if (Tweaking.DrawTouchAnchors)
-            {
-                if (Input.touchAnchor1 != null)
-                {
-                    DrawAnchor(Gfx.JoystickBase, Input.touchAnchor1.Position, screenManager, false);
-                    DrawAnchor(Gfx.Joystick, Input.touchAnchor1.MovePosition, screenManager, Input.touchAnchor1.MovePosition.X > Input.touchAnchor1.Position.X);
-                }
-                if (Input.touchAnchor2 != null)
-                {
-                    DrawAnchor(Gfx.JoystickBase, Input.touchAnchor2.Position, screenManager, false);
-                    DrawAnchor(Gfx.Joystick, Input.touchAnchor2.MovePosition, screenManager, Input.touchAnchor2.MovePosition.X > Input.touchAnchor2.Position.X);
-                }
-            }
 
             if (Version.IsTrialMode)
             {
@@ -4750,28 +4525,21 @@ EndType*/
                 if (P2 != null)
                 {
                     CreateOffCenterMessage("Player 1", 1, (int)(Window.Width / 4), 1f);
-                    CreateOffCenterMessage("touch above", 2, (int)(Window.Width / 4), 1f);
+                    CreateOffCenterMessage("A W D", 2, (int)(Window.Width / 4), 1f);
                     CreateOffCenterMessage("Player 2", 1, (int)(Window.Width * 3 / 4), 1f);
-                    CreateOffCenterMessage("touch below", 2, (int)(Window.Width * 3 / 4), 1f);
-                    //CreateMessage("Touch for control", 3);
+                    CreateOffCenterMessage("Arrow keys", 2, (int)(Window.Width * 3 / 4), 1f);
+                    //CreateMessageImg("keys.png", 5);
                 }
                 else
                 {
-                    //CreateMessage("slide or tilt to move", 3);
-                    //CreateMessage("slide or tilt to move", 3);
+                    CreateMessage("Use arrow keys", 3);
                 }
-                /* for 2 player: createMessage("Player 1",-4)
-                createMessage("Use arrow keys",-3)
-                createMessage("Player 2",-2)
-                createMessage("Use W, A and D keys",-1)     */
-                //CreateMessageImg("keys.png", 5);
+                
             }
 
             if (every[3] == 0)
             {
                 CreateMessage("Promotion to " + GetRank(), 1);
-                // P.Promotion();
-                // if (P2 != null) P2.Promotion();
             }
             CreateMessage("Level " + level, 0);
 
@@ -4791,8 +4559,8 @@ EndType*/
             }
 
             //Act 1 - levels 1 to 8
-            //'Octo or Monk       
-            //1:O 2:O 3:O 4:M 5:--special-- 6:M 7:O 8:M 9:O  
+            //'Octo or Monk
+            //1:O 2:O 3:O 4:M 5:--special-- 6:M 7:O 8:M 9:O
 
             if (level < 9)
             {
@@ -5078,22 +4846,10 @@ EndType*/
         public bool P1HasFingerDown;
         public bool P2HasFingerDown;
 
-        public TouchAnchor touchAnchor1;
-        public TouchAnchor touchAnchor2;
-
-        //Input Members
-        TouchCollection touchState;
-
         //Hacks for the upsell screen
         public Rectangle UpsellBuyButton;
         public Rectangle UpsellBackButton;
         public UpsellAction UpsellAction;
-
-        double[] accelX = new double[Tweaking.MaxAccelerationSmoothing];
-        double[] accelY = new double[Tweaking.MaxAccelerationSmoothing];
-        int accelCount = 0;
-        double smoothedAccelX = 0;
-        double smoothedAccelY = 0;
 
         private void UpsellHacksPressed(Vector2 position)
         {
@@ -5110,13 +4866,8 @@ EndType*/
             }
         }
 
-#if WINDOWS_PHONE
-        public void HandleInputs(InputState input, AccelerometerReadingEventArgs accelState, Player player, Player player2)
-#else
         public void HandleInputs(InputState input, Player player, Player player2)
-#endif
         {
-                touchState = TouchPanel.GetState();
 
                 bool wasFingerDown = HasFingerDown;
                 HasFingerDown = false;
@@ -5128,90 +4879,6 @@ EndType*/
 
                 KeyboardState keyState = Keyboard.GetState();
 
-                //interpret touch screen presses
-                foreach (TouchLocation location in touchState)
-                {
-                     switch (location.State)
-                     {
-                       case TouchLocationState.Pressed:
-                           UpsellHacksPressed(location.Position);
-                           HasFingerDown = true;
-                           bool isPlayer2;
-                             //determine if this touch is for player 2
-                           if (Core.Instance.P2 != null)
-                           {
-                               //if one player is already touching, the new touch is the other guy.
-                               if (touchAnchor1 != null && touchAnchor2 == null)
-                               {
-                                   isPlayer2 = true;
-                               }
-                               else if (touchAnchor2 != null && touchAnchor1 == null)
-                               {
-                                   isPlayer2 = false;
-                               }
-                               else //they are both touching, or neither is touching.
-                               {
-                                   if (location.Position.Y < Window.Height/ 2) 
-                                   {
-                                       isPlayer2 = true;
-                                   } else {
-                                       isPlayer2 = false;
-                                   }
-                               }
-
-                           } else {
-                               isPlayer2 = false; //single player game
-                           }
-
-                           if (isPlayer2)
-                           {
-                               Debug.WriteLine("New touch P2");
-                               touchAnchor2 = new TouchAnchor(location.Position, location.Id);
-                               P2HasFingerDown = true;
-                           }
-                           else
-                           {
-                               Debug.WriteLine("New touch P1");
-                               touchAnchor1 = new TouchAnchor(location.Position, location.Id);
-                               P1HasFingerDown = true;
-                           }
-                           break;
-                        case TouchLocationState.Moved:
-                            HasFingerDown = true;
-                            if (touchAnchor2 != null && location.Id == touchAnchor2.Id)
-                            {
-                                touchAnchor2.MovePosition = location.Position;
-                                P2HasFingerDown = true;
-                                
-                            } else if (touchAnchor1 != null && location.Id == touchAnchor1.Id)
-                            {
-                                touchAnchor1.MovePosition = location.Position;
-                                P1HasFingerDown = true;
-                            }
-                            else
-                            {
-                                //Handling an edge case that I wish I could test for...
-                                touchAnchor1 = new TouchAnchor(location.Position, location.Id);
-                                P1HasFingerDown = true;
-                            }
-                            
-                            break;
-                        case TouchLocationState.Released:
-                            if (touchAnchor2 != null && location.Id == touchAnchor2.Id)
-                            {
-                                touchAnchor2 = null;
-                            }
-                            else if (touchAnchor1 != null && location.Id == touchAnchor1.Id)
-                            {
-                                touchAnchor1 = null;
-                            }
-                            break;
-
-                     }
-                    
-
-                }
-
                 if (keyState.IsKeyDown(Keys.Space) || keyState.IsKeyDown(Keys.Enter))
                 {
                     HasFingerDown = true;
@@ -5220,18 +4887,6 @@ EndType*/
                 if (HasFingerDown && !wasFingerDown)
                 {
                     TappedThisFrame = true;
-                }
-
-                //These are redundant, because I capture the 'release' event above.
-                //they're here because i'm not 100% confident you always get a release event.
-                //as soon as i test on a real phone, i should delete these.
-                if (!P2HasFingerDown)
-                {
-                    touchAnchor2 = null;
-                }
-                if (!P1HasFingerDown)
-                {
-                    touchAnchor1 = null;
                 }
 
                 player.left = false;
@@ -5246,59 +4901,6 @@ EndType*/
                     player2.up = false;
                     player2.down = false;
                 }
-
-        /*        if (accelState != null)
-                {
-                    accelX[accelCount] = accelState.X;
-                    accelY[accelCount] = accelState.Y;
-                    smoothedAccelX = 0;
-                    smoothedAccelY = 0;
-                    for (int i = 0; i < Tweaking.AccelerationSmoothing; i++)
-                    {
-                        smoothedAccelX += accelX[i];
-                        smoothedAccelY += accelY[i];
-                    }
-                    smoothedAccelX /= Tweaking.AccelerationSmoothing;
-                    smoothedAccelY /= Tweaking.AccelerationSmoothing;
-
-                    accelCount++;
-                    if (accelCount >= Tweaking.AccelerationSmoothing)
-                    {
-                        accelCount = 0;
-
-                        if (Tweaking.RecalibrateAccel)
-                        {
-                            Debug.WriteLine("Recalibrating up\\down accelerometer movement to " + smoothedAccelY);
-                            Tweaking.RecalibrateAccel = false;
-                            Tweaking.AccelDefaultY = smoothedAccelY;
-                        }
-                    }
-                }
-
-                //ignore accelerometer in two player games.
-                //ignore acceleromter when the player is touching the screen.
-                if (accelState != null && Core.Instance.P2 == null && !HasFingerDown) 
-                {
-                    //Dead zone: according to someone, a device sitting flat can get variance of up to .06
-                    //I haven't done any smoothing here :/ and may need it.
-                    if (Math.Abs(smoothedAccelX) > 0.10f) //dead zone
-                    {
-                        if (smoothedAccelX > 0.0f)
-                            player.right = true;
-                        else
-                            player.left = true;
-                    }
-
-                    if (Tweaking.VerticleMotion && Math.Abs(smoothedAccelY - Tweaking.AccelDefaultY) > 0.08f) //dead zone
-                    {
-                        if (smoothedAccelY + Tweaking.AccelDefaultY < 0.0f)
-                            player.down = true;
-                        else
-                            player.up = true;
-                    }
-                }*/
-
-                ProcessTouchMovement(player, player2);
 
                 //use keyboard for cheats
                 if (keyState.IsKeyDown(Keys.D1)) Core.Instance.CheatSkipLevelTo(1);
@@ -5319,8 +4921,8 @@ EndType*/
                 if (keyState.IsKeyDown(Keys.Y)) Core.Instance.CheatManyPowerUps(false);
                 if (keyState.IsKeyDown(Keys.U)) Tweaking.ShowPerfStats = true;
                 if (keyState.IsKeyDown(Keys.I)) Tweaking.ShowPerfStats = false;
-                
-                //keyboard control (overrides accelerometer and touch)
+
+                //Keyboard controls    
                 if (keyState.IsKeyDown(Keys.Right))
                 {
                     player.right = true;
@@ -5365,13 +4967,6 @@ EndType*/
                         player2.down = true;
                     }
                 }
-
-                //if (input.CurrentGamePadStates[0].DPad.Left == ButtonState.Pressed
-                //else if (input.CurrentGamePadStates[0].DPad.Right == ButtonState.Pressed 
-                //    player.Velocity.X = MathHelper.Min(input.CurrentGamePadStates[0].ThumbSticks.Left.X * 2.0f, 1.0f);
-                // B button, or pressing on the upper half of the pad or space on keyboard or touching the touch panel fires the weapon.
-                //               if (input.CurrentGamePadStates[0].IsButtonDown(Buttons.B) || input.CurrentGamePadStates[0].IsButtonDown(Buttons.A) || input.CurrentGamePadStates[0].ThumbSticks.Left.Y > 0.25f ||
-                //        keyState.IsKeyDown(Keys.Space) || buttonTouched)
         }
 
         private float pickAbsoluteSmallest(float one, float two)
@@ -5383,70 +4978,6 @@ EndType*/
             else
             {
                 return two;
-            }
-        }
-
-        private static int TOUCH_DEAD_DIST = 2;
-
-        //TODO: calculate touchXChange and touchYChange in here instead of passing in.
-        private void ProcessTouchMovement(Player player, Player player2)
-        {
-            processTouchInDragMode(player, touchAnchor1);
-            if (player2 != null) processTouchInDragMode(player2, touchAnchor2);
-        }
-
-        private void processTouchInDragMode(Player p, TouchAnchor touchAnchor)
-        {
-            if (touchAnchor == null) return;
-            float touchXChange = touchAnchor.MovePosition.X - touchAnchor.Position.X;
-            float touchYChange = touchAnchor.MovePosition.Y - touchAnchor.Position.Y;
-
-            //update the anchor based on how far the player moved last frame.
-            //Cap the movement so it can't go past the anchorpoint, that would lead to wobbling :o
-            float xMove = p.LastMove.X * Tweaking.RelativeAnchorsScale;
-            float xMoveLimit = touchAnchor.MovePosition.X - touchAnchor.Position.X;
-            touchAnchor.Position.X += pickAbsoluteSmallest(xMove, xMoveLimit);
-
-            float yMove = p.LastMove.Y * Tweaking.RelativeAnchorsScale;
-            float yMoveLimit = touchAnchor.MovePosition.Y - touchAnchor.Position.Y;
-            touchAnchor.Position.Y += pickAbsoluteSmallest(yMove, yMoveLimit);
-
-            //touching overrides the accelerometer
-            if (Math.Abs(touchXChange) > TOUCH_DEAD_DIST) //threshhold
-            {
-                if (touchXChange > 0)
-                {
-                    p.right = true;
-                    p.left = false;
-                }
-                else
-                {
-                    p.left = true;
-                    p.right = false;
-                }
-
-            }
-
-            if (Options.Instance.VerticalMotion)
-            {
-                if (Math.Abs(touchYChange) > TOUCH_DEAD_DIST) //threshhold
-                {
-                    if (touchYChange > 0)
-                    {
-                        p.down = true;
-                        p.up = false;
-                    }
-                    else
-                    {
-                        p.up = true;
-                        p.down = false;
-                    }
-                }
-            }
-            else
-            {
-                touchAnchor.Position.Y = p.centerY();
-                touchAnchor.MovePosition.Y = touchAnchor.Position.Y;
             }
         }
 
