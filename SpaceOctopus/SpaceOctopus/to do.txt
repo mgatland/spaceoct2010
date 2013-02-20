@@ -4,10 +4,12 @@ every  release: check these:
 * version number in Options menu
 * git diffs
 * tile icon
-* do a release build
+* do a release build (check .xap file's modified date)
+* check description, including category
 
-stats tracking v1: track first trial run and first purchased run.
+[ ] change Category to Shooter again!
 
+[ ] "In love with SOM? Please rate it in the App Hub!"
 
 [ ] swap P1 and P2 positions, scores etc in 2player mode. so P1 is the single player player.
 [ ] p2, when she has doublefire, her shots appear visibly beneath her gunbits :(
@@ -85,6 +87,7 @@ PHASE MAYBE
 [ ] allow names on high scores.
 [ ] consider using a noise overly as a transition effect, or when players are damaged, or just to generally noise things up
 - rainbow particles at some point, somewhere.
+- stats: total playtime.
 
 Unimportant memory leaks:
 the drawStrings may be leaking memory.
@@ -120,6 +123,10 @@ PHASE NEVER
 - let users create their own artsets using in in-game pixel art editor.
 
 CHANGE LOG ================================================
+
+-- Release v 1.4
+
+No change (except version number)
 
 -- Release v 1.3
 
