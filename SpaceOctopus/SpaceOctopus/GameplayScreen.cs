@@ -1666,7 +1666,7 @@ namespace SpaceOctopus
                     Debug.WriteLine("Unrecognised upgrade " + type);
                     break;
             }
-            if (showMessage) Core.Instance.CreateMessage(text, 2, 2);
+            if (showMessage && !Tweaking.lowTextMode) Core.Instance.CreateMessage(text, 2, 2);
         }
 
         /*Case powerUp.SPIKEWINGS
@@ -2464,14 +2464,13 @@ namespace SpaceOctopus
         }
     }
 
-    //TODO: split out persistent options into the Options class
     public class Tweaking
     {
-        //Settings here
-        public const bool isCheatsEnabled = false;
-        public const bool SimulateTrial = false;
+        public const bool lowTextMode = true;
 
-        // Options menu options     
+        //Settings here
+        public static bool isCheatsEnabled = false;
+        public const bool SimulateTrial = false;
 
         //other random stuff
         public static bool EnableSound = true; //true
@@ -3811,7 +3810,7 @@ EndType*/
                     {
                         scores.AddScoreAndSave(new Score(P.Score, P2.Score, level, GetRank(level, P.Kills), "", true));
                     }
-                    CreateMessage("Tap to restart", 6, 0);
+                    CreateMessage("Press Enter to restart", 6, 0);
                     lostMessage = true;
                 }
 
@@ -3840,7 +3839,10 @@ EndType*/
             {
                 if (!P.IsAlive && !P2.IsAlive && !hasLost)
                 {
-                    CreateDeathMessage("You are both destroyed!");
+                    if (!Tweaking.lowTextMode)
+                    {
+                        CreateDeathMessage("You are both destroyed!");
+                    }
                     SetLost();
                 }
             }
@@ -3852,10 +3854,13 @@ EndType*/
                     P.IsAlive = false;
                     if (!hasLost && P2 == null)
                     {
-                        CreateDeathMessage("You are destroyed!");
+                        if (!Tweaking.lowTextMode)
+                        {
+                            CreateDeathMessage("You are destroyed!");
+                        }
                         SetLost();
                     }
-                    if (P2 != null && P2.IsAlive)
+                    if (P2 != null && P2.IsAlive && !Tweaking.lowTextMode)
                     {
                         CreateMessage("Player 1 is lost!", 0);
                     }
@@ -3867,7 +3872,7 @@ EndType*/
                 if (P2.IsAlive)
                 {
                     P2.IsAlive = false;
-                    if (P.IsAlive)
+                    if (P.IsAlive && !Tweaking.lowTextMode)
                     {
                         CreateMessage("Player 2 is lost!", 0);
                     }
@@ -4215,30 +4220,24 @@ EndType*/
             {
                 scores.Draw(xOff, yOff, screenManager);
             }
-            
-            if (P2 != null)
-            {
-                //FIXME: uses memory every frame!
-                string msg1 = "Score: " + P.Score;
-                string msg2 = "Score: " + P2.Score;
-                drawString(msg2, 30, Window.Height - 30, 0, 0, screenManager);
-                drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
 
-                //display a cross when trying to move a dead player (if there is also an alive player)
-                if (!hasLost && !P2.IsAlive && Input.P2HasFingerDown)
-                {
-                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, 0, Window.Width, Window.Height / 2), CrossColor);
-                }
-                if (!hasLost && !P.IsAlive && Input.P1HasFingerDown)
-                {
-                    screenManager.SpriteBatch.Draw(Gfx.Cross, new Rectangle(0, Window.Height/2, Window.Width, Window.Height / 2), CrossColor);
-                }
-            }
-            else
+            if (!Tweaking.lowTextMode)
             {
-                //FIXME: uses memory every frame!
-                string msg1 = "Score: " + P.Score;
-                drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
+                if (P2 != null)
+                {
+                    //FIXME: uses memory every frame!
+                    string msg1 = "Score: " + P.Score;
+                    string msg2 = "Score: " + P2.Score;
+                    drawString(msg2, 30, Window.Height - 30, 0, 0, screenManager);
+                    drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
+
+                }
+                else
+                {
+                    //FIXME: uses memory every frame!
+                    string msg1 = "Score: " + P.Score;
+                    drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
+                }
             }
 
             if (Tweaking.isCheatsEnabled)
@@ -4539,15 +4538,22 @@ EndType*/
 
             if (every[3] == 0)
             {
-                CreateMessage("Promotion to " + GetRank(), 1);
+                if (!Tweaking.lowTextMode)
+                {
+                    CreateMessage("Promotion to " + GetRank(), 1);
+                }
             }
-            CreateMessage("Level " + level, 0);
+
+            if (!Tweaking.lowTextMode)
+            {
+                CreateMessage("Level " + level, 0);
+            }
 
             if (level >= 5 && every[5] == 0)
             {
                 special = new Special(level / 5);
                 DebugLog("Special Stage");
-                if (level == 5 || level == 10)
+                if ((level == 5 || level == 10) && !Tweaking.lowTextMode)
                 {
                     CreateMessage("Avoid", -2);
                 }
@@ -4902,6 +4908,15 @@ EndType*/
                     player2.down = false;
                 }
 
+
+                //cheats can be enabled by holding the magic key combination
+            if (keyState.IsKeyDown(Keys.Z) && keyState.IsKeyDown(Keys.L)) {
+                Tweaking.isCheatsEnabled = true;
+            } else if (Tweaking.isCheatsEnabled && keyState.IsKeyDown(Keys.L))
+            {
+                Tweaking.isCheatsEnabled = false;
+            }
+
                 //use keyboard for cheats
                 if (keyState.IsKeyDown(Keys.D1)) Core.Instance.CheatSkipLevelTo(1);
                 if (keyState.IsKeyDown(Keys.D2)) Core.Instance.CheatSkipLevelTo(2);
@@ -4914,13 +4929,13 @@ EndType*/
                 if (keyState.IsKeyDown(Keys.D9)) Core.Instance.CheatSkipLevelTo(9);
                 if (keyState.IsKeyDown(Keys.D0)) Core.Instance.CheatSkipLevelTo(0);
                 if (keyState.IsKeyDown(Keys.Q)) Core.Instance.CheatSkipLevel(-1);
-                if (keyState.IsKeyDown(Keys.W)) Core.Instance.CheatSkipLevel(1);
-                if (keyState.IsKeyDown(Keys.E)) Core.Instance.CheatPowerUp();
-                if (keyState.IsKeyDown(Keys.R)) Core.Instance.CheatSad();
-                if (keyState.IsKeyDown(Keys.T)) Core.Instance.CheatManyPowerUps(true);
-                if (keyState.IsKeyDown(Keys.Y)) Core.Instance.CheatManyPowerUps(false);
-                if (keyState.IsKeyDown(Keys.U)) Tweaking.ShowPerfStats = true;
-                if (keyState.IsKeyDown(Keys.I)) Tweaking.ShowPerfStats = false;
+                if (keyState.IsKeyDown(Keys.E)) Core.Instance.CheatSkipLevel(1);
+                if (keyState.IsKeyDown(Keys.O)) Core.Instance.CheatPowerUp();
+                if (keyState.IsKeyDown(Keys.P)) Core.Instance.CheatSad();
+                if (keyState.IsKeyDown(Keys.OemMinus)) Core.Instance.CheatManyPowerUps(true);
+                if (keyState.IsKeyDown(Keys.OemPlus)) Core.Instance.CheatManyPowerUps(false);
+                if (keyState.IsKeyDown(Keys.OemOpenBrackets)) Tweaking.ShowPerfStats = true;
+                if (keyState.IsKeyDown(Keys.OemCloseBrackets)) Tweaking.ShowPerfStats = false;
 
                 //Keyboard controls    
                 if (keyState.IsKeyDown(Keys.Right))

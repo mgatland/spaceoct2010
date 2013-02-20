@@ -125,6 +125,7 @@
     <Content Include="GameThumbnail.png" />
     <Content Include="Game.ico" />
     <Content Include="code for drawing classic graphics.txt" />
+    <Content Include="todo 2013.txt" />
     <Content Include="to do.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -191,7 +192,7 @@
     <None Include="Windows Copy of SpaceOctopus_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <PublishFile Include="TextFile1.txt">
+    <PublishFile Include="to do.txt">
       <Visible>False</Visible>
       <Group>
       </Group>
@@ -201,7 +202,7 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
-    <PublishFile Include="to do.txt">
+    <PublishFile Include="todo 2013.txt">
       <Visible>False</Visible>
       <Group>
       </Group>

@@ -1,0 +1,29 @@
+﻿
+2013-02-20
+
+I'm showing the game at an event on Saturday.
+Let's focus on things to do before then.
+
+Before Saturday:
+
+[X] Remove almost all text from the game.
+[ ] less text - make the controls description a picture of keyboard keys, instead of just text
+
+
+[ ] make a beautiful particle effect for rescuing
+[ ] use a visual\audio cue for 'Player X is lost"
+[ ] make 'avoid' levels less random, more visually interesting
+
+Later:
+[ ] Bug: Sometimes I get a 'rescue' pickup but nothing happens.
+	Fix: When a player respawns, grant them invulnerability until they are fully on screen
+[ ] use an audio cue for 'upgrade not needed', since we removed the text cue? (low priority, doesn't really matter)
+[ ] have a (non-text) cue for "Aliens got past you" (low priority because it almost never happens)
+[ ] replace "Press Enter to restart" with a picture of the enter key
+
+Random ideas:
+1. make the game always have 2 ships - it's 2 player or player + bot
+2. add the bot, obviously
+3. consider having no menus - jump straight into a 2-player game, AI takes over if the player doesn't.
+Make more of a thing of sharing the space - encourage each player to pick a side. Occasionally make it wise to swap sides.
+(how? powerups that are more effective against certain enemies, and enemies come on a certain side?)
