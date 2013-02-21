@@ -104,6 +104,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Special.cs" />
     <Compile Include="Data\Analytics.cs" />
     <Compile Include="BackgroundScreen.cs" />
     <Compile Include="OptionsMenuScreen.cs" />

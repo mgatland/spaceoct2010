@@ -6,20 +6,38 @@ Let's focus on things to do before then.
 
 Before Saturday:
 
-[X] Remove almost all text from the game.
-[ ] less text - make the controls description a picture of keyboard keys, instead of just text
-
-
-[ ] make a beautiful particle effect for rescuing
-[ ] use a visual\audio cue for 'Player X is lost"
+[ ] make the controls description a picture of keyboard keys, instead of just text
+[ ] make the menus better - the font and slide animation do not suit the game
+[ ] make the stars more interesting to battle.
+[ ] tweak level progression? more interesting content
 [ ] make 'avoid' levels less random, more visually interesting
+[ ] make a beautiful particle effect for rescuing
+[ ] make a new artset, and all that crazy stuff
+[ ] new enemy - they appear across the top of the screen,  then 'stomp' straight downwards, rapidly
+[ ] stealth wave
+[ ] boss?
+
+
+done:
+
+[X] Remove almost all text from the game.
+[X] megashots cut through an unlimited number of enemies, not only one (make it more overt and obvious)
+[X] fix glitches with the Lightwave Cannon (by making it fire automatically, you can't stop firing with it)
+
+later:
+
+[ ] convey progress in some way other than 'Level 1' text.
+[ ] use an audio cue for 'upgrade not needed', since we removed the text cue? (low priority, doesn't really matter)
+[ ] have a (non-text) cue for "Aliens got past you" (low priority because it almost never happens)
+[ ] cue for 'aliens got past you'
+[ ] don't save the game to disk - if you quit, you start over (the saving feature was for Windows Phone's tombstoning)
 
 Later:
 [ ] Bug: Sometimes I get a 'rescue' pickup but nothing happens.
 	Fix: When a player respawns, grant them invulnerability until they are fully on screen
-[ ] use an audio cue for 'upgrade not needed', since we removed the text cue? (low priority, doesn't really matter)
-[ ] have a (non-text) cue for "Aliens got past you" (low priority because it almost never happens)
+
 [ ] replace "Press Enter to restart" with a picture of the enter key
+[ ] use a visual\audio cue for 'Player X is lost"
 
 Random ideas:
 1. make the game always have 2 ships - it's 2 player or player + bot
@@ -27,3 +45,10 @@ Random ideas:
 3. consider having no menus - jump straight into a 2-player game, AI takes over if the player doesn't.
 Make more of a thing of sharing the space - encourage each player to pick a side. Occasionally make it wise to swap sides.
 (how? powerups that are more effective against certain enemies, and enemies come on a certain side?)
+
+An enemy that requires that the players syncronise their attacks? (annoying if one has refire rate upgrades)
+an enemy that requires that the players attack at two different places at the same time
+(get some syncronized movement in there - that'll be cool)
+A level where upgrades appear at far sides of the screen at the same time. Oooh, the same upgrades keep appearing there,
+which means the players have to swap to get the full range of upgrades :)
+	(bubble sheilds on one side, spirit shots on the other)

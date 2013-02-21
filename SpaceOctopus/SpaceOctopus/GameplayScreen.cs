@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.GamerServices;
-
+using System.Xml.Linq;
 
 namespace SpaceOctopus
 {
@@ -272,7 +272,12 @@ namespace SpaceOctopus
         private float fontScale = 1f;
 
         public Message(String text, int row)
-            : base(null)
+            : this(text, null, row)
+        {
+        }
+
+        public Message(String text, Sprite picture, int row)
+            : base(picture)
         {
             this.text = text;
             this.Row = row;
@@ -310,6 +315,16 @@ namespace SpaceOctopus
             return m;
         }
 
+
+        public static Message CreateImageAt(String text, Sprite pic, int x, int y)
+        {
+            Message m = new Message(text, pic, -1);
+            m.Position.Y = y;
+            m.Position.X = x;
+            m.Row = -1; //exclude from the row management system.
+            return m;
+        }
+
         public override void Move(int delta)
         {
             alpha -= alphaDrain * delta;
@@ -323,26 +338,13 @@ namespace SpaceOctopus
 
             if (Picture != null)
             {
-                base.Draw(xOff, yOff, screenManager);
+                base.Draw(xOff - Picture.Width / 2 + 10, yOff - Picture.Height / 2 - 5, screenManager);
             }
-            else
+            if (text != null)
             {
                 screenManager.SpriteBatch.DrawString(GameFont, text, Position, new Color(r, g, b, a), 0, new Vector2(0, GameFont.LineSpacing / 2), fontScale, SpriteEffects.None, 0);
             }
         }
-
-        /*FIXME: image messagetype. Function createImg:messageType(fileName:String,x:Int,y:Int)
-         Local p:messageType = New messageType
-         p.bLive = True
-         p.text = ""
-         p.image = LoadImage(fileName)
-         p.x = x - (p.image.width / 2)
-         p.y = y
-         p.alpha = 1
-         p.alphadrain = 0.0002
-         p.row = -99 'images don't use row. Won't be mistaken for a real value.
-         Return p
-     EndFunction*/
 
     }
 
@@ -1961,7 +1963,7 @@ namespace SpaceOctopus
 
 
                 //if (Core.Instance.EnemyCount > 0 || Upgrades.hasCannon || Core.Instance.InTrialLimbo) //the player is firing
-                if (up)
+                if (up || Upgrades.hasCannon)
                 {
                     if (RefireTimer == 0)
                     {
@@ -3051,7 +3053,7 @@ EndType
                 s.Speed = -StandardShotSpeed * .83f;
                 s.expType = ParticleType.FAST_SCATTER;
                 s.Picture = Core.Instance.Art.PlayerShotMega;
-                s.Pierce = 1;
+                s.Pierce = 10;
             }
             s.Width = s.Picture.Width;
             s.Height = s.Picture.Height;
@@ -3170,187 +3172,6 @@ EndType
                 base.Draw(xOff, yOff, screenManager);
             }
         }
-    }
-
-    public class Special
-    {
-        int duration;
-        int time;
-        int spawnPeriod;
-        int spawned;
-        int spawnStart;
-        int scoreIncPeriod = 66;
-        int lastScoreInc = 0;
-        Core core;
-        int stage;
-        float speedMulti;
-
-        bool makeSeekingBlocks;
-        bool makeCentreBlocks;
-        bool makeWallBlocks;
-
-        //awful hacks to make seeking blocks alternate falling on the left and right
-        bool alternateLeftRightSeeking;
-        int lastSeekingX;
-
-        public int Creatures;
-
-        public Special(int level)
-        {
-            stage = level; //do'h
-            duration = 15000;
-            spawnStart = 200;
-            int specialType = stage % 3;
-
-            if (specialType == 0)
-            {
-                //special divided-screen stage
-                makeCentreBlocks = true;
-                makeSeekingBlocks = true;
-                alternateLeftRightSeeking = true;
-                speedMulti = 0.75f; //slow
-                spawnPeriod = 400;
-                if (stage <= 3) spawnPeriod = (int)(spawnPeriod * 1.3f); //super slow the first time
-                makeWallBlocks = false;
-                if (stage > 6 && stage % 2 != 0)
-                {
-                    //this will be the third time you face this level.
-                    if (stage <= 3) spawnPeriod = (int)(spawnPeriod * 1.2f); //slower because...
-                    Creatures = 1; //monk wave
-                }
-            }
-            else if (specialType == 2)
-            {
-                //special wall stage
-                makeSeekingBlocks = false;
-                speedMulti = 0.53f;
-                spawnPeriod = (int)(1250 * 1f / 0.7f);
-                makeWallBlocks = true;
-                if (stage > 3) // from the second time, you face monks
-                {
-                    Creatures = 1; //monk wave
-                }
-            }
-            else // specialType == 1
-            {
-                makeSeekingBlocks = true;
-                alternateLeftRightSeeking = false;
-                speedMulti = (float)Math.Min(0.5 + stage * .12, 1.3);
-                spawnPeriod = Math.Max(530 - stage * 40, 220);
-                makeWallBlocks = false;
-                if (stage > 9 && stage % 2 != 0)
-                {
-                    speedMulti *= 0.7f;
-                    Creatures = 1;
-                }
-            }
-            spawned = 0;
-            time = 0;
-            core = Core.Instance;
-        }
-
-        public bool Finished()
-        {
-            if (time > duration)
-            {
-                Debug.WriteLine("Special stage finished");
-                return true;
-            }
-            return false;
-        }
-
-        public void Move(int delta)
-        {
-            time += delta;
-            if (time > spawnStart + spawned * spawnPeriod)
-            {
-                spawned++;
-                if (makeSeekingBlocks)
-                {
-                    //TODO: if it's 2 player, randomly pick a player to target.
-                    Player target;
-                    if (core.P2 != null && core.P2.IsAlive && core.Random.Next(0, 2) == 0)
-                    {
-                        target = core.P2;
-                    }
-                    else
-                    {
-                        target = core.P;
-                    }
-                    spawnSeekingBlocks(target);
-                }
-                if (makeCentreBlocks)
-                {
-                    spawnCentreBlocks();
-                }
-                if (makeWallBlocks)
-                {
-                    spawnWallBlocks();
-                }
-            }
-            while (time > spawnStart + lastScoreInc + scoreIncPeriod)
-            {
-                lastScoreInc += scoreIncPeriod;
-                if (core.P.IsAlive) core.P.Score++;
-                if (core.P2 != null && core.P2.IsAlive) core.P2.Score++;
-            }
-        }
-
-        private void spawnSeekingBlocks(Player p)
-        {
-            int x = p.centerX() + core.Random.Next(-130, 130);
-
-            //hacks: if we are already spawning center blocks, don't spawn this in the center.
-            int attempts = 0; //just to make sure an infinte loop never happens due to art changes.
-            while (attempts < 10 && makeCentreBlocks && Math.Abs(x - (Window.Width / 2)) < core.Art.ShotHeartBigPicture.Width)
-            {
-                x += core.Random.Next(-Window.Width / 4, Window.Width / 4);
-                attempts++;
-            }
-            
-            if (x < 10) x = core.Random.Next(10, 60);
-            if (x > Window.Width) x = Window.Width - core.Random.Next(10, 60);
-
-            //megahax: if this awful hacky flag is set, we alternate between sides of the screen.
-            if (alternateLeftRightSeeking)
-            {
-                bool wasLeftBefore = (lastSeekingX < Window.Width / 2);
-                bool isLeftNow = (x < Window.Width / 2);
-                if (wasLeftBefore == isLeftNow) 
-                {
-                    //flip the x-coordinate around the center of the screen.
-                    x = Window.Width - x;
-                }
-                lastSeekingX = x;
-            }
-
-            Shot s = Shot.CreateHeart(x, -200, speedMulti);
-            core.AddShot(s);
-        }
-
-        private void spawnCentreBlocks()
-        {
-            int x = Window.Width / 2;
-            Shot s = Shot.CreateHeartBig(x, -200, speedMulti);
-            core.AddShot(s);
-        }
-
-        private void spawnWallBlocks()
-        {
-            int stepWidth = Window.Width * 40 / 300;
-            int steps = Window.Width / stepWidth + 1;
-            int safeStep = core.Random.Next(0, steps - 2);
-
-            for (int x = 0; x < steps; x++)
-            {
-                if (x != safeStep && x != safeStep + 1)
-                {
-                    Shot s = Shot.CreateHeart(x * stepWidth + 10, -50, speedMulti);
-                    core.AddShot(s);
-                }
-            }
-        }
-
     }
 
     public class Snd
@@ -4377,26 +4198,11 @@ EndType*/
             return message;
         }
 
-        public Message CreateOffCenterMessage(String text, int row, int yPos, float alphaDrainMulti)
+        public void CreateKeyboardKeyMessage(String text, int x, int y)
         {
-            Debug.Assert(row <= 7);
-            //Note, Off center messages do not 'fill up' a row.
-            Message message = Message.CreateAtRowWithYOffset(text, row, yPos);
-            messageList.Add(message);
-            return message;
+            Message key = Message.CreateImageAt(text, Gfx.KeyOutline, x, y);
+            messageList.Add(key);
         }
-
-        private Message CreateMessageImg(String path, int row)
-        {
-            return null;
-            //FIXME
-            /*  Method createMessageImg:messageType(path:String, row:Int=0)
-        Local m:messageType = messageType.createImg(path,windowType.width/2, windowType.height/2 + 16*row)
-        messageList.addLast(m)      
-        Return m
-    EndMethod*/
-        }
-
 
         private void CreateDeathMessage(String text)
         {
@@ -4523,11 +4329,16 @@ EndType*/
             {
                 if (P2 != null)
                 {
-                    CreateOffCenterMessage("Player 1", 1, (int)(Window.Width / 4), 1f);
-                    CreateOffCenterMessage("A W D", 2, (int)(Window.Width / 4), 1f);
-                    CreateOffCenterMessage("Player 2", 1, (int)(Window.Width * 3 / 4), 1f);
-                    CreateOffCenterMessage("Arrow keys", 2, (int)(Window.Width * 3 / 4), 1f);
-                    //CreateMessageImg("keys.png", 5);
+                    int startX = 70;
+                    int xOffset = 55;
+                    int currentX = startX;
+                    int yPos = Window.Height / 10 * 9;
+                    CreateKeyboardKeyMessage("A", currentX, yPos);
+                    currentX += xOffset;
+                    CreateKeyboardKeyMessage("S", currentX, yPos);
+                    currentX += xOffset;
+                    CreateKeyboardKeyMessage("D", currentX, yPos);
+                    currentX += xOffset*3;
                 }
                 else
                 {
@@ -4551,7 +4362,8 @@ EndType*/
 
             if (level >= 5 && every[5] == 0)
             {
-                special = new Special(level / 5);
+                //every 5 levels, but the 5th level counts as 0, not 1.
+                special = new Special((level / 5) - 1);
                 DebugLog("Special Stage");
                 if ((level == 5 || level == 10) && !Tweaking.lowTextMode)
                 {
@@ -5202,11 +5014,7 @@ EndType*/
     public static class Gfx
     {
         public static Texture2D Pixel;
-        public static Texture2D Cross;
-        public static Texture2D Joystick;
-        public static Texture2D JoystickBase;
-        public static Texture2D ArrowLeft;
-        public static Texture2D ArrowRight;
+        public static Sprite KeyOutline;
 
         public const int StandardScale = 12;
 
@@ -5363,12 +5171,8 @@ EndType*/
             PowerUp.LoadImages(ScreenManager);
 
             Gfx.Pixel = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/px"), Gfx.StandardScale, gd);
-            Gfx.Cross = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/cross"), Window.Width / 2, gd);
-            Gfx.Joystick = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/joystick"), Gfx.StandardScale, gd);
-            Gfx.JoystickBase = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/joystickbase"), Gfx.StandardScale, gd);
-            Gfx.ArrowLeft = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/arrowleft"), Gfx.StandardScale, gd);
-            Gfx.ArrowRight = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/arrowright"), Gfx.StandardScale, gd);
-
+            Gfx.KeyOutline = new Sprite(c.Load<Texture2D>("gfx/key")); //TODO: Don't use a Sprite for this, a Texture2D will do
+ 
             Snd.PlayerShotSound = c.Load<SoundEffect>("snd/EugenSopot/menu_select22_edited");
             Snd.AlienDieSound = c.Load<SoundEffect>("snd/space sound jiggled");
             Snd.envSound = c.Load<SoundEffect>("snd/EugenSopot/new_radio9"); //was iSubmarineRunLoop 'looping damage sound
