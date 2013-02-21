@@ -8,7 +8,7 @@ Before Saturday:
 
 [ ] make the controls description a picture of keyboard keys, instead of just text
 [ ] make the menus better - the font and slide animation do not suit the game
-[ ] make the stars more interesting to battle.
+[x] make the stars more interesting to battle. (a little - they're still not quite right)
 [ ] tweak level progression? more interesting content
 [ ] make 'avoid' levels less random, more visually interesting
 [ ] make a beautiful particle effect for rescuing
@@ -24,6 +24,12 @@ done:
 [X] megashots cut through an unlimited number of enemies, not only one (make it more overt and obvious)
 [X] fix glitches with the Lightwave Cannon (by making it fire automatically, you can't stop firing with it)
 
+2013-02-21
+[ ] Bug: Sometimes I get a 'rescue' pickup but nothing happens.
+	Fix: When a player respawns, grant them invulnerability until they are fully on screen
+
+
+
 later:
 
 [ ] convey progress in some way other than 'Level 1' text.
@@ -33,8 +39,6 @@ later:
 [ ] don't save the game to disk - if you quit, you start over (the saving feature was for Windows Phone's tombstoning)
 
 Later:
-[ ] Bug: Sometimes I get a 'rescue' pickup but nothing happens.
-	Fix: When a player respawns, grant them invulnerability until they are fully on screen
 
 [ ] replace "Press Enter to restart" with a picture of the enter key
 [ ] use a visual\audio cue for 'Player X is lost"

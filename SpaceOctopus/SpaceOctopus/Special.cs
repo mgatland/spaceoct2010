@@ -122,8 +122,8 @@ namespace SpaceOctopus
                 terrain.Add(" x        ");
 
                 //This one gets faster and faster every time.
-                speedMulti = (float)Math.Min(0.5 + stage * .12, 1.3);
-                spawnPeriod = Math.Max(530 - stage * 40, 220);
+                speedMulti = (float)Math.Min(0.5 + difficulty * .2, 1.1);
+                spawnPeriod = Math.Max(530 - difficulty * 50, 290);
                 if (difficulty % 2 == 1)
                 {
                     //monks every second time.

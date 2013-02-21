@@ -818,17 +818,21 @@ namespace SpaceOctopus
     {
         float xV;
         float yV;
-        float friction = 0.998f;
+        float friction = 0.997f;
         int stillTime;
-        static int defaultMaxStillTime = 120;
+        static int defaultMaxStillTime = 30;
         public int MaxStillTime;
         static int maxJumpDist = Window.Width;
         static int defaultROF = 6000;
         static float defaultSpeed = 0.1f;
+        int hops = 0;
+        private int waveDelay;
+        private int fastHopThreshhold = 3;
 
-        public Star()
+        public Star(int waveDelay)
             : base(Core.Instance.Art.Star, defaultROF, defaultSpeed)
         {
+            this.waveDelay = waveDelay;
             Art = Core.Instance.Art;
             //shootSound = n/a stars don't shoot
             //sound die
@@ -845,6 +849,11 @@ namespace SpaceOctopus
 
         public override void Move(int delta)
         {
+            if (waveDelay > 0)
+            {
+                waveDelay--; //FIXME: not framerate independent
+                return;
+            }
             xV *= (float)Math.Pow(friction, delta);
             yV *= (float)Math.Pow(friction, delta);
             Position.X += xV * delta;
@@ -852,31 +861,50 @@ namespace SpaceOctopus
             if (Math.Abs(xV) < 0.01) xV = 0;
             if (Math.Abs(yV) < 0.01) yV = 0;
             //Local fearDirection:Float = starsAvoidShots()
-            if (xV == 0 && yV == 0)
+
+            if (Math.Abs(xV) < 0.04 && Math.Abs(yV) < 0.04)
             {
-                stillTime++; //FIXME: should be framerate dependent.
+                stillTime++;
             }
 
-            if (stillTime > defaultMaxStillTime)
-            { // if we can dodge, also move on (fearDirection != 0) but don't decrease MaxStillTime in that case.
-                MaxStillTime = (int)(MaxStillTime * 0.9f);
-                stillTime = 0;
-                //choose X destination
-                int destX = Core.Instance.Random.Next(0, Window.Width);
-                /*'override random movement if we're fleeing.
-                         'if (fearDirection > 0) destX = windowType.WIDTH - 30
-                         'if (fearDirection < 0) destX = 0 + 30
-                         'x = fearDirection + (windowType.width / 2)*/
-                //make sure destination is in range.
-                destX = (int)Math.Min(destX, Position.X + maxJumpDist / 2);
-                destX = (int)Math.Max(destX, Position.X - maxJumpDist / 2);
+            if (stillTime > MaxStillTime)
+            {
+                hops++;
+                if (hops >= fastHopThreshhold)
+                {
+                    Debug.Print("Star gets fast!");
+                    //fast mode
+                    xV = 0;
+                    yV = 0.4f;
+                    stillTime = 0;
+                    friction = 0.996f;
+                    MaxStillTime = 10;
+                }
+                else
+                {
+                    Debug.Print("slow star");
+                    //slow mode
+                    // if we can dodge, also move on (fearDirection != 0) but don't decrease MaxStillTime in that case.
+                    stillTime = 0;
+                    //choose X destination
+                    int destX = Core.Instance.Random.Next(0, Window.Width);
+                    /*'override random movement if we're fleeing.
+                             'if (fearDirection > 0) destX = windowType.WIDTH - 30
+                             'if (fearDirection < 0) destX = 0 + 30
+                             'x = fearDirection + (windowType.width / 2)*/
+                    //make sure destination is in range.
+                    destX = (int)Math.Min(destX, Position.X + maxJumpDist / 2);
+                    destX = (int)Math.Max(destX, Position.X - maxJumpDist / 2);
 
-                //calculate Y coordinate using trig, to get a destinationpoint that is maxJumpDist away.
-                //c^2 = a^2 - b^2
-                int c = (int)Math.Sqrt(maxJumpDist * maxJumpDist - Math.Abs(Position.X - (destX * destX)));
-                int destY = (int)(c + Position.Y);
-                xV = (destX - Position.X) * 10 / maxJumpDist / 18;
-                yV = (destY - Position.Y) * 10 / maxJumpDist / 18;
+                    //calculate Y coordinate using trig, to get a destinationpoint that is maxJumpDist away.
+                    //c^2 = a^2 - b^2
+                    int c = (int)Math.Sqrt(maxJumpDist * maxJumpDist - Math.Abs(Position.X - (destX * destX)));
+                    int destY = (int)(c + Position.Y);
+                    xV = (destX - Position.X) * 6 / maxJumpDist / 18;
+                    yV = (destY - Position.Y) * 6 / maxJumpDist / 18;
+                }
+                
+
 
 
             }
@@ -1648,14 +1676,13 @@ namespace SpaceOctopus
                         if (!Core.Instance.P.IsAlive)
                         {
                             text = "Rescued Player 1!";
-                            Core.Instance.P.IsAlive = true;
-                            Core.Instance.P.Position.Y = Window.Height - 1;
+                            Core.Instance.P.revive();
                         }
                         else if (!Core.Instance.P2.IsAlive)
                         {
+                            
                             text = "Rescued Player 2!";
-                            Core.Instance.P2.IsAlive = true;
-                            Core.Instance.P2.Position.Y = Window.Height - 1;
+                            Core.Instance.P2.revive();
                         }
                         else
                         {
@@ -1763,6 +1790,8 @@ namespace SpaceOctopus
 
         public int ShotCount;
         int CurrentShot;
+        private int invulnerabilityTimer = 0;
+        private const int RESPAWN_INVULERABILITY_TIME = 100;
 
         public void Upgrade(int type)
         {
@@ -1825,6 +1854,10 @@ namespace SpaceOctopus
 
         private void PushDown(float impact, double shakeImpact, bool loseUpgrades)
         {
+            if (invulnerabilityTimer > 0)
+            {
+                return;
+            }
             impact *= BaseDamageDistanceFactor;
             Upgrades.PushDown(ref impact, ref shakeImpact, ref loseUpgrades);
             int y = (int)Position.Y;
@@ -1935,6 +1968,12 @@ namespace SpaceOctopus
         public override void Move(int delta)
         {
             if (!IsAlive) return;
+
+            if (invulnerabilityTimer > 0)
+            {
+                invulnerabilityTimer--;
+            }
+
             DoCollisions();
             if (isAI)
             {
@@ -2124,6 +2163,13 @@ namespace SpaceOctopus
             p.Score = pd.Score;
             p.Upgrades.LoadFromPlayerData(pd);
             return p;
+        }
+
+        internal void revive()
+        {
+            IsAlive = true;
+            Position.Y = Window.Height - 1;
+            invulnerabilityTimer = RESPAWN_INVULERABILITY_TIME;
         }
     }
 
@@ -4399,12 +4445,16 @@ EndType*/
             {
                 if (level == 9) MakeStarWave();
                 if (level == 10) MakeOctoWave();
-                if (level == 11) MakeStarWave();
+                if (level == 11)
+                {
+                    MakeOctoWave();
+                    MakeStarWave();
+                }
                 return;
             }
 
             //Act 3: levels 12 to 19
-            //Octo + Monk, Star + Monk
+            //Octo + Monk, Octo + Star
             if (level < 20)
             {
                 if (every[2] == 0)
@@ -4414,7 +4464,7 @@ EndType*/
                 }
                 else
                 {
-                    MakeMonkWave();
+                    MakeOctoWave();
                     MakeStarWave();
                 }
                 return;
@@ -4432,24 +4482,25 @@ EndType*/
                     MakeOctoWave();
                     break;
                 case 2:
-                    MakeStarWave();
-                    break;
-                case 3:
                     MakeOctoWave();
+                    MakeStarWave();
                     MakeMonkWave();
                     break;
+                case 3:
+                    MakeMonkWave();
+                    MakeStarWave();
+                    break;
                 case 4:
-                    MakeOctoWave();
                     MakeStarWave();
                     break;
                 case 5:
                     MakeMonkWave();
                     MakeStarWave();
+                    MakeOctoWave();
                     break;
                 case 6:
-                    MakeMonkWave();
-                    MakeStarWave();
                     MakeOctoWave();
+                    MakeStarWave();
                     break;
                 default: Debug.WriteLine("Math error, science does not exist.");
                     throw new ArgumentException("Terrible Math Error: Unexpected value for every[7] which was " + every[7]);
@@ -4577,48 +4628,21 @@ EndType*/
 
         public void MakeStarWave()
         {
-
-            //fixme: at high levels, stars should shoot (don't yet)
-            //the starwave is split into sub waves once it gets too big, to stop it getting impossible to destroy in time.
-            int numAliens;
-            if (level < 10)
-            {
-                numAliens = 4 + level / 3;
-            }
-            else
-            {
-                numAliens = 4 + 10 / 3 + (level - 10) / 5;
-            }
-
-            float stillTimeMulti;
-            if (level < 10)
-            {
-                stillTimeMulti = 1f;
-            }
-            else if (level < 15)
-            {
-                stillTimeMulti = 0.5f;
-            }
-            else
-            {
-                stillTimeMulti = 0.3f;
-            }
-
-            int ySpacing = (int)(Core.Instance.Art.Star.Height * 1.1);
-            int addHeight = -ySpacing;
+            int numAliens = Math.Min(4 + level / 3, 12);
+            int waveDelayEachRound = 190;
+            int waveDelay = 0;
             while (numAliens > 0)
             {
                 for (int i = 1; i <= 4 && numAliens > 0; i++) //weird for loop because of blitzmax old ways. TODO: make start from zero...
                 {
-                    Star a = new Star();
+                    Star a = new Star(waveDelay);
                     a.Position.X = (Window.Width / 5) * i - a.Width / 2;
                     int wave = numAliens / 8;
-                    a.Position.Y = addHeight - wave * a.Height;
-                    a.MaxStillTime = (int)(a.MaxStillTime * stillTimeMulti);
+                    a.Position.Y = -a.Height - 5;
                     AlienList.Add(a);
                     numAliens--;
                 }
-                addHeight -= ySpacing;
+                waveDelay += waveDelayEachRound;
             }
         }
 
