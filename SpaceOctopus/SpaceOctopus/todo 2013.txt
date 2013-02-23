@@ -11,8 +11,13 @@ Top priority:
 	I tried changing it to a pixellated font but didn't like it - it wasn't very readable.
 [x] make stars look cooler. yes! a simple art change made this enemy work much better. They're now frogs.
 
+[x] new tile-laying enemy.
+	the snail!
+	moves horziontally across the screen
+	drops snail-trails behind it. These absorb player shots.
+
 [ ] AI buddy
-[ ] new tile-laying enemy.
+
 
 
 Maybe priority:

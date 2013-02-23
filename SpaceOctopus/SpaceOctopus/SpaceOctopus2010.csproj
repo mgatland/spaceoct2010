@@ -104,6 +104,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="creatures\Shell.cs" />
+    <Compile Include="creatures\Snail.cs" />
     <Compile Include="creatures\Creature.cs" />
     <Compile Include="creatures\Enemy.cs" />
     <Compile Include="creatures\Frog.cs" />

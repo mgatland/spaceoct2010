@@ -3885,7 +3885,6 @@ EndType*/
                     int yPos = Window.Height / 10 * 5;
                     CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 2 - xOffset, yPos);
                 }
-                
             }
 
             if (every[3] == 0)
@@ -3934,7 +3933,7 @@ EndType*/
                 return;
             }
 
-            //Act 2: Levels 9 to 11
+            //Act 2:
             //Octo, Frog.
             if (level < 12)
             {
@@ -3949,18 +3948,23 @@ EndType*/
             }
 
             //Act 3: levels 12 to 19
-            //Octo + Monk, Octo + Frog
+            //introducing snails
             if (level < 20)
             {
-                if (every[2] == 0)
+                if (every[3] == 0)
                 {
                     MakeOctoWave();
                     MakeMonkWave();
                 }
-                else
+                else if (every[3] == 1)
                 {
                     MakeOctoWave();
                     MakeStarWave();
+                }
+                else
+                {
+                    MakeSnailWave();
+                    MakeOctoWave();
                 }
                 return;
             }
@@ -4001,6 +4005,36 @@ EndType*/
                     throw new ArgumentException("Terrible Math Error: Unexpected value for every[7] which was " + every[7]);
             }
 
+        }
+
+        private void MakeSnailWave()
+        {
+            Snail s = new Snail();
+            s.Position.X = 0 - s.Picture.Width;
+            s.Position.Y = Window.Height / 2;
+            //m.SleepTime = i * 1500;
+            AlienList.Add(s);
+
+            Snail s2 = new Snail();
+            s2.Position.X = Window.Width;
+            s2.Position.Y = Window.Height / 2 - s2.Picture.Height * 3;
+            //m.SleepTime = i * 1500;
+            AlienList.Add(s2);
+
+            if (level > 10)
+            {
+                Snail s3 = new Snail();
+                s3.Position.X = 0 - s3.Picture.Width;
+                s3.Position.Y = Window.Height / 2 - s3.Picture.Height * 1;
+                //m.SleepTime = i * 1500;
+                AlienList.Add(s3);
+
+                Snail s4 = new Snail();
+                s4.Position.X = Window.Width;
+                s4.Position.Y = Window.Height / 2 - s4.Picture.Height * 4;
+                //m.SleepTime = i * 1500;
+                AlienList.Add(s4);
+            }
         }
 
         public void MakeMonkWave()
@@ -4480,6 +4514,8 @@ EndType*/
                 grey.Player2 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter2"), Gfx.StandardScale, gd);
                 grey.Frog = Gfx.Scale(c.Load<Texture2D>("gfx/frog0"), Gfx.StandardScale, gd);
                 grey.FrogLeap = Gfx.Scale(c.Load<Texture2D>("gfx/frog1"), Gfx.StandardScale, gd);
+                grey.SnailRight = Gfx.Scale(c.Load<Texture2D>("gfx/snail_right"), Gfx.StandardScale, gd);
+                grey.SnailShell = Gfx.Scale(c.Load<Texture2D>("gfx/snail_shell"), Gfx.StandardScale, gd);
 
                 grey.PlayerShotBase1 = Gfx.Scale(c.Load<Texture2D>("gfx/shot01"), Gfx.StandardScale, gd);
                 grey.PlayerShotBase2 = Gfx.Scale(c.Load<Texture2D>("gfx/shot02"), Gfx.StandardScale, gd);
@@ -4518,6 +4554,9 @@ EndType*/
         public Sprite Octo;
         public Sprite Monk;
         public Sprite[] MonkSpecialPicture = new Sprite[3];
+        public Sprite SnailRight;
+        public Sprite SnailShell;
+
         public Sprite Player1;
         public Sprite Player2;
 
@@ -4702,6 +4741,8 @@ EndType*/
             Snd.envSound = c.Load<SoundEffect>("snd/EugenSopot/new_radio9"); //was iSubmarineRunLoop 'looping damage sound
             Monk.DefaultShootSound = c.Load<SoundEffect>("snd/Gulping"); //was illegal\iBodyFall-002.wav
             Octo.DefaultShootSound = c.Load<SoundEffect>("snd/EugenSopot/new_radio13"); //iSpaceElevatorDown
+            //FIXME:
+            Snail.DefaultShootSound = Monk.DefaultShootSound;
 
             Player.DefaultPowerUpSound = c.Load<SoundEffect>("snd/EugenSopot/menu_select2"); //' was illegal\imodChainCatch-002.wav
             Player.DefaultHitSound = c.Load<SoundEffect>("snd/EugenSopot/explosion5"); //'was illegal\iBlowMusket-001.wav
