@@ -27,6 +27,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input.Touch;
+using System.Diagnostics;
 
 namespace AlienGameSample
 {
@@ -58,8 +59,8 @@ namespace AlienGameSample
     {
       this.menuTitle = menuTitle;
 
-      TransitionOnTime = TimeSpan.FromSeconds(1.0);
-      TransitionOffTime = TimeSpan.FromSeconds(1.0);
+      TransitionOnTime = TimeSpan.FromSeconds(0.6);
+      TransitionOffTime = TimeSpan.FromSeconds(0.0);
     }
 
     public override void LoadContent()
@@ -198,15 +199,12 @@ namespace AlienGameSample
         SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
         SpriteFont font = ScreenManager.Font;
 
-        //old fixed bottom height menu Vector2 position = new Vector2(/*40*/60, 400 - menuEntries[0].GetHeight(this));
-        Vector2 position = new Vector2(/*40*/60, 400 + totalmenuHeight/2);
+        Vector2 position = new Vector2(60, 400 + totalmenuHeight/2);
 
         // Make the menu slide into place during transitions, using a
         // power curve to make things look more interesting (this makes
         // the movement slow down as it nears the end).
         float transitionOffset = (float)Math.Pow(TransitionPosition, 2);
-
-        position.Y += transitionOffset * 512;
 
         spriteBatch.Begin();
 
@@ -219,7 +217,7 @@ namespace AlienGameSample
 
           position.X = 240 - font.MeasureString(menuEntry.Text).X / 2;
           Vector2 scaledPosition = new Vector2(position.X * scaleFactor, position.Y * scaleFactor);
-          menuEntry.Draw(this, scaledPosition, isSelected, gameTime);
+          menuEntry.Draw(this, scaledPosition, isSelected, gameTime, transitionOffset);
 
           position.Y -= menuEntry.GetHeight(this) + menuEntry.ExtraSpacing;
         }

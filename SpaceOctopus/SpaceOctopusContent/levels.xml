@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<zombies>
-  <zombie>
-    <health>100</health>
-    <positionX>23</positionX>
-    <positionY>12</positionY>
-    <speed>2</speed>
-  </zombie>
-</zombies>

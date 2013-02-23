@@ -24,6 +24,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
 
 namespace AlienGameSample
 {
@@ -99,17 +100,30 @@ namespace AlienGameSample
                 selectionFade = Math.Max(selectionFade - fadeSpeed, 1);
         }
 
+        private Color blend(Color color2, Color color1, float amount)
+        {
+            float inverseAmount = 1f - amount;
+            Color newColor = new Color((int)(color1.R * amount + color2.R * inverseAmount),
+                (int)(color1.G * amount + color2.G * inverseAmount),
+                (int)(color1.B * amount + color2.B * inverseAmount));
+
+            Debug.WriteLine(newColor.R);
+            return newColor;
+        }
+
         /// <summary>
         /// Draws the menu entry. This can be overridden to customize the appearance.
         /// </summary>
         public virtual void Draw(MenuScreen screen, Vector2 position,
-                                 bool isSelected, GameTime gameTime)
+                                 bool isSelected, GameTime gameTime, float alpha)
         {
             Color color = isSelected ? new Color(255, 243, 155) : Color.White;
+            Color backgroundColor = new Color(192, 192, 192);
+
+            Color shadowColor = blend(Color.Black, backgroundColor, alpha);
             float scale = 1.0f;
 
-            // Modify the alpha to fade text out during transitions.
-            color = new Color(color.R, color.G, color.B, screen.TransitionAlpha);
+            color = blend(color, backgroundColor, alpha);
 
             // Draw text, centered on the middle of each line.
             ScreenManager screenManager = screen.ScreenManager;
@@ -118,8 +132,8 @@ namespace AlienGameSample
 
             Vector2 origin = new Vector2(-1, - 1);
 
-          
-            spriteBatch.DrawString(font, text, position, Color.Black, 0,
+
+            spriteBatch.DrawString(font, text, position, shadowColor, 0,
                                    origin, scale, SpriteEffects.None, 0);
             origin = new Vector2(0, 0);
 

@@ -6,7 +6,14 @@ Let's focus on things to do before then.
 
 Top priority:
 
-[ ] make the controls description a picture of keyboard keys, instead of just text
+[x] make the controls description a picture of keyboard keys, instead of just text
+[x] menu fades in rather than boucing in.
+	I tried changing it to a pixellated font but didn't like it - it wasn't very readable.
+[x] make stars look cooler. yes! a simple art change made this enemy work much better. They're now frogs.
+
+[ ] AI buddy
+[ ] new tile-laying enemy.
+
 
 Maybe priority:
 [x] make the stars more interesting to battle. (a little - they're still not quite right)

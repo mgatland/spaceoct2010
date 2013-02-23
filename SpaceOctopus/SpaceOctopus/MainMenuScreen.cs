@@ -54,16 +54,6 @@ namespace SpaceOctopus
 #endif
         }
 
-//#if WINDOWS
-//        public override void DrawExtraThings()
-//        {
-//            SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
-//            int yOff = (int)(TransitionPosition * 160);
-//            spriteBatch.DrawString(ScreenManager.Font, "BETA", new Vector2(400, 70 - yOff * 2), Color.White, 0,
-//                                    new Vector2(0, 0), 0.6f, SpriteEffects.None, 0);
-//        }
-//#endif
-
         void StartGameMenuEntrySelected(object sender, EventArgs e)
         {
             if (!Core.IsThereARunningGameToContinue())

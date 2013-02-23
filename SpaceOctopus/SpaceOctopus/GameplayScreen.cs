@@ -359,7 +359,7 @@ namespace SpaceOctopus
         public const int PowerUpTypesCount = 9; //sigh, remove this when i understand c#. Enum.GetValues()
         public const int DOUBLEFIRE = 0;
         public const int RAPIDFIRE = 1;
-        public const int SPIKEWINGS = 2;
+        public const int DISABLED = 2; //NOT USED
         public const int HEIGHTBOOST = 3;
         public const int MEGASHOT = 4;
         public const int CANNON = 5;
@@ -376,7 +376,6 @@ namespace SpaceOctopus
         static Sprite DoubleImage;
         static Sprite RapidImage;
         static Sprite FastImage;
-        static Sprite SpikeImage;
         static Sprite HeightImage;
         static Sprite MegaImage;
         static Sprite CannonImage;
@@ -388,7 +387,6 @@ namespace SpaceOctopus
             DoubleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrdouble"), 6, screenManager.GraphicsDevice);
             RapidImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrrapid"), 6, screenManager.GraphicsDevice);
             FastImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrfast"), 6, screenManager.GraphicsDevice);
-            SpikeImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrspike"), 1, screenManager.GraphicsDevice);
             HeightImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrheight"), 6, screenManager.GraphicsDevice);
             MegaImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrmega"), 6, screenManager.GraphicsDevice);
             CannonImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/pwrcannon"), 6, screenManager.GraphicsDevice);
@@ -419,7 +417,7 @@ namespace SpaceOctopus
                     type = REVIVE_IMMEDIATE;
                 } else {
                     type = Core.Instance.Random.Next(PowerUpTypesCount);
-                    if (type == SPIKEWINGS || type == HEIGHTBOOST) type = -1; //hacky disable spikewings and height boost.
+                    if (type == DISABLED || type == HEIGHTBOOST) type = -1; //hacky disable spikewings and height boost.
                     if (type == REVIVE_IMMEDIATE && (Core.Instance.P2 == null || (Core.Instance.P2.IsAlive && Core.Instance.P.IsAlive))) type = -1; //revive is only allowed in two player mode when one player is dead.
                 }
 
@@ -430,7 +428,6 @@ namespace SpaceOctopus
             {
                 case DOUBLEFIRE: Picture = DoubleImage; break;
                 case RAPIDFIRE: Picture = RapidImage; break;
-                case SPIKEWINGS: Picture = SpikeImage; break;
                 case HEIGHTBOOST: Picture = HeightImage; break;
                 case MEGASHOT: Picture = MegaImage; break;
                 case FASTMOVE: Picture = FastImage; break;
@@ -817,7 +814,7 @@ namespace SpaceOctopus
     #region enemies
 
 
-    class Star : Enemy
+    class Frog : Enemy
     {
         float xV;
         float yV;
@@ -832,12 +829,12 @@ namespace SpaceOctopus
         private int waveDelay;
         private int fastHopThreshhold = 3;
 
-        public Star(int waveDelay)
-            : base(Core.Instance.Art.Star, defaultROF, defaultSpeed)
+        public Frog(int waveDelay)
+            : base(Core.Instance.Art.Frog, defaultROF, defaultSpeed)
         {
             this.waveDelay = waveDelay;
             Art = Core.Instance.Art;
-            //shootSound = n/a stars don't shoot
+            //shootSound = n/a frogs don't shoot
             //sound die
             Direction = 2; //ignored
             MaxStillTime = defaultMaxStillTime;
@@ -869,32 +866,31 @@ namespace SpaceOctopus
             {
                 stillTime++;
             }
+            
+            if (Math.Abs(yV) > 0.06f)
+            {
+                Picture = Art.FrogLeap;
+            } else {
+                Picture = Art.Frog;
+            }
 
             if (stillTime > MaxStillTime)
             {
                 hops++;
                 if (hops >= fastHopThreshhold)
                 {
-                    Debug.Print("Star gets fast!");
                     //fast mode
                     xV = 0;
                     yV = 0.4f;
                     stillTime = 0;
                     friction = 0.996f;
-                    MaxStillTime = 10;
+                    MaxStillTime = 9 + Core.Instance.Random.Next(0, 2);
                 }
                 else
                 {
-                    Debug.Print("slow star");
                     //slow mode
-                    // if we can dodge, also move on (fearDirection != 0) but don't decrease MaxStillTime in that case.
                     stillTime = 0;
-                    //choose X destination
                     int destX = Core.Instance.Random.Next(0, Window.Width);
-                    /*'override random movement if we're fleeing.
-                             'if (fearDirection > 0) destX = windowType.WIDTH - 30
-                             'if (fearDirection < 0) destX = 0 + 30
-                             'x = fearDirection + (windowType.width / 2)*/
                     //make sure destination is in range.
                     destX = (int)Math.Min(destX, Position.X + maxJumpDist / 2);
                     destX = (int)Math.Max(destX, Position.X - maxJumpDist / 2);
@@ -915,43 +911,7 @@ namespace SpaceOctopus
         }
 
     }
-    /*Rem Method starsAvoidShots:Float()
-       'get nearest threat. Move to avoid it 
-    Method starsAvoidShots:Float()
-                Local core:coreType = coreType.getInstance()
-                Local s:shotType
-                Local danger:Int
-                Local leftHelp:Int = 0
-                Local rightHelp:Int = 0
-                Local fearDirection:Float = 0
-                For Local i:Int = 0 To core.shotFirstEmpty - 1 Step 1
-                    s=core.shotArray[i]
-                    If s.bLive = True And s.hurtsEnemy > 0 Then
-                        If s.x + s.width + 30 > x And s.x < x + width + 30 Then  '30s are a 'safety margin'
-                            If s.speed < 0 And s.y > y Then 'below us, coming up
-                              Local timeLeft%
-                                timeLeft= (y - (s.y + s.height)) / s.speed 'ticks until collision.
-                                If timeLeft < 900 Then
-                                    DebugLog("starfish: look out, a shot! - distance " + timeLeft)                           
-                                  If timeLeft < 1 Then timeLeft = 1
-                                    danger = 900.0 / timeLeft
-                                    Local dist:Int = centreX() - s.centreX()
-                                    'stuck in a corner?
-                                    If s.x < width + 5 And dist < 0 Then dist = -dist '5 is a safety margin
-                                    If s.x + s.width > windowType.width - (width + 5) And dist > 0 Then dist = -dist '5 is a safety margin
-                                    fearDirection = fearDirection + danger/dist
-                                EndIf                           
-                            EndIf
-                      EndIf
-                    EndIf
-                Next
-                Return fearDirection
-    EndMethod  
-    EndRem  
-    
-    EndType*/
-
-
+  
     class Monk : Enemy
     {
         float xV;
@@ -964,8 +924,6 @@ namespace SpaceOctopus
         static double friction = 0.99997;
         public int SleepTime;
 
- //       public static Texture2D MonkPicture;
- //      public static Texture2D[] SpecialPicture = new Texture2D[3];
         static int defaultROF = 4000;
         static float defaultSpeed = 0.0002f;
         //use specImage 2 for explosionmap
@@ -1026,7 +984,6 @@ namespace SpaceOctopus
         {
             Debug.Assert(left);
             left = false;
-            //TODO: set these offsets correctly, make it flexible to image size changes.
             Shot s = Shot.CreateMonkShot(Position.X, Position.Y + Height - Art.MonkShot.Height, 1);
             Core.Instance.AddShot(s);
         }
@@ -1177,7 +1134,6 @@ namespace SpaceOctopus
         public Sprite DoubleImage;
         public Sprite RapidImage;
         public Sprite FastImage;
-        public Sprite SpikeImage;
         public Sprite HeightImage;
         public Sprite MegaImage;
         public Sprite CannonImage;
@@ -1188,7 +1144,6 @@ namespace SpaceOctopus
             DoubleImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partdouble" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
             RapidImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partrapid" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
             FastImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partfast" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
-            SpikeImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partspikes" + playerSuffix), 1, screenManager.GraphicsDevice);
             HeightImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partheight" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
             MegaImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partmega" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
             CannonImage = Gfx.Scale(screenManager.Game.Content.Load<Texture2D>("gfx/partcannon" + playerSuffix), Gfx.StandardScale, screenManager.GraphicsDevice);
@@ -1220,7 +1175,6 @@ namespace SpaceOctopus
 
         bool hasDouble;
         bool hasRapid;
-        bool hasSpike;
         bool hasHeight;
         bool hasMega;
         bool hasSpeed;
@@ -1256,7 +1210,7 @@ namespace SpaceOctopus
             u.SilentUpgrade(PowerUp.HEIGHTBOOST, pd.Height);
             u.SilentUpgrade(PowerUp.MEGASHOT, pd.Mega);
             u.SilentUpgrade(PowerUp.RAPIDFIRE, pd.Rapid);
-            u.SilentUpgrade(PowerUp.SPIKEWINGS, pd.SpikeWings);
+            //pd.SpikeWings is unused
         }
 
         public void GetPlayerData(PlayerData pd)
@@ -1268,7 +1222,7 @@ namespace SpaceOctopus
             pd.Height = hasHeight ? 1 : 0;
             pd.Mega = hasMega ? 1 : 0;
             pd.Rapid = hasRapid ? 1 : 0;
-            pd.SpikeWings = hasSpike ? 1 : 0;
+            pd.SpikeWings = 0;
 
             //special handling for multi-part upgrades:
             //only doublefire (triplefire) is supported, others will be discarded.
@@ -1345,12 +1299,6 @@ namespace SpaceOctopus
                 drawCannon((int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
             }
 
-            if (hasSpike)
-            {
-                //add spikexoff, spikeyoff
-                drawImage(Art.SpikeImage, (int)p.Position.X + xOff, (int)p.Position.Y + yOff, screenManager);
-            }
-
         }
 
 
@@ -1395,18 +1343,11 @@ namespace SpaceOctopus
         int[] pwrUpXOff = new int[PowerUp.PowerUpTypesCount];
         int[] pwrUpYOff = new int[PowerUp.PowerUpTypesCount];
 
-        /*Const spikeXOff:Int = -19       Const spikeYOff:Int = 16*/
-
         const int bubbleXOff = -26;
         const int bubbleYOff = -20;
 
         public void Move(int delta)
         {
-            if (hasSpike)
-            {
-                Debug.WriteLine("spike upgrade not supported");
-                //movespikes
-            }
 
             if (hasBubble && bubbleHealth < bubbleHealthMax - 1) //the minus one is for int to double rounding errors (in BlitzMax, may be obselete now)
             {
@@ -1608,9 +1549,6 @@ namespace SpaceOctopus
                         text = "Upgrade not needed";
                     }
                     break;
-                case PowerUp.SPIKEWINGS:
-                    text = "FAIL FAIL DON'T USE SPIKEWINGS";
-                    break;
                 case PowerUp.HEIGHTBOOST:
                     if (!hasHeight)
                     {
@@ -1701,14 +1639,6 @@ namespace SpaceOctopus
             if (showMessage && !Tweaking.lowTextMode) Core.Instance.CreateMessage(text, 2, 2);
         }
 
-        /*Case powerUp.SPIKEWINGS
-         If (bSpike = False) Then
-         bSpike = True
-             text = "Projectile Repellers"
-         Else
-             text = "Upgrade not needed"
-         EndIf*/
-
         public void LoseUpgrades()
         {
             p.resetAbilities();
@@ -1720,7 +1650,6 @@ namespace SpaceOctopus
 
             ExplodeComponent(hasDouble, Art.DoubleImage);
             ExplodeComponent(hasRapid, Art.RapidImage);
-            //spike
             ExplodeComponent(hasHeight, Art.HeightImage);
             ExplodeComponent(hasMega, Art.MegaImage);
             ExplodeComponent(hasSpeed, Art.FastImage);
@@ -1729,7 +1658,6 @@ namespace SpaceOctopus
 
             hasDouble = false;
             hasRapid = false;
-            //hasSpike = false;
             hasHeight = false;
             hasMega = false;
             hasSpeed = false;
@@ -2131,21 +2059,6 @@ namespace SpaceOctopus
                  EndIf   
            EndIf
          EndMethod*/
-
-        /*'spikes powerup: pushes enemy shots away from player
-        Method moveSpikes(delta:Int)
-            For Local i:Int = 0 To coreType.getInstance().maxShots - 1
-                Local s:shotType = coreType.getInstance().shotArray[i]
-                If (s <> Null And s.bLive And s.y + s.height > 0 And s.hurtsPlayer > 0) Then
-                 'NO that sucked. Previously -> only push if it's on one side of us - straight above will still come straight down.
-                    If s.x + s.width/2 > x + width/2 Then
-                        s.xSpeed:+0.0004
-                    ElseIf s.x + s.width/2 < x + width/2 Then
-                      s.xSpeed:-0.0004
-                    EndIf
-                EndIf
-            Next 'i
-        EndMethod*/
 
         public PlayerData GetPlayerData()
         {
@@ -4439,7 +4352,7 @@ EndType*/
             }
 
             //Act 2: Levels 9 to 11
-            //Octo, Star.
+            //Octo, Frog.
             if (level < 12)
             {
                 if (level == 9) MakeStarWave();
@@ -4453,7 +4366,7 @@ EndType*/
             }
 
             //Act 3: levels 12 to 19
-            //Octo + Monk, Octo + Star
+            //Octo + Monk, Octo + Frog
             if (level < 20)
             {
                 if (every[2] == 0)
@@ -4634,7 +4547,7 @@ EndType*/
             {
                 for (int i = 1; i <= 4 && numAliens > 0; i++) //weird for loop because of blitzmax old ways. TODO: make start from zero...
                 {
-                    Star a = new Star(waveDelay);
+                    Frog a = new Frog(waveDelay);
                     a.Position.X = (Window.Width / 5) * i - a.Width / 2;
                     int wave = numAliens / 8;
                     a.Position.Y = -a.Height - 5;
@@ -4982,7 +4895,8 @@ EndType*/
                 grey.Monk = Gfx.Scale(c.Load<Texture2D>("gfx/monk"), Gfx.StandardScale, gd);
                 grey.Player1 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter"), Gfx.StandardScale, gd);
                 grey.Player2 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter2"), Gfx.StandardScale, gd);
-                grey.Star = Gfx.Scale(c.Load<Texture2D>("gfx/star"), Gfx.StandardScale, gd);
+                grey.Frog = Gfx.Scale(c.Load<Texture2D>("gfx/frog0"), Gfx.StandardScale, gd);
+                grey.FrogLeap = Gfx.Scale(c.Load<Texture2D>("gfx/frog1"), Gfx.StandardScale, gd);
 
                 grey.PlayerShotBase1 = Gfx.Scale(c.Load<Texture2D>("gfx/shot01"), Gfx.StandardScale, gd);
                 grey.PlayerShotBase2 = Gfx.Scale(c.Load<Texture2D>("gfx/shot02"), Gfx.StandardScale, gd);
@@ -5010,7 +4924,8 @@ EndType*/
 
         #endregion
 
-        public Sprite Star;
+        public Sprite Frog;
+        public Sprite FrogLeap;
         public Sprite PlayerShotBase1;
         public Sprite PlayerShotBase2;
         public Sprite PlayerShotMega;
