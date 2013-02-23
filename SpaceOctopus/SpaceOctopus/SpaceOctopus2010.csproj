@@ -104,6 +104,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="creatures\Creature.cs" />
+    <Compile Include="creatures\Enemy.cs" />
+    <Compile Include="creatures\Frog.cs" />
+    <Compile Include="creatures\Octo.cs" />
+    <Compile Include="creatures\Monk.cs" />
     <Compile Include="Special.cs" />
     <Compile Include="Data\Analytics.cs" />
     <Compile Include="BackgroundScreen.cs" />
