@@ -4,19 +4,36 @@
 I'm showing the game at an event on Saturday.
 Let's focus on things to do before then.
 
-Before Saturday:
+Top priority:
 
 [ ] make the controls description a picture of keyboard keys, instead of just text
-[ ] make the menus better - the font and slide animation do not suit the game
+
+Maybe priority:
 [x] make the stars more interesting to battle. (a little - they're still not quite right)
+[ ] something that will blow people away - something breathtaking
+	something huge. (like a boss?)
+		or a more special-looking special level.
+			maybe special levels should be made out of custom objects, not generic blocks
+
+[ ] some comedy waves
+	[ ] invisible enemies wave
+	[ ] rainbow particles wave
+	[ ] a boss? need a boss.
+	a three-eyed boss and you have to shoot the eye that is open
+	[ ] a few new enemies?
+
+
+[ ] make the menus better - the font and slide animation do not suit the game
 [ ] tweak level progression? more interesting content
-[ ] make 'avoid' levels less random, more visually interesting
 [ ] make a beautiful particle effect for rescuing
 [ ] make a new artset, and all that crazy stuff
 [ ] new enemy - they appear across the top of the screen,  then 'stomp' straight downwards, rapidly
+[ ] an enemy who builds a protective wall across the middle of the level (you have to shoot through it)
+[ ] an enemy who sprays out projectiles which spin outwards in a spiral
+[ ] a level where half the level is blocked off into solid wall
+
 [ ] stealth wave
 [ ] boss?
-
 
 done:
 

@@ -290,10 +290,13 @@ namespace SpaceOctopus
             g = 255;
             b = 255;
 
-            Vector2 size = GameFont.MeasureString(text);
-            size *= fontScale;
-            Position.Y = Window.Height / 2 + (row * size.Y) - (size.Y / 2);
-            Position.X = Window.Width / 2 - (size.X / 2);
+            if (text != null)
+            {
+                Vector2 size = GameFont.MeasureString(text);
+                size *= fontScale;
+                Position.Y = Window.Height / 2 + (row * size.Y) - (size.Y / 2);
+                Position.X = Window.Width / 2 - (size.X / 2);
+            }
         }
 
         //TODO: Is this ever actually used in single player?
@@ -316,9 +319,9 @@ namespace SpaceOctopus
         }
 
 
-        public static Message CreateImageAt(String text, Sprite pic, int x, int y)
+        public static Message CreateImageAt(Sprite pic, int x, int y)
         {
-            Message m = new Message(text, pic, -1);
+            Message m = new Message(null, pic, -1);
             m.Position.Y = y;
             m.Position.X = x;
             m.Row = -1; //exclude from the row management system.
@@ -338,7 +341,7 @@ namespace SpaceOctopus
 
             if (Picture != null)
             {
-                base.Draw(xOff - Picture.Width / 2 + 10, yOff - Picture.Height / 2 - 5, screenManager);
+                base.Draw(xOff, yOff, screenManager);
             }
             if (text != null)
             {
@@ -3539,9 +3542,8 @@ EndType*/
 
             if (P2 != null)
             {
-                P2.Position.X = Window.Width / 3 * 1 - P.Width / 2;
-                P2.RefireTimer = P2.ROF / 2;
-                P.Position.X = Window.Width / 3 * 2 - P2.Width / 2;
+                P2.Position.X = Window.Width / 4 * 1 - P2.Width / 2;
+                P.Position.X = Window.Width / 4 * 3 - P.Width / 2;
             }
             GenerateLevel();
             particleDrain = defaultParticleDrain;
@@ -4244,9 +4246,9 @@ EndType*/
             return message;
         }
 
-        public void CreateKeyboardKeyMessage(String text, int x, int y)
+        public void CreateKeyboardKeyMessage(Sprite sprite, int x, int y)
         {
-            Message key = Message.CreateImageAt(text, Gfx.KeyOutline, x, y);
+            Message key = Message.CreateImageAt(sprite, x, y);
             messageList.Add(key);
         }
 
@@ -4375,20 +4377,17 @@ EndType*/
             {
                 if (P2 != null)
                 {
-                    int startX = 70;
-                    int xOffset = 55;
-                    int currentX = startX;
-                    int yPos = Window.Height / 10 * 9;
-                    CreateKeyboardKeyMessage("A", currentX, yPos);
-                    currentX += xOffset;
-                    CreateKeyboardKeyMessage("S", currentX, yPos);
-                    currentX += xOffset;
-                    CreateKeyboardKeyMessage("D", currentX, yPos);
-                    currentX += xOffset*3;
+                    int xOffset = Gfx.KeysP1.Width / 2;
+                    int yPos = Window.Height / 10 * 5;
+                    CreateKeyboardKeyMessage(Gfx.KeysP2, Window.Width / 4 - xOffset, yPos);
+                    CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 4 * 3 - xOffset, yPos);
+
                 }
                 else
                 {
-                    CreateMessage("Use arrow keys", 3);
+                    int xOffset = Gfx.KeysP1.Width / 2;
+                    int yPos = Window.Height / 10 * 5;
+                    CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 2 - xOffset, yPos);
                 }
                 
             }
@@ -5038,7 +5037,8 @@ EndType*/
     public static class Gfx
     {
         public static Texture2D Pixel;
-        public static Sprite KeyOutline;
+        public static Sprite KeysP1;
+        public static Sprite KeysP2;
 
         public const int StandardScale = 12;
 
@@ -5195,8 +5195,10 @@ EndType*/
             PowerUp.LoadImages(ScreenManager);
 
             Gfx.Pixel = Gfx.ScaleTexture(c.Load<Texture2D>("gfx/px"), Gfx.StandardScale, gd);
-            Gfx.KeyOutline = new Sprite(c.Load<Texture2D>("gfx/key")); //TODO: Don't use a Sprite for this, a Texture2D will do
- 
+
+            Gfx.KeysP1 = new Sprite(c.Load<Texture2D>("gfx/keys_arrows"));
+            Gfx.KeysP2 = new Sprite(c.Load<Texture2D>("gfx/keys_wasd"));
+
             Snd.PlayerShotSound = c.Load<SoundEffect>("snd/EugenSopot/menu_select22_edited");
             Snd.AlienDieSound = c.Load<SoundEffect>("snd/space sound jiggled");
             Snd.envSound = c.Load<SoundEffect>("snd/EugenSopot/new_radio9"); //was iSubmarineRunLoop 'looping damage sound

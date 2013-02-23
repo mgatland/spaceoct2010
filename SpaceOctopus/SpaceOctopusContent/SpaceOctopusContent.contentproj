@@ -395,13 +395,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="gfx\key.png">
-      <Name>key</Name>
+    <Compile Include="gfx\keys_arrows.png">
+      <Name>keys_arrows</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="gfx\keys_wasd.png">
+      <Name>keys_wasd</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Content Include="levels.xml">
       <Name>levels</Name>
       <Importer>XmlImporter</Importer>
