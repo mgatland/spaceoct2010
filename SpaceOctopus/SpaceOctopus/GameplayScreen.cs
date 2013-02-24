@@ -13,7 +13,8 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.GamerServices;
 using System.Xml.Linq;
-using SpaceOctopus.creatures;
+using SpaceOctopus.Creatures;
+using SpaceOctopus.Projectiles;
 
 namespace SpaceOctopus
 {
@@ -1124,7 +1125,7 @@ namespace SpaceOctopus
                         }
                         else
                         {
-                            text = "Speed increased";
+                            text = "YSpeed increased";
                         }
                     }
                     else
@@ -2386,9 +2387,9 @@ namespace SpaceOctopus
                         {
                             //check that it vertically passed us this frame.
                             float heightDiff = s.Position.Y - Position.Y;
-                            int dir = Math.Sign(s.Speed);
+                            int dir = Math.Sign(s.YSpeed);
                             heightDiff *= dir;
-                            int deltaDist = (int)(dir * s.Speed * delta * 1.5); //the distance the shot moves per frame ( plus half a frame to be safe)
+                            int deltaDist = (int)(dir * s.YSpeed * delta * 1.5); //the distance the shot moves per frame ( plus half a frame to be safe)
                             if (heightDiff > 0 && heightDiff < deltaDist)
                             {
                                 float multi = Math.Min(4f, 6f - ((float)yDist * 6f)); // from distance 0-2 speed = 4f, after that there's a linear decline.
@@ -2458,164 +2459,6 @@ EndMethod
 
 EndType
 */
-    public class Shot : Drawable
-    {
-        #region pooling
-        public const int PoolSize = 50;
-        private static Pool<Shot> Pool;
-
-        public static Shot Create(Sprite texture)
-        {
-            Debug.Assert(Pool != null, "Pool not initialized");
-            Shot s = Pool.Fetch();
-            s.Initialize(texture);
-            return s;
-        }
-
-        public static void Release(Shot s)
-        {
-            Debug.Assert(Pool != null, "Pool not initialized");
-            //TODO: check that the shot has not already been released. That could get weird.
-            Pool.Release(s);
-        }
-
-        public static void CreatePool()
-        {
-            if (Pool != null) return;
-            Pool = new Pool<Shot>(PoolSize);
-        }
-        #endregion
-
-        public float Speed;
-        float XSpeed;
-        public int HurtsEnemy = 1;
-        public int HurtsPlayer = 0;
-        public int Pierce;
-        public int Owner; //TODO: should be a Player object.
-        public ParticleType expType;
-
-        protected const float StandardShotSpeed = Window.Height / 1670f;
-
-        public Shot()
-            : base(null)
-        {
-            IsAlive = false; //You must Initialize a shot to make it alive.
-        }
-
-        public virtual void Initialize(Sprite texture)
-        {
-            IsAlive = true;
-            Picture = texture;
-            if (texture != null)
-            {
-                Width = texture.Width;
-                Height = texture.Height;
-            }
-            SetColor(Color.White);
-        }
-
-        public void move(int delta)
-        {
-            Position.Y += Speed * delta;
-            Position.X += XSpeed * delta;
-            if (Position.Y + Height < 0 && Speed < 0) IsAlive = false;
-            if (Position.Y > Window.Height && Speed > 0) IsAlive = false;
-            if (Position.X + Width < 0) IsAlive = false;
-            if (Position.X > Window.Width) IsAlive = false;
-        }
-
-        public void Die()
-        {
-            if (Pierce == 0)
-            {
-                IsAlive = false;
-            }
-            else
-            {
-                Pierce--;
-            }
-        }
-
-        internal static Shot CreateHeart(int x, int y, float speedMulti)
-        {
-            Shot s =  Shot.Create(Core.Instance.Art.ShotHeartPicture);
-            s.Speed = StandardShotSpeed;
-            s.HurtsEnemy = 0;
-            s.HurtsPlayer = 30;
-            s.Pierce = 0;
-            s.Owner = -1;
-            s.expType = ParticleType.FAST_SCATTER;
-            s.Position.X = s.offCenterX(x);
-            s.Position.Y = y;
-            s.Speed *= speedMulti;
-            return s;
-        }
-
-        internal static Shot CreateHeartBig(int x, int y, float speedMulti)
-        {
-            Shot s = Shot.Create(Core.Instance.Art.ShotHeartBigPicture); //difference from CreateHeart
-            s.Speed = StandardShotSpeed;
-            s.HurtsEnemy = 0;
-            s.HurtsPlayer = 30;
-            s.Pierce = 1; //difference from CreateHeart
-            s.Owner = -1;
-            s.expType = ParticleType.FAST_SCATTER;
-            s.Position.X = s.offCenterX(x);
-            s.Position.Y = y;
-            s.Speed *= speedMulti;
-            return s;
-        }
-
-        internal static Shot CreateMonkShot(float x, float y, float speedMulti)
-        {
-            Shot s = Shot.Create(Core.Instance.Art.MonkShot);
-            s.Speed = StandardShotSpeed;
-            s.HurtsEnemy = 0;
-            s.HurtsPlayer = 30;
-            s.Pierce = 0;
-            s.Owner = -1;
-            s.expType = ParticleType.FAST_SCATTER;
-            s.Position.X = x; //not off centered!
-            s.Position.Y = y;
-            s.Speed *= speedMulti;
-            return s;
-        }
-
-        public enum ShotType { Normal, Mega }; //Only used by player shots
-
-        internal static Shot CreatePlayerShot(ShotType type, int inX, int inY, float SpeedMultiplier, int playerId)
-        {
-            Shot s = Shot.Create(null); //we set the texture, height and width manually so we can pass null here.
-            if (type == ShotType.Normal)
-            {
-                s.Picture = playerId == 0?  Core.Instance.Art.PlayerShotBase1 :  Core.Instance.Art.PlayerShotBase2;
-                s.Pierce = 0;
-                s.expType = ParticleType.FAST_SCATTER;
-                s.Speed = -StandardShotSpeed;
-            }
-            else
-            {
-                s.Speed = -StandardShotSpeed * .83f;
-                s.expType = ParticleType.FAST_SCATTER;
-                s.Picture = Core.Instance.Art.PlayerShotMega;
-                s.Pierce = 10;
-            }
-            s.Width = s.Picture.Width;
-            s.Height = s.Picture.Height;
-            s.HurtsEnemy = 1;
-            s.HurtsPlayer = 0;
-            s.Owner = playerId;
-            s.Position.X = s.offCenterX(inX);
-            s.Position.Y = inY;
-            s.Speed *= SpeedMultiplier;
-            s.Owner = playerId;
-
-            s.r = 255;
-            s.g = 255;
-            s.b = 255;
-            return s;
-        }
-    }
 
     public class Beam : Drawable
     {
@@ -3356,6 +3199,11 @@ EndType*/
                     newEnemyCount++;
                     e.Move(delta);
 
+                    if (e.Position.Y > Window.Height)
+                    {
+                        e.DieWithNoEffects();
+                    }
+
                     if (lowestEnemy == null || e.Position.Y + e.Height > lowestEnemy.Position.Y + lowestEnemy.Height)
                     {
                         lowestEnemy = e;
@@ -3369,11 +3217,6 @@ EndType*/
             if (lowestEnemy != null)
             {
                 lowestEnemyCentreX = lowestEnemy.centerX();
-                if (!hasLost && lowestEnemy.Position.Y > Window.Height)
-                {
-                    CreateDeathMessage("Aliens got past you!");
-                    SetLost();
-                }
             }
             else
             {
@@ -3869,142 +3712,138 @@ EndType*/
                 every[i] = level % i;
             }
 
-            if (level == 1)
-            {
-                if (P2 != null)
-                {
-                    int xOffset = Gfx.KeysP1.Width / 2;
-                    int yPos = Window.Height / 10 * 5;
-                    CreateKeyboardKeyMessage(Gfx.KeysP2, Window.Width / 4 - xOffset, yPos);
-                    CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 4 * 3 - xOffset, yPos);
-
-                }
-                else
-                {
-                    int xOffset = Gfx.KeysP1.Width / 2;
-                    int yPos = Window.Height / 10 * 5;
-                    CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 2 - xOffset, yPos);
-                }
-            }
-
-            if (every[3] == 0)
-            {
-                if (!Tweaking.lowTextMode)
-                {
-                    CreateMessage("Promotion to " + GetRank(), 1);
-                }
-            }
-
             if (!Tweaking.lowTextMode)
             {
                 CreateMessage("Level " + level, 0);
             }
 
-            if (level >= 5 && every[5] == 0)
+            switch (level)
             {
-                //every 5 levels, but the 5th level counts as 0, not 1.
-                special = new Special((level / 5) - 1);
-                DebugLog("Special Stage");
-                if ((level == 5 || level == 10) && !Tweaking.lowTextMode)
-                {
-                    CreateMessage("Avoid", -2);
-                }
-                if (special.Creatures == 1)
-                {
+                    //introducing monks
+                case 1:
+                    ShowInstructions(P2 != null);
+                    MakeOctoWave();
+                    return;
+                case 2:
+                    MakeOctoWave();
+                    return;
+                case 3:
+                    MakeOctoWave();
+                    return;
+                case 4:
                     MakeMonkWave();
-                }
-                return;
-            }
+                    return;
+                case 5: makeSpecialStage(0);
+                    return;
 
-            //Act 1 - levels 1 to 8
-            //'Octo or Monk
-            //1:O 2:O 3:O 4:M 5:--special-- 6:M 7:O 8:M 9:O
+                    //introducing stars
+                case 6: MakeOctoWave(); return;
+                case 7: MakeMonkWave(); return;
+                case 8: MakeOctoWave(); return;
+                case 9: MakeFrogWave(); return;
+                case 10: makeSpecialStage(1); return;
 
-            if (level < 9)
-            {
-                if (level > 3 && every[2] == 0)
-                {
-                    MakeMonkWave();
-                }
-                else
-                {
-                    MakeOctoWave();
-                }
-                return;
-            }
+                //introducing snails (and multiple enemy types together)
+                case 11: MakeOctoWave();
+                    MakeFrogWave();
+                    return;
+                case 12: MakeMonkWave();
+                    return;
+                case 13: MakeMonkWave(); 
+                    MakeFrogWave(); return;
+                case 14: MakeSnailWave(); return;
+                case 15: makeSpecialStage(2); return;
 
-            //Act 2:
-            //Octo, Frog.
-            if (level < 12)
-            {
-                if (level == 9) MakeStarWave();
-                if (level == 10) MakeOctoWave();
-                if (level == 11)
-                {
+                //nothing left to introduce :( let's take a break from monks until the special stage
+                case 16:
                     MakeOctoWave();
-                    MakeStarWave();
-                }
-                return;
-            }
-
-            //Act 3: levels 12 to 19
-            //introducing snails
-            if (level < 20)
-            {
-                if (every[3] == 0)
-                {
+                    return;
+                case 17:  
                     MakeOctoWave();
-                    MakeMonkWave();
-                }
-                else if (every[3] == 1)
-                {
+                    MakeFrogWave();
+                    return;
+                case 18:
                     MakeOctoWave();
-                    MakeStarWave();
-                }
-                else
-                {
                     MakeSnailWave();
+                    return;
+                case 19:
                     MakeOctoWave();
-                }
+                    MakeFrogWave();
+                    MakeSnailWave();
+                    return;
+            }
+
+            if (every[5] == 0)
+            {
+                makeSpecialStage((level / 5) - 1);
                 return;
             }
 
-            //Act 4: levels 20 to infinity
+            //levels 20 to infinity
             //Specials override some of these, remember
             switch (every[7])
             {
                 case 0:
-                    MakeOctoWave();
+                    MakeOctoWave(); //5
                     break;
                 case 1:
-                    MakeMonkWave();  //this is meant to be monk alone, but that's too boring.
                     MakeOctoWave();
+                    MakeMonkWave(); //3
                     break;
                 case 2:
-                    MakeOctoWave();
-                    MakeStarWave();
-                    MakeMonkWave();
+                    MakeFrogWave(); //4
+                    MakeSnailWave(); //4
                     break;
                 case 3:
+                    MakeOctoWave();
                     MakeMonkWave();
-                    MakeStarWave();
+                    MakeFrogWave();
+                    MakeSnailWave();
                     break;
                 case 4:
-                    MakeStarWave();
+                    MakeOctoWave();
+                    MakeFrogWave();
                     break;
                 case 5:
+                    MakeFrogWave();
                     MakeMonkWave();
-                    MakeStarWave();
-                    MakeOctoWave();
+                    MakeSnailWave();
                     break;
                 case 6:
                     MakeOctoWave();
-                    MakeStarWave();
+                    MakeSnailWave();
                     break;
                 default: Debug.WriteLine("Math error, science does not exist.");
                     throw new ArgumentException("Terrible Math Error: Unexpected value for every[7] which was " + every[7]);
             }
 
+        }
+
+        private void makeSpecialStage(int number)
+        {
+            special = new Special(number);
+            if (special.Creatures == 1)
+            {
+                MakeMonkWave();
+            }
+        }
+
+        private void ShowInstructions(bool isTwoPlayer)
+        {
+            if (isTwoPlayer)
+            {
+                int xOffset = Gfx.KeysP1.Width / 2;
+                int yPos = Window.Height / 10 * 5;
+                CreateKeyboardKeyMessage(Gfx.KeysP2, Window.Width / 4 - xOffset, yPos);
+                CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 4 * 3 - xOffset, yPos);
+
+            }
+            else
+            {
+                int xOffset = Gfx.KeysP1.Width / 2;
+                int yPos = Window.Height / 10 * 5;
+                CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 2 - xOffset, yPos);
+            }
         }
 
         private void MakeSnailWave()
@@ -4155,7 +3994,7 @@ EndType*/
 
         }
 
-        public void MakeStarWave()
+        public void MakeFrogWave()
         {
             int numAliens = Math.Min(4 + level / 3, 12);
             int waveDelayEachRound = 190;
@@ -4514,6 +4353,7 @@ EndType*/
                 grey.Player2 = Gfx.Scale(c.Load<Texture2D>("gfx/fighter2"), Gfx.StandardScale, gd);
                 grey.Frog = Gfx.Scale(c.Load<Texture2D>("gfx/frog0"), Gfx.StandardScale, gd);
                 grey.FrogLeap = Gfx.Scale(c.Load<Texture2D>("gfx/frog1"), Gfx.StandardScale, gd);
+                grey.SnailLeft = Gfx.Scale(c.Load<Texture2D>("gfx/snail_left"), Gfx.StandardScale, gd);
                 grey.SnailRight = Gfx.Scale(c.Load<Texture2D>("gfx/snail_right"), Gfx.StandardScale, gd);
                 grey.SnailShell = Gfx.Scale(c.Load<Texture2D>("gfx/snail_shell"), Gfx.StandardScale, gd);
 
@@ -4525,6 +4365,9 @@ EndType*/
                 grey.ShotHeartBigPicture = Gfx.Scale(c.Load<Texture2D>("gfx/heartbig"), Gfx.StandardScale, gd);
 
                 grey.MonkShot = Gfx.Scale(c.Load<Texture2D>("gfx/monkshot"), Gfx.StandardScale, gd);
+                grey.FrogShotLeft = Gfx.Scale(c.Load<Texture2D>("gfx/frogshot"), Gfx.StandardScale, gd);
+                grey.FrogShotRight = Gfx.Scale(c.Load<Texture2D>("gfx/frogshot1"), Gfx.StandardScale, gd);
+
                 grey.Monk = Gfx.Scale(c.Load<Texture2D>("gfx/monk"), Gfx.StandardScale, gd);
                 grey.MonkSpecialPicture[0] = Gfx.Scale(c.Load<Texture2D>("gfx/monk01"), Gfx.StandardScale, gd);
                 grey.MonkSpecialPicture[1] = Gfx.Scale(c.Load<Texture2D>("gfx/monk10"), Gfx.StandardScale, gd);
@@ -4554,6 +4397,8 @@ EndType*/
         public Sprite Octo;
         public Sprite Monk;
         public Sprite[] MonkSpecialPicture = new Sprite[3];
+
+        public Sprite SnailLeft;
         public Sprite SnailRight;
         public Sprite SnailShell;
 
@@ -4569,6 +4414,9 @@ EndType*/
         }
 
 
+
+        public Sprite FrogShotLeft { get; set; }
+        public Sprite FrogShotRight { get; set; }
     }
 
     public static class Gfx

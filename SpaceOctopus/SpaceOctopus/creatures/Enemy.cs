@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Audio;
 using System.Diagnostics;
+using SpaceOctopus.Projectiles;
 
-namespace SpaceOctopus.creatures
+namespace SpaceOctopus.Creatures
 {
     public abstract class Enemy : Creature
     {
@@ -79,6 +80,11 @@ namespace SpaceOctopus.creatures
             }
         }
 
+        public void DieWithNoEffects()
+        {
+            IsAlive = false;
+        }
+
         public void Die(ParticleType expType)
         {
             IsAlive = false;
@@ -89,7 +95,6 @@ namespace SpaceOctopus.creatures
         public virtual void Explode(ParticleType expType)
         {
             DieSound.Play();
-            // If coreType.getInstance().fpsAlertLevel<2 Then return 'no explosion effects if framerate is low  
             MakeIntoParticles(expType);
         }
     }

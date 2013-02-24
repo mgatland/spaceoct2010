@@ -104,13 +104,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="creatures\Shell.cs" />
-    <Compile Include="creatures\Snail.cs" />
-    <Compile Include="creatures\Creature.cs" />
-    <Compile Include="creatures\Enemy.cs" />
-    <Compile Include="creatures\Frog.cs" />
-    <Compile Include="creatures\Octo.cs" />
-    <Compile Include="creatures\Monk.cs" />
+    <Compile Include="Creatures\Shell.cs" />
+    <Compile Include="Creatures\Snail.cs" />
+    <Compile Include="Creatures\Creature.cs" />
+    <Compile Include="Creatures\Enemy.cs" />
+    <Compile Include="Creatures\Frog.cs" />
+    <Compile Include="Creatures\Octo.cs" />
+    <Compile Include="Creatures\Monk.cs" />
+    <Compile Include="Projectiles\Shot.cs" />
     <Compile Include="Special.cs" />
     <Compile Include="Data\Analytics.cs" />
     <Compile Include="BackgroundScreen.cs" />

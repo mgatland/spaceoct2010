@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Audio;
 
-namespace SpaceOctopus.creatures
+namespace SpaceOctopus.Creatures
 {
     public class Creature : Drawable
     {

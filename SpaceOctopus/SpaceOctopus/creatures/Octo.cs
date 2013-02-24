@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Audio;
 using System.Diagnostics;
 
-namespace SpaceOctopus.creatures
+namespace SpaceOctopus.Creatures
 {
     public class Octo : Enemy
     {

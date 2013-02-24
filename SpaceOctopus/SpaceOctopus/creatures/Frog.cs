@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SpaceOctopus.Projectiles;
 
-namespace SpaceOctopus.creatures
+namespace SpaceOctopus.Creatures
 {
     class Frog : Enemy
     {
@@ -35,7 +36,14 @@ namespace SpaceOctopus.creatures
 
         public override void Shoot()
         {
-            //base.Shoot();
+            ShootInDirection(1);
+            ShootInDirection(-1);
+        }
+
+        private void ShootInDirection(int dir)
+        {
+            Shot s = Shot.CreateFrogShot(centerX(), Position.Y + Picture.Height * 3 / 4, dir);
+            Core.Instance.AddShot(s);
         }
 
         public override void Move(int delta)
@@ -70,7 +78,17 @@ namespace SpaceOctopus.creatures
             if (stillTime > MaxStillTime)
             {
                 hops++;
-                if (hops >= fastHopThreshhold)
+
+                if (iFeelLikeShooting())
+                {
+                    //A little hop, and a shoot.
+                    Shoot();
+                    yV = 0.1f;
+                    stillTime = 0;
+                    friction = 0.996f;
+                    MaxStillTime = 50;
+                }
+                else if (hops >= fastHopThreshhold)
                 {
                     //fast mode
                     xV = 0;
@@ -103,5 +121,25 @@ namespace SpaceOctopus.creatures
             DoCollisions();
         }
 
+        private bool iFeelLikeShooting()
+        {
+            if (amIDownToPlayer(Core.Instance.P) || amIDownToPlayer(Core.Instance.P2)) {
+                return true;
+            }
+            return false;
+        }
+
+        private bool amIDownToPlayer(Player p)
+        {
+            if (p != null)
+            {
+                int pY = (int)p.Position.Y;
+                if (Position.Y + Picture.Height > pY)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

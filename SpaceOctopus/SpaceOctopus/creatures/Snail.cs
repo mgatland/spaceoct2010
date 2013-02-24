@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Audio;
 using System.Diagnostics;
 
-namespace SpaceOctopus.creatures
+namespace SpaceOctopus.Creatures
 {
     public class Snail : Enemy
     {
@@ -48,6 +48,7 @@ namespace SpaceOctopus.creatures
                 //initialize direction
                 if (Position.X > 0)
                 {
+                    Picture = Core.Instance.Art.SnailLeft;
                     Direction = -1;
                     lastShellX = Window.Width - Picture.Width;
                 }
@@ -92,10 +93,12 @@ namespace SpaceOctopus.creatures
                 Position.Y += Picture.Height;
                 if (Direction == 1)
                 {
+                    Picture = Core.Instance.Art.SnailRight;
                     lastShellX = 0;
                 }
                 else
                 {
+                    Picture = Core.Instance.Art.SnailLeft;
                     lastShellX = Window.Width - Picture.Width;
                 }
             }

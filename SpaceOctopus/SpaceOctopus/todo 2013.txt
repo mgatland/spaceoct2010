@@ -1,4 +1,55 @@
-﻿
+﻿2013-02-24
+
+Time to focus on changes that have real benefits.
+
+You no longer lose when enemies get past you.
+- (this was a major cause of confusion in playtests)
+- Frogs shoot darts out their sides when they get horizontally level with you.
+  (so they are still dangerous even though going past you is now harmless)
+- Octos, Monks, Snails just go past harmlessly and disappear. (todo: change this)
+
+Refactor: moved shots to a separate file
+Fixed: snails face the way they're going. They used to always face right.
+
+[ ] Visual effect to make the revive powerup easier to understand
+	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
+
+[ ] instructions shouldn't mention 's' and the down arrow, they don't do anything!
+
+[ ]	pixel perfect collisions for the player.
+	i often notice rocks hurting me when they didn't really hit me
+
+[ ] Make the game easier to install. Can I stop using XNA?
+
+2013-04-24
+
+The event was a great success!
+
+Key feedback:
+
+There's a balance issue, at around level 31, where the beams start coming constantly and frantically
+I think the individual octos need to have no refire rate, and beams need to come from  the octos as a whole
+getting constant  i.e. beam refiring should be done collectively, not per octo.
+(if the pool of octos is too large, you get constant beam attacks.)
+
+I need to balance it, but I still love the feeling when you get almost constant beam attacks - maybe that should
+	be for octo-only levels.
+
+It's not obvious that aliens getting past you makes you lose.
+(Carl points out that it's inconsistent, as you let the mine-things go past you)
+
+It's also hard to know which powerup causes which power. Michelle suggested color coding them,
+ that would work really well but i don't want that many colors in the game.
+	so we'll leave this problem for later.
+
+snail shells - I didn't really think about it. They probably shouldn't drop powerups.
+I thought they shouldn't require destroying to end the level, but carl felt it was ok - a nice pacing change.
+
+[ ] snails should not be able to lay shells on top of other shells.
+
+Carl commented on how with powerups that make you wider, you can go slightly off the side of the screen
+The powerups don't change your collision size, but players don't know that...
+
 2013-02-20
 
 I'm showing the game at an event on Saturday.
@@ -18,7 +69,7 @@ Top priority:
 
 [ ] AI buddy
 
-
+[ ] make octos and monks hang around above the player instead of going past.
 
 Maybe priority:
 [x] make the stars more interesting to battle. (a little - they're still not quite right)

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Audio;
 using System.Diagnostics;
+using SpaceOctopus.Projectiles;
 
-namespace SpaceOctopus.creatures
+namespace SpaceOctopus.Creatures
 {
     class Monk : Enemy
     {
