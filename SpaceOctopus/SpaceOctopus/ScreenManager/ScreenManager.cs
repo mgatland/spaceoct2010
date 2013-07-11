@@ -43,7 +43,6 @@ namespace AlienGameSample
         List<GameScreen> screensToUpdate = new List<GameScreen>();
 
         InputState input = new InputState();
-        MediaLibrary mediaLibrary;
 
         SpriteBatch spriteBatch;
         SpriteFont font;
@@ -52,15 +51,6 @@ namespace AlienGameSample
         bool isInitialized;
 
         bool traceEnabled;
-
-        /// <summary>
-        /// A media library shared by all the screens. This saves
-        /// each screen having to bother creating their own local instance.
-        /// </summary>
-        public MediaLibrary MediaLibrary
-        {
-            get { return mediaLibrary; }
-        }
 
         /// <summary>
         /// A default SpriteBatch shared by all the screens. This saves
@@ -104,7 +94,6 @@ namespace AlienGameSample
         /// </summary>
         public override void Initialize()
         {
-            mediaLibrary = new MediaLibrary();
             base.Initialize();
 
             isInitialized = true;

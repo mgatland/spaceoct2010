@@ -11,7 +11,7 @@ namespace SpaceOctopus.Projectiles
     {
         #region pooling
         public const int PoolSize = 50;
-        private static Pool<Shot> Pool;
+        private static ShotPool Pool;
 
         public static Shot Create(Sprite texture)
         {
@@ -33,7 +33,7 @@ namespace SpaceOctopus.Projectiles
         public static void CreatePool()
         {
             if (Pool != null) return;
-            Pool = new Pool<Shot>(PoolSize);
+            Pool = new ShotPool(PoolSize);
         }
         #endregion
 

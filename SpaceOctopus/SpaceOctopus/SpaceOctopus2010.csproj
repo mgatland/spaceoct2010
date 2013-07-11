@@ -111,6 +111,7 @@
     <Compile Include="Creatures\Frog.cs" />
     <Compile Include="Creatures\Octo.cs" />
     <Compile Include="Creatures\Monk.cs" />
+    <Compile Include="Pools.cs" />
     <Compile Include="Projectiles\Shot.cs" />
     <Compile Include="Special.cs" />
     <Compile Include="Data\Analytics.cs" />

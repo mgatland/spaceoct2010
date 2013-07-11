@@ -2037,7 +2037,7 @@ namespace SpaceOctopus
     {
         #region pooling
         public const int PoolSize = 50; // in testing, 20 was the max in single player
-        private static Pool<ParticleGroup> Pool;
+        private static ParticleGroupPool Pool;
 
         public static ParticleGroup Create(ParticleType expType)
         {
@@ -2057,7 +2057,7 @@ namespace SpaceOctopus
         public static void CreatePool()
         {
             if (Pool != null) return;
-            Pool = new Pool<ParticleGroup>(PoolSize);
+            Pool = new ParticleGroupPool(PoolSize);
         }
         #endregion
 
@@ -2172,59 +2172,6 @@ namespace SpaceOctopus
         }
     }
 
-    //from http://blog.gallusgames.com/programming/lean-mean-object-pool-in-c
-    public class Pool<T> where T : new()
-    {
-        private T[] pool;
-        private int nextItem = -1;
-
-        private bool hasPoolExausted; //limits debug messages.
-        private bool hasPoolOverfilled; //limits debug messages.
-
-        public Pool(int capacity)
-        {
-            pool = new T[capacity];
-            for (int i = 0; i < capacity; i++)
-            {
-                pool[i] = new T();
-            }
-        }
-
-        public override string ToString()
-        {
-            return base.ToString() + "( nextItem " + nextItem + ", capacity " + pool.Length + ")";
-        }
-
-        public T Fetch()
-        {
-            if (nextItem == pool.Length - 1)
-            {
-                T newT = new T();
-                if (!hasPoolExausted)
-                {
-                    Debug.WriteLine("Pool exausted, creating an instance of " + newT.GetType().Name);
-                    hasPoolExausted = true;
-                }
-                return newT;
-            }
-            return pool[++nextItem];
-        }
-
-        public void Release(T instance)
-        {
-            if (nextItem < 0)
-            {
-                if (!hasPoolOverfilled)
-                {
-                    Debug.WriteLine("Too many objects returned to pool.");
-                    hasPoolOverfilled = true;
-                }
-                return;
-            }
-            pool[nextItem--] = instance;
-        }
-    }
-
     public class Particle : Drawable
     {
         float xV;
@@ -2239,7 +2186,7 @@ namespace SpaceOctopus
 
         #region pooling
         private const int PoolSize = 8000; //performance degrades at 5000
-        private static Pool<Particle> Pool;
+        private static ParticlePool Pool;
 
         public static Particle Create(int x, int y, Color color, float relX, float relY, ParticleType type)
         {
@@ -2260,7 +2207,7 @@ namespace SpaceOctopus
         public static void CreatePool()
         {
             if (Pool != null) return;
-            Pool = new Pool<Particle>(PoolSize);
+            Pool = new ParticlePool(PoolSize);
         }
         #endregion
 

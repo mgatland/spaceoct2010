@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="ValidateSolutionConfiguration;ValidateToolsVersions;ValidateProjects" DefaultTargets="Build">
+  <PropertyGroup>
+    <MSBuildToolsRoot>c:\Windows\Microsoft.NET\Framework\</MSBuildToolsRoot>
+    <FrameworkSDKRoot>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\</FrameworkSDKRoot>
+    <MSBuildRuntimeVersion>4.0.30319</MSBuildRuntimeVersion>
+    <SDK40ToolsPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\NETFX 4.0 Tools\</SDK40ToolsPath>
+    <SDK35ToolsPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\</SDK35ToolsPath>
+    <MSBuildToolsPath32>c:\Windows\Microsoft.NET\Framework\v4.0.30319\</MSBuildToolsPath32>
+    <Configuration>Debug</Configuration>
+    <Platform>Mixed Platforms</Platform>
+    <AspNetConfiguration>Debug</AspNetConfiguration>
+    <SolutionDir>K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\</SolutionDir>
+    <SolutionExt>.sln</SolutionExt>
+    <SolutionFileName>SpaceOctopus.sln</SolutionFileName>
+    <SolutionName>SpaceOctopus</SolutionName>
+    <SolutionPath>K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus.sln</SolutionPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <CurrentSolutionConfigurationContents>
+      <SolutionConfiguration xmlns="">
+  <ProjectConfiguration Project="{0F5A690A-0A9E-4566-B8EC-520C05F651C1}" AbsolutePath="K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopusContent\SpaceOctopusContent.contentproj" BuildProjectInSolution="False">Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project="{B3026D35-8142-468C-B0D1-7EC197DF2FE8}" AbsolutePath="K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj" BuildProjectInSolution="True">Debug|x86</ProjectConfiguration>
+</SolutionConfiguration>
+    </CurrentSolutionConfigurationContents>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <ProjectReference Include="K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj">
+      <ToolsVersion>
+      </ToolsVersion>
+      <SkipNonexistentProjects>False</SkipNonexistentProjects>
+      <AdditionalProperties>Configuration=Debug; Platform=x86</AdditionalProperties>
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectReference>
+  </ItemGroup>
+  <Target Name="Build" Outputs="@(CollectedBuildOutput)">
+    <MSBuild Projects="@(ProjectReference)" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="ValidateProjects">
+    <Message Condition=" ('$(Configuration)' == 'Android') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Android|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Android') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Android|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Android') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Android|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Android') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Android|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Debug|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Debug|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Debug|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Debug|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'iOS') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;iOS|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'iOS') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;iOS|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'iOS') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;iOS|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'iOS') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;iOS|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Linux') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Linux|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Linux') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Linux|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Linux') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Linux|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Linux') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Linux|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'OSX') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;OSX|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'OSX') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;OSX|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'OSX') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;OSX|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'OSX') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;OSX|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Profiling') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Profiling|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Profiling') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Profiling|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Profiling') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Profiling|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Profiling') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Profiling|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'PSM') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;PSM|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'PSM') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;PSM|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'PSM') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;PSM|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'PSM') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;PSM|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Release|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Release|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Release|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Release|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows8') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows8|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows8') and ('$(Platform)' == 'Mixed Platforms') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows8|Mixed Platforms&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows8') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows8|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows8') and ('$(Platform)' == 'x86') " Text="The project &quot;SpaceOctopusContent&quot; is not selected for building in solution configuration &quot;Windows8|x86&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Android') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Android|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Android') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Android|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Debug|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Debug') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Debug|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'iOS') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;iOS|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'iOS') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;iOS|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Linux') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Linux|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Linux') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Linux|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'OSX') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;OSX|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'OSX') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;OSX|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Profiling') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Profiling|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Profiling') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Profiling|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'PSM') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;PSM|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'PSM') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;PSM|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Release|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Release') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Release|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Windows|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Windows|Windows Phone&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows8') and ('$(Platform)' == 'Any CPU') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Windows8|Any CPU&quot;." />
+    <Message Condition=" ('$(Configuration)' == 'Windows8') and ('$(Platform)' == 'Windows Phone') " Text="The project &quot;SpaceOctopus2010&quot; is not selected for building in solution configuration &quot;Windows8|Windows Phone&quot;." />
+  </Target>
+  <Target Name="ValidateToolsVersions">
+    <Error Condition="'$(MSBuildToolsVersion)' == '2.0' and ('$(ProjectToolsVersion)' != '2.0' and '$(ProjectToolsVersion)' != '')" Text="The tools version &quot;$(MSBuildToolsVersion)&quot; of the solution does not support building projects with a different tools version." Code="MSB4149" HelpKeyword="MSBuild.SolutionToolsVersionDoesNotSupportProjectToolsVersion" />
+  </Target>
+  <Target Name="ValidateSolutionConfiguration">
+    <Error Condition="('$(CurrentSolutionConfigurationContents)' == '') and ('$(SkipInvalidConfigurations)' != 'true')" Text="The specified solution configuration &quot;$(Configuration)|$(Platform)&quot; is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform=&quot;Any CPU&quot;) or leave those properties blank to use the default solution configuration." Code="MSB4126" HelpKeyword="MSBuild.SolutionInvalidSolutionConfiguration" />
+    <Warning Condition="('$(CurrentSolutionConfigurationContents)' == '') and ('$(SkipInvalidConfigurations)' == 'true')" Text="The specified solution configuration &quot;$(Configuration)|$(Platform)&quot; is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform=&quot;Any CPU&quot;) or leave those properties blank to use the default solution configuration." Code="MSB4126" HelpKeyword="MSBuild.SolutionInvalidSolutionConfiguration" />
+    <Message Condition="'$(CurrentSolutionConfigurationContents)' != ''" Text="Building solution configuration &quot;$(Configuration)|$(Platform)&quot;." />
+  </Target>
+  <Target Name="Clean">
+    <MSBuild Projects="@(ProjectReference-&gt;Reverse())" Targets="Clean" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)" />
+  </Target>
+  <Target Name="Rebuild" Outputs="@(CollectedBuildOutput)">
+    <MSBuild Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="Publish">
+    <MSBuild Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" SkipNonexistentProjects="%(ProjectReference.SkipNonexistentProjects)" />
+  </Target>
+  <Target Name="SpaceOctopus2010" Outputs="@(SpaceOctopus2010BuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj'" Projects="@(ProjectReference)" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=x86;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="SpaceOctopus2010BuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="SpaceOctopus2010:Clean">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj'" Projects="@(ProjectReference)" Targets="Clean" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=x86;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+  <Target Name="SpaceOctopus2010:Rebuild" Outputs="@(SpaceOctopus2010BuildOutput)">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj'" Projects="@(ProjectReference)" Targets="Rebuild" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=x86;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="SpaceOctopus2010BuildOutput" />
+    </MSBuild>
+  </Target>
+  <Target Name="SpaceOctopus2010:Publish">
+    <MSBuild Condition="'%(ProjectReference.Identity)' == 'K:\i\Documents\Visual Studio 2010\Projects\SpaceOctopus\SpaceOctopus\SpaceOctopus\SpaceOctopus2010.csproj'" Projects="@(ProjectReference)" Targets="Publish" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=Debug; Platform=x86;BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+  </Target>
+</Project>

@@ -1,4 +1,48 @@
-﻿2013-02-24
+﻿-----
+
+Wow, making this work with JSIL will be quite an adventure.
+I'm amazed by how quickly I can get a little bit working.
+
+JSIL compiles my SpaceOct.exe into javascript that runs in a browser!
+Setting it up was easy - easier than almost any codebase I've ever devved on.
+
+But then my game failed immediately - but the error messages are clear.
+JSIL doesn't support threads - my game tries to load assets in a background thread. That's easily removed.
+Next up, you can't check the state of a sound to tell if it's playing or not - OK, remove that sound for now.
+Next, it gets tricky - the object pools I use to recycle Shots and other game objects don't work.
+I think it's the generics. I guess I can un-generic-ify those object pools.
+
+Done... and that works.
+
+And... wow. The game runs! In a web browser!
+
+The framerate is super-slow when there are particles on screen. Super dooper slow. That's unfortunate.
+I wonder if it can be fixed - I've seen HTML5 demos that are pretty fast.
+The particles also don't look right, I think the blending isn't working correctly. But they look kind of cool
+even though it's not how I intended.
+
+Still crashes when a player gets hit by a beam, that's another case where i'm checking the status of
+a sound effect that's playing. That's not supported.
+
+So, things that I'd need to fix to make it OK:
+1. Improve particle effects performance (or give up on particles)
+2. Add support for checking the state of a currently playing sound
+Oh, one more thing - the music doesn't work!
+The asset is in there but it doesn't play.
+
+------
+
+[ ] Visual effect to make the revive powerup easier to understand
+	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
+
+[ ] instructions shouldn't mention 's' key and the down arrow because they don't do anything.
+
+[ ]	pixel perfect collisions for the player.
+	i often notice rocks hurting me when they didn't really hit me
+
+[ ] Make the game easier to install. Can I stop using XNA?
+
+2013-02-24
 
 Time to focus on changes that have real benefits.
 
@@ -11,15 +55,6 @@ You no longer lose when enemies get past you.
 Refactor: moved shots to a separate file
 Fixed: snails face the way they're going. They used to always face right.
 
-[ ] Visual effect to make the revive powerup easier to understand
-	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
-
-[ ] instructions shouldn't mention 's' and the down arrow, they don't do anything!
-
-[ ]	pixel perfect collisions for the player.
-	i often notice rocks hurting me when they didn't really hit me
-
-[ ] Make the game easier to install. Can I stop using XNA?
 
 2013-04-24
 

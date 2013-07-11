@@ -125,7 +125,7 @@ namespace AlienGameSample
                 LastKeyboardStates[i] = CurrentKeyboardStates[i];
                 LastGamePadStates[i] = CurrentGamePadStates[i];
 
-                CurrentGamePadStates[i] = GamePad.GetState((PlayerIndex)i,GamePadDeadZone.IndependentAxes);
+              //  CurrentGamePadStates[i] = GamePad.GetState((PlayerIndex)i,GamePadDeadZone.IndependentAxes);
                 CurrentKeyboardStates[i] = Keyboard.GetState((PlayerIndex)i);
             }
         }

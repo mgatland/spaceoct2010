@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
 
 namespace AlienGameSample
@@ -75,40 +74,6 @@ namespace AlienGameSample
     /// 
     public override void HandleInput(InputState input)
     {
-
-        //HACKS:
-   //     menuEntries[0].OnSelectEntry();
-
-      TouchCollection touchState = TouchPanel.GetState();
-      bool touchDetected = false;
-      Vector2 touchPosition = new Vector2();
-      //interpert touch screen presses
-      foreach (TouchLocation location in touchState)
-      {
-        switch (location.State)
-        {
-          case TouchLocationState.Pressed:
-            touchDetected = true;
-            touchPosition = location.Position;
-            break;
-          case TouchLocationState.Moved:
-            break;
-          case TouchLocationState.Released:
-            break;
-        }
-      }
-
-      if (touchDetected)
-      {
-        foreach (MenuEntry menuEntry in menuEntries)
-        {
-          Rectangle touchRect = new Rectangle((int)touchPosition.X - 5, (int)touchPosition.Y - 5,
-                                              10, 10);
-          if (menuEntry.EntryPosition.Intersects(touchRect))
-            menuEntry.OnSelectEntry();
-        }
-      }
-
       // Move to the previous menu entry?
       if (input.MenuUp)
       {

@@ -106,8 +106,6 @@ namespace AlienGameSample
             Color newColor = new Color((int)(color1.R * amount + color2.R * inverseAmount),
                 (int)(color1.G * amount + color2.G * inverseAmount),
                 (int)(color1.B * amount + color2.B * inverseAmount));
-
-            Debug.WriteLine(newColor.R);
             return newColor;
         }
 
