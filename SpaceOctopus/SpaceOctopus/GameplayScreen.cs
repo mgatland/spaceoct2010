@@ -358,22 +358,15 @@ namespace SpaceOctopus
         float xV;
         float yV;
 
-        public const int PowerUpTypesCount = 9; //sigh, remove this when i understand c#. Enum.GetValues()
-        public const int DOUBLEFIRE = 0;
-        public const int RAPIDFIRE = 1;
-        public const int DISABLED = 2; //NOT USED
-        public const int HEIGHTBOOST = 3;
-        public const int MEGASHOT = 4;
-        public const int CANNON = 5;
-        public const int FASTMOVE = 6;
-        public const int BUBBLE = 7;
-        public const int REVIVE_IMMEDIATE = 8; //immediate means it's not held and stored.
+        public enum PowerUpTypes { NULL, DOUBLEFIRE, RAPIDFIRE, MEGASHOT, CANNON, BUBBLE, REVIVE_IMMEDIATE};
+        //no longer used: FASTMOVE, HEIGHTBOOST
+        //immediate means it works immediately - it's not a permanent effect that attaches to the ship
 
         private const float DefaultFallSpeed = Window.Height / 7142f;
 
         PowerUp NextP;
         PowerUp PrevP;
-        int type;
+        PowerUpTypes type;
 
         static Sprite DoubleImage;
         static Sprite RapidImage;
@@ -407,20 +400,20 @@ namespace SpaceOctopus
             other.PrevP = this;
         }
 
-        public PowerUp() : this(-1) { }
+        public PowerUp() : this(PowerUpTypes.NULL) { }
 
-        public PowerUp(int type)
+        public PowerUp(PowerUpTypes type)
             : base(null) //must call base with null texture for now because we won't know our texture until later :/
         {
-            while (type < 0 || type >= PowerUpTypesCount)
+            while (type == PowerUpTypes.NULL)
             {
                 if (Core.Instance.P2 != null && (!Core.Instance.P2.IsAlive || !Core.Instance.P.IsAlive) && Core.Instance.PowerUps == null) {
                     //hack: you always get a revive powerup first when one player dies in a two player game.
-                    type = REVIVE_IMMEDIATE;
+                    type = PowerUpTypes.REVIVE_IMMEDIATE;
                 } else {
-                    type = Core.Instance.Random.Next(PowerUpTypesCount);
-                    if (type == DISABLED || type == HEIGHTBOOST) type = -1; //hacky disable spikewings and height boost.
-                    if (type == REVIVE_IMMEDIATE && (Core.Instance.P2 == null || (Core.Instance.P2.IsAlive && Core.Instance.P.IsAlive))) type = -1; //revive is only allowed in two player mode when one player is dead.
+                    Array values = Enum.GetValues(typeof(PowerUpTypes));
+                    type = (PowerUpTypes)values.GetValue(Core.Instance.Random.Next(values.Length));
+                    if (type == PowerUpTypes.REVIVE_IMMEDIATE && (Core.Instance.P2 == null || (Core.Instance.P2.IsAlive && Core.Instance.P.IsAlive))) type = PowerUpTypes.NULL; //revive is only allowed in two player mode when one player is dead.
                 }
 
             }
@@ -428,14 +421,12 @@ namespace SpaceOctopus
             //Set our picture, which we didn't do in base()
             switch (type)
             {
-                case DOUBLEFIRE: Picture = DoubleImage; break;
-                case RAPIDFIRE: Picture = RapidImage; break;
-                case HEIGHTBOOST: Picture = HeightImage; break;
-                case MEGASHOT: Picture = MegaImage; break;
-                case FASTMOVE: Picture = FastImage; break;
-                case CANNON: Picture = CannonImage; break;
-                case BUBBLE: Picture = BubbleImage; break;
-                case REVIVE_IMMEDIATE: Picture = ReviveImage; break;
+                case PowerUpTypes.DOUBLEFIRE: Picture = DoubleImage; break;
+                case PowerUpTypes.RAPIDFIRE: Picture = RapidImage; break;
+                case PowerUpTypes.MEGASHOT: Picture = MegaImage; break;
+                case PowerUpTypes.CANNON: Picture = CannonImage; break;
+                case PowerUpTypes.BUBBLE: Picture = BubbleImage; break;
+                case PowerUpTypes.REVIVE_IMMEDIATE: Picture = ReviveImage; break;
             }
 
             this.type = type;
@@ -787,13 +778,13 @@ namespace SpaceOctopus
         public void LoadFromPlayerData(PlayerData pd)
         {
             PlayerUpgrades u = p.Upgrades;
-            u.SilentUpgrade(PowerUp.BUBBLE, pd.Bubbles);
-            u.SilentUpgrade(PowerUp.CANNON, pd.Cannon);
-            u.SilentUpgrade(PowerUp.DOUBLEFIRE, pd.DoubleFire);
-            u.SilentUpgrade(PowerUp.FASTMOVE, pd.FastMove);
-            u.SilentUpgrade(PowerUp.HEIGHTBOOST, pd.Height);
-            u.SilentUpgrade(PowerUp.MEGASHOT, pd.Mega);
-            u.SilentUpgrade(PowerUp.RAPIDFIRE, pd.Rapid);
+            u.SilentUpgrade(PowerUp.PowerUpTypes.BUBBLE, pd.Bubbles);
+            u.SilentUpgrade(PowerUp.PowerUpTypes.CANNON, pd.Cannon);
+            u.SilentUpgrade(PowerUp.PowerUpTypes.DOUBLEFIRE, pd.DoubleFire);
+           // u.SilentUpgrade(PowerUp.PowerUpTypes.FASTMOVE, pd.FastMove);
+           // u.SilentUpgrade(PowerUp.PowerUpTypes.HEIGHTBOOST, pd.Height);
+            u.SilentUpgrade(PowerUp.PowerUpTypes.MEGASHOT, pd.Mega);
+            u.SilentUpgrade(PowerUp.PowerUpTypes.RAPIDFIRE, pd.Rapid);
             //pd.SpikeWings is unused
         }
 
@@ -818,7 +809,7 @@ namespace SpaceOctopus
 
         #endregion
 
-        private void SilentUpgrade(int type, int amount)
+        private void SilentUpgrade(PowerUp.PowerUpTypes type, int amount)
         {
             if (amount <= 0) return;
             for (int i = 0; i < amount; i++)
@@ -924,8 +915,9 @@ namespace SpaceOctopus
             }
         }
 
-        int[] pwrUpXOff = new int[PowerUp.PowerUpTypesCount];
-        int[] pwrUpYOff = new int[PowerUp.PowerUpTypesCount];
+        static int powerUpTypesCount = Enum.GetValues(typeof(PowerUp.PowerUpTypes)).Length;
+        int[] pwrUpXOff = new int[powerUpTypesCount];
+        int[] pwrUpYOff = new int[powerUpTypesCount];
 
         const int bubbleXOff = -26;
         const int bubbleYOff = -20;
@@ -1054,17 +1046,17 @@ namespace SpaceOctopus
             }
         }
 
-        public void Upgrade(int type)
+        public void Upgrade(PowerUp.PowerUpTypes type)
         {
             Upgrade(type, true);
         }
 
-        private void Upgrade(int type, bool showMessage)
+        private void Upgrade(PowerUp.PowerUpTypes type, bool showMessage)
         {
             String text = "--";
             switch (type)
             {
-                case PowerUp.DOUBLEFIRE:
+                case PowerUp.PowerUpTypes.DOUBLEFIRE:
                     if (p.ShotCount >= 3)
                     {
                         text = "Upgrade not needed";
@@ -1089,7 +1081,7 @@ namespace SpaceOctopus
 
                     }
                     break;
-                case PowerUp.RAPIDFIRE:
+                case PowerUp.PowerUpTypes.RAPIDFIRE:
                     int maxROF = Player.DefaultROF / 2; //but less is more. er. so it's minROF really.
                     if (p.ROF > maxROF)
                     {
@@ -1111,46 +1103,7 @@ namespace SpaceOctopus
                         text = "Upgrade not needed";
                     }
                     break;
-                case PowerUp.FASTMOVE:
-                    float maxSpeed = (float)(1.5 * p.DefaultSpeed);
-                    if (p.Speed < maxSpeed - 0.01)
-                    {
-                        p.Speed += boostSpeed;
-                        hasSpeed = true;
-                        AnyBonus++;
-                        if (boostSpeed > maxSpeed)
-                        {
-                            p.Speed = maxSpeed;
-                            text = "Maximum speed";
-                        }
-                        else
-                        {
-                            text = "YSpeed increased";
-                        }
-                    }
-                    else
-                    {
-                        text = "Upgrade not needed";
-                    }
-                    break;
-                case PowerUp.HEIGHTBOOST:
-                    if (!hasHeight)
-                    {
-                        hasHeight = true;
-                        AnyBonus++;
-                        p.DesiredY += boostDesiredY;
-                        if (p.DesiredY < Player.DefaultDesiredY + boostDesiredY)
-                        {
-                            p.DesiredY = Player.DefaultDesiredY + boostDesiredY;
-                        }
-                        text = "Height increase";
-                    }
-                    else
-                    {
-                        text = "Upgrade not needed";
-                    }
-                    break;
-                case PowerUp.MEGASHOT:
+                case PowerUp.PowerUpTypes.MEGASHOT:
                     //assumes unlimited megashot ammo
                     if (!hasMega)
                     {
@@ -1164,7 +1117,7 @@ namespace SpaceOctopus
                     }
                     MegaShots += boostMegaShots;
                     break;
-                case PowerUp.CANNON:
+                case PowerUp.PowerUpTypes.CANNON:
                     if (!hasCannon)
                     {
                         hasCannon = true;
@@ -1181,7 +1134,7 @@ namespace SpaceOctopus
                         cannonTime = cannonTimeMax;
                     }
                     break;
-                case PowerUp.BUBBLE:
+                case PowerUp.PowerUpTypes.BUBBLE:
                     if (!hasBubble || bubbleHealth < bubbleHealthMax)
                     {
                         text = "Safety Bubble";
@@ -1195,7 +1148,7 @@ namespace SpaceOctopus
                         text = "Upgrade not needed";
                     }
                     break;
-                case PowerUp.REVIVE_IMMEDIATE:
+                case PowerUp.PowerUpTypes.REVIVE_IMMEDIATE:
                     if (Core.Instance.P2 != null)
                     {
                         if (!Core.Instance.P.IsAlive)
@@ -1295,7 +1248,7 @@ namespace SpaceOctopus
         const int DefaultShotCount = 1;
         public const int DefaultROF = 600;
         const float DefaultShotSpeedMulti = 1.0f;
-        public const int DefaultDesiredY = DeathY - 200;
+        public const int DefaultDesiredY = DeathY - 130;
 
         public readonly PlayerUpgrades Upgrades;
 
@@ -1308,7 +1261,7 @@ namespace SpaceOctopus
         private int invulnerabilityTimer = 0;
         private const int RESPAWN_INVULERABILITY_TIME = 100;
 
-        public void Upgrade(int type)
+        public void Upgrade(PowerUp.PowerUpTypes type)
         {
             PowerUpSound.Play();
             Upgrades.Upgrade(type);
@@ -2416,7 +2369,8 @@ EndType
         const float BeamSpeed = Window.Height * 0.67f / 500;
         const int Width2 = Window.Width * 15 / 300;
         const int InitialWidth = Window.Width * 2 / 300;
-        const float Damage = 0.15f;
+        const float Damage = 0.25f;
+        const float Shake = 0.15f;
 
         public Beam()
             : base(null)
@@ -2464,12 +2418,12 @@ EndType
                 //Hit and hurt the player
                 if (p.IsAlive && (p.Position.X + p.Width > Position.X) && (p.Position.X < Position.X + Width) && (p.Position.Y + p.Height > Position.Y))
                 {
-                    p.PushDown(delta * Damage, delta * Damage);
+                    p.PushDown(delta * Damage, delta * Shake);
                     isHit = true;
                 }
                 if (p2 != null && p2.IsAlive && (p2.Position.X + p2.Width > Position.X) && (p2.Position.X < Position.X + Width) && (p2.Position.Y + p2.Height > Position.Y))
                 {
-                    p2.PushDown(delta * Damage, delta * Damage);
+                    p2.PushDown(delta * Damage, delta * Shake);
                     isHit = true;
                 }
                 if (isHit)
@@ -3108,6 +3062,10 @@ EndType*/
             if (P.Shake > 0)
             {
                 P.Shake -= 0.3 * delta;
+                if (P.Shake < 0)
+                {
+                    P.Shake = 0;
+                }
             }
 
             if (special != null) special.Move(delta);
@@ -3585,7 +3543,8 @@ EndType*/
         public void CheatPowerUp()
         {
             if (!Tweaking.isCheatsEnabled) return;
-            P.Upgrade(Random.Next(0, PowerUp.PowerUpTypesCount));
+            Array values = Enum.GetValues(typeof(PowerUp.PowerUpTypes));
+            P.Upgrade((PowerUp.PowerUpTypes)values.GetValue(Random.Next(0, values.Length)));
         }
 
         public void CheatSad()

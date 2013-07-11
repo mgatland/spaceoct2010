@@ -1,4 +1,35 @@
-﻿-----
+﻿[ ] Visual effect to make the revive powerup easier to understand
+	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
+
+[ ] instructions shouldn't mention 's' key and the down arrow because they don't do anything.
+
+[ ]	pixel perfect collisions for the player.
+	i often notice rocks hurting me when they didn't really hit me
+
+[ ] Make the game easier to install. Can I stop using XNA?
+
+[ ] snails should not be able to lay shells on top of other shells.
+
+[ ] fix balance \ pacing issues - too easy until level 30, too hard after that
+
+[ ] convey progress in some way other than 'Level 1' text.
+[ ] use an audio cue for 'upgrade not needed', since we removed the text cue? (low priority, doesn't really matter)
+[ ] don't save the game to disk - if you quit, you start over (the saving feature was for Windows Phone's tombstoning)
+[ ] replace "Press Enter to restart" with a picture of the enter key
+[ ] use a visual\audio cue for 'Player X is lost"
+
+[ ] always have 2 ships, even in single player (the other is a bot)
+
+2013-07-11
+
+[x] Difficulty - everything is more damaging than before
+[x] removed 'faster movement' powerup because it's not fun
+[x] cleaned powerup code to use an enum
+[ ] you only move upwards towards DesiredY when shake is zero.
+(shake is shared between both players)
+
+-----
+2013-03-02
 
 Wow, making this work with JSIL will be quite an adventure.
 I'm amazed by how quickly I can get a little bit working.
@@ -29,18 +60,7 @@ So, things that I'd need to fix to make it OK:
 2. Add support for checking the state of a currently playing sound
 Oh, one more thing - the music doesn't work!
 The asset is in there but it doesn't play.
-
 ------
-
-[ ] Visual effect to make the revive powerup easier to understand
-	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
-
-[ ] instructions shouldn't mention 's' key and the down arrow because they don't do anything.
-
-[ ]	pixel perfect collisions for the player.
-	i often notice rocks hurting me when they didn't really hit me
-
-[ ] Make the game easier to install. Can I stop using XNA?
 
 2013-02-24
 
@@ -54,7 +74,6 @@ You no longer lose when enemies get past you.
 
 Refactor: moved shots to a separate file
 Fixed: snails face the way they're going. They used to always face right.
-
 
 2013-04-24
 
@@ -80,7 +99,7 @@ It's also hard to know which powerup causes which power. Michelle suggested colo
 snail shells - I didn't really think about it. They probably shouldn't drop powerups.
 I thought they shouldn't require destroying to end the level, but carl felt it was ok - a nice pacing change.
 
-[ ] snails should not be able to lay shells on top of other shells.
+snails should not be able to lay shells on top of other shells.
 
 Carl commented on how with powerups that make you wider, you can go slightly off the side of the screen
 The powerups don't change your collision size, but players don't know that...
@@ -102,9 +121,7 @@ Top priority:
 	moves horziontally across the screen
 	drops snail-trails behind it. These absorb player shots.
 
-[ ] AI buddy
-
-[ ] make octos and monks hang around above the player instead of going past.
+[no] make octos and monks hang around above the player instead of going past.
 
 Maybe priority:
 [x] make the stars more interesting to battle. (a little - they're still not quite right)
@@ -126,7 +143,7 @@ Maybe priority:
 [ ] make a beautiful particle effect for rescuing
 [ ] make a new artset, and all that crazy stuff
 [ ] new enemy - they appear across the top of the screen,  then 'stomp' straight downwards, rapidly
-[ ] an enemy who builds a protective wall across the middle of the level (you have to shoot through it)
+[x] an enemy who builds a protective wall across the middle of the level (you have to shoot through it)
 [ ] an enemy who sprays out projectiles which spin outwards in a spiral
 [ ] a level where half the level is blocked off into solid wall
 
@@ -143,20 +160,7 @@ done:
 [ ] Bug: Sometimes I get a 'rescue' pickup but nothing happens.
 	Fix: When a player respawns, grant them invulnerability until they are fully on screen
 
-
-
 later:
-
-[ ] convey progress in some way other than 'Level 1' text.
-[ ] use an audio cue for 'upgrade not needed', since we removed the text cue? (low priority, doesn't really matter)
-[ ] have a (non-text) cue for "Aliens got past you" (low priority because it almost never happens)
-[ ] cue for 'aliens got past you'
-[ ] don't save the game to disk - if you quit, you start over (the saving feature was for Windows Phone's tombstoning)
-
-Later:
-
-[ ] replace "Press Enter to restart" with a picture of the enter key
-[ ] use a visual\audio cue for 'Player X is lost"
 
 Random ideas:
 1. make the game always have 2 ships - it's 2 player or player + bot

@@ -92,7 +92,7 @@ namespace SpaceOctopus.Projectiles
             Shot s = Shot.Create(Core.Instance.Art.ShotHeartPicture);
             s.YSpeed = StandardShotSpeed;
             s.HurtsEnemy = 0;
-            s.HurtsPlayer = 30;
+            s.HurtsPlayer = 80;
             s.Pierce = 0;
             s.Owner = -1;
             s.expType = ParticleType.FAST_SCATTER;
@@ -107,7 +107,7 @@ namespace SpaceOctopus.Projectiles
             Shot s = Shot.Create(Core.Instance.Art.ShotHeartBigPicture); //difference from CreateHeart
             s.YSpeed = StandardShotSpeed;
             s.HurtsEnemy = 0;
-            s.HurtsPlayer = 30;
+            s.HurtsPlayer = 50;
             s.Pierce = 1; //difference from CreateHeart
             s.Owner = -1;
             s.expType = ParticleType.FAST_SCATTER;
@@ -122,7 +122,7 @@ namespace SpaceOctopus.Projectiles
             Shot s = Shot.Create(Core.Instance.Art.MonkShot);
             s.YSpeed = StandardShotSpeed;
             s.HurtsEnemy = 0;
-            s.HurtsPlayer = 30;
+            s.HurtsPlayer = 80;
             s.Pierce = 0;
             s.Owner = -1;
             s.expType = ParticleType.FAST_SCATTER;
@@ -138,7 +138,7 @@ namespace SpaceOctopus.Projectiles
             s.YSpeed = 0f;
             s.XSpeed = xDirection * 0.25f;
             s.HurtsEnemy = 0;
-            s.HurtsPlayer = 20;
+            s.HurtsPlayer = 40;
             s.Pierce = 0;
             s.Owner = -1;
             s.expType = ParticleType.FAST_SCATTER;
