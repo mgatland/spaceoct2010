@@ -1,16 +1,23 @@
 ﻿[ ] Visual effect to make the revive powerup easier to understand
 	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
 
+[ ] always have 2 ships, even in single player (the other is a bot)
+
+[ ] remove the refire rate powerup... probably.
+
 [ ] instructions shouldn't mention 's' key and the down arrow because they don't do anything.
 
 [ ]	pixel perfect collisions for the player.
 	i often notice rocks hurting me when they didn't really hit me
+
+[ ] Special novelty levels
 
 [ ] Make the game easier to install. Can I stop using XNA?
 
 [ ] snails should not be able to lay shells on top of other shells.
 
 [ ] fix balance \ pacing issues - too easy until level 30, too hard after that
+	increasing damage should help
 
 [ ] convey progress in some way other than 'Level 1' text.
 [ ] use an audio cue for 'upgrade not needed', since we removed the text cue? (low priority, doesn't really matter)
@@ -18,15 +25,21 @@
 [ ] replace "Press Enter to restart" with a picture of the enter key
 [ ] use a visual\audio cue for 'Player X is lost"
 
-[ ] always have 2 ships, even in single player (the other is a bot)
+[ ] you only move upwards towards DesiredY when shake is zero.
+(shake is shared between both players)
+
+2013-07-21
+
+Tonight I'm adding:
+
+[X] Game can run in full screen. This can be toggled in the Options menu.
+[ ] Support mouse input
 
 2013-07-11
 
 [x] Difficulty - everything is more damaging than before
 [x] removed 'faster movement' powerup because it's not fun
 [x] cleaned powerup code to use an enum
-[ ] you only move upwards towards DesiredY when shake is zero.
-(shake is shared between both players)
 
 -----
 2013-03-02

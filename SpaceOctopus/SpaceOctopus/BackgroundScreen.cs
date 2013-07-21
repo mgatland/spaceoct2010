@@ -46,11 +46,11 @@ namespace SpaceOctopus
             spriteBatch.Begin();
 
             // Draw Background
-            spriteBatch.Draw(background, new Vector2(0, 0),
+            spriteBatch.Draw(background, new Vector2(0 + ScreenManager.screenX, 0 + ScreenManager.screenY),
          new Color(255, 255, 255, TransitionAlpha));
 
             // Draw Title
-            spriteBatch.Draw(title, new Vector2(60, 55),
+            spriteBatch.Draw(title, new Vector2(60 + ScreenManager.screenX, 55 + ScreenManager.screenY),
          new Color(255, 255, 255, TransitionAlpha));
 
             spriteBatch.End();

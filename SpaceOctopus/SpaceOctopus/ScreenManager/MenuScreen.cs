@@ -181,7 +181,7 @@ namespace AlienGameSample
           bool isSelected = IsActive && (i == selectedEntry);
 
           position.X = 240 - font.MeasureString(menuEntry.Text).X / 2;
-          Vector2 scaledPosition = new Vector2(position.X * scaleFactor, position.Y * scaleFactor);
+          Vector2 scaledPosition = new Vector2((position.X + ScreenManager.screenX) * scaleFactor, (position.Y + ScreenManager.screenY) * scaleFactor);
           menuEntry.Draw(this, scaledPosition, isSelected, gameTime, transitionOffset);
 
           position.Y -= menuEntry.GetHeight(this) + menuEntry.ExtraSpacing;

@@ -22,17 +22,13 @@ namespace SpaceOctopus
     {
         GraphicsDeviceManager graphics;
         ScreenManager screenManager;
+        Boolean FullScreen = true;
 
         public SpaceOctGame()
         {
             graphics = new GraphicsDeviceManager(this);
             this.IsMouseVisible = true;
-            //Set the Windows Phone screen resolution
-            graphics.PreferredBackBufferWidth = 480;
-            graphics.PreferredBackBufferHeight = 800;
-
             Content.RootDirectory = "Content";
-
             #if DEBUG
                 if (Tweaking.SimulateTrial) Guide.SimulateTrialMode = true;
             #endif
@@ -49,6 +45,9 @@ namespace SpaceOctopus
             //Create a new instance of the Screen Manager
             screenManager = new ScreenManager(this);
             Components.Add(screenManager);
+
+            Options.Instance.SetGame(this); //so it can manipulate the full screen.
+            Options.Instance.FullScreen = Options.Instance.FullScreen;
 
             //Add two new screens
             screenManager.AddScreen(new BackgroundScreen());
@@ -73,6 +72,26 @@ namespace SpaceOctopus
                     new TrackedEvent("run-full", "", false).Fire();
                 }
             }*/
+        }
+
+        //called by Options
+        public void SetFullScreen(Boolean value)
+        {
+            FullScreen = value;
+            if (FullScreen)
+            {
+                graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+                graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+                graphics.IsFullScreen = true;
+            } 
+            else
+            {
+                graphics.PreferredBackBufferWidth = 480;
+                graphics.PreferredBackBufferHeight = 800;
+                graphics.IsFullScreen = false;
+            }
+            screenManager.UpdateScreenAfterResize(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            graphics.ApplyChanges();
         }
 
         protected override void OnExiting(object sender, EventArgs args)

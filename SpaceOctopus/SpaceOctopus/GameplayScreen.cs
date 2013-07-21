@@ -203,7 +203,7 @@ namespace SpaceOctopus
         private void drawString(string text, int x, int y, int xOff, int yOff, ScreenManager screenManager)
         {
             float fontScale = 1.0f;
-            Vector2 textPos = new Vector2(x + xOff, y + yOff);
+            Vector2 textPos = new Vector2(x + xOff + screenManager.screenX, y + yOff + screenManager.screenY);
             screenManager.SpriteBatch.DrawString(Message.GameFont, text, textPos, new Color(r, g, b, a), 0, new Vector2(0, Message.GameFont.LineSpacing / 2), fontScale, SpriteEffects.None, 0);
         }
 
@@ -347,7 +347,8 @@ namespace SpaceOctopus
             }
             if (text != null)
             {
-                screenManager.SpriteBatch.DrawString(GameFont, text, Position, new Color(r, g, b, a), 0, new Vector2(0, GameFont.LineSpacing / 2), fontScale, SpriteEffects.None, 0);
+                var screenPos = new Vector2(Position.X + screenManager.screenX, Position.Y + screenManager.screenY);
+                screenManager.SpriteBatch.DrawString(GameFont, text, screenPos, new Color(r, g, b, a), 0, new Vector2(0, GameFont.LineSpacing / 2), fontScale, SpriteEffects.None, 0);
             }
         }
 
@@ -587,12 +588,12 @@ namespace SpaceOctopus
             if (!IsAlive) return;
             if (Picture != null)
             {
-                screenManager.SpriteBatch.Draw(Picture.Texture, new Rectangle((int)Position.X + xOff, (int)Position.Y + yOff, (int)Width, (int)Height), color);
+                screenManager.SpriteBatch.Draw(Picture.Texture, new Rectangle((int)Position.X + xOff + screenManager.screenX, (int)Position.Y + yOff + screenManager.screenY, (int)Width, (int)Height), color);
             }
             else
             {
                 //Draw a rectangle in the specified color.
-                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle((int)Position.X + xOff, (int)Position.Y + yOff, (int)Width, (int)Height), color);
+                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle((int)Position.X + xOff + screenManager.screenX, (int)Position.Y + yOff + screenManager.screenY, (int)Width, (int)Height), color);
             }
         }
 
@@ -839,7 +840,7 @@ namespace SpaceOctopus
             int xBack = XBack(image);
             int yBack = YBack(image);
 
-            screenManager.SpriteBatch.Draw(image.Texture, new Rectangle(x - xBack, y - yBack, (int)(image.Width), (int)(image.Height)), Color.White);
+            screenManager.SpriteBatch.Draw(image.Texture, new Rectangle(x - xBack + screenManager.screenX, y - yBack + screenManager.screenY, (int)(image.Width), (int)(image.Height)), Color.White);
         }
 
         private int XBack(Sprite image)
@@ -859,7 +860,7 @@ namespace SpaceOctopus
         private void drawCannon(int x, int y, ScreenManager screenManager)
         {
             beamColor.A = Math.Min((byte)255, (byte)(254 * 2 * cannonWarmth / cannonWarmthMax));
-            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(x, 0, p.Width, y), beamColor);
+            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(x + screenManager.screenX, 0 + +screenManager.screenY, p.Width, y), beamColor);
 
         }
 
@@ -1902,7 +1903,9 @@ namespace SpaceOctopus
         int version = 1;
         bool enableSound = true;
         bool enableMusic = true;
-        bool verticalMotion = false;
+        bool fullScreen = true;
+        bool verticalMotion = false; //always false
+        private SpaceOctGame game;
 
         //public properties
         public bool EnableMusic
@@ -1915,6 +1918,18 @@ namespace SpaceOctopus
                 {
                     MediaPlayer.Stop();
                 }
+                Save();
+            }
+        }
+
+        //public properties
+        public bool FullScreen
+        {
+            get { return fullScreen; }
+            set
+            {
+                fullScreen = value;
+                game.SetFullScreen(fullScreen);
                 Save();
             }
         }
@@ -1946,10 +1961,15 @@ namespace SpaceOctopus
                 writer.WriteLine(version);
                 writer.WriteLine(enableSound);
                 writer.WriteLine(enableMusic);
-                writer.WriteLine(verticalMotion);
+                writer.WriteLine(FullScreen);
             };
 
             IOUtil.WriteFile(filename, handler, IOUtil.NothingAction);
+        }
+
+        public void SetGame(SpaceOctGame game)
+        {
+            this.game = game;
         }
 
         private Options()
@@ -1959,7 +1979,7 @@ namespace SpaceOctopus
                 int version = IOUtil.ReadInt(reader);
                 enableSound = IOUtil.ReadBool(reader);
                 enableMusic = IOUtil.ReadBool(reader);
-                verticalMotion = IOUtil.ReadBool(reader);
+                FullScreen = IOUtil.ReadBool(reader);
             };
             IOUtil.ReadFile(filename, handler, IOUtil.NothingAction);
         }
@@ -3298,7 +3318,7 @@ EndType*/
 
             screenManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
-            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, 0, Window.Width, Window.Height), Color.Gray);
+            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0 + screenManager.screenX, 0 + screenManager.screenY, Window.Width, Window.Height), Color.Gray);
 
             if (PowerUps != null)
             {

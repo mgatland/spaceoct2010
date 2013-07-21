@@ -28,6 +28,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
+using SpaceOctopus;
 
 namespace AlienGameSample
 {
@@ -95,8 +96,13 @@ namespace AlienGameSample
         public override void Initialize()
         {
             base.Initialize();
-
             isInitialized = true;
+        }
+
+        public void UpdateScreenAfterResize(int Width, int Height)
+        {
+            screenX = (Width - screenWidth) / 2;
+            screenY = (Height - screenHeight) / 2;
         }
 
         /// <summary>
@@ -209,6 +215,17 @@ namespace AlienGameSample
 
                 screen.Draw(gameTime);
             }
+
+            //Draw the black frame around the game screen
+            Viewport viewport = GraphicsDevice.Viewport;
+            int spaceOnEachSide = (viewport.Width - this.screenWidth) / 2;
+            int spaceAboveAndBelow = (viewport.Height - this.screenHeight) / 2;
+            SpriteBatch.Begin();
+            SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0, 0, spaceOnEachSide, viewport.Height), Color.Black);
+            SpriteBatch.Draw(Gfx.Pixel, new Rectangle(spaceOnEachSide + screenWidth, 0, spaceOnEachSide, viewport.Height), Color.Black);
+            SpriteBatch.Draw(Gfx.Pixel, new Rectangle(spaceOnEachSide, 0, this.screenWidth, spaceAboveAndBelow), Color.Black);
+            SpriteBatch.Draw(Gfx.Pixel, new Rectangle(spaceOnEachSide, spaceAboveAndBelow + this.screenHeight, this.screenWidth, spaceAboveAndBelow), Color.Black);
+            SpriteBatch.End();
         }
 
         /// <summary>
@@ -272,5 +289,10 @@ namespace AlienGameSample
 
             spriteBatch.End();
         }
+
+        public int screenWidth = 480;
+        public int screenHeight = 800;
+        public int screenX = 0;
+        public int screenY = 0;
     }
 }
