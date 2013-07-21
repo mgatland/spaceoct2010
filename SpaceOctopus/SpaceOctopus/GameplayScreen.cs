@@ -3408,7 +3408,7 @@ EndType*/
 
             if (Tweaking.isCheatsEnabled)
             {
-                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(45, 0, 45, 20), Color.Coral);
+                screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(45 + screenManager.screenX, 0 + screenManager.screenY, 45, 20), Color.Coral);
             }
 
 #if PROFILING
