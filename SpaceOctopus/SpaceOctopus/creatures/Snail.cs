@@ -50,7 +50,7 @@ namespace SpaceOctopus.Creatures
                 {
                     Picture = Core.Instance.Art.SnailLeft;
                     Direction = -1;
-                    lastShellX = Window.Width - Picture.Width;
+                    lastShellX = GameWindow.Width - Picture.Width;
                 }
                 else
                 {
@@ -99,7 +99,7 @@ namespace SpaceOctopus.Creatures
                 else
                 {
                     Picture = Core.Instance.Art.SnailLeft;
-                    lastShellX = Window.Width - Picture.Width;
+                    lastShellX = GameWindow.Width - Picture.Width;
                 }
             }
 
@@ -112,7 +112,7 @@ namespace SpaceOctopus.Creatures
             {
                 return true;
             }
-            if (Position.X > Window.Width + Picture.Width / 2)
+            if (Position.X > GameWindow.Width + Picture.Width / 2)
             {
                 return true;
             }

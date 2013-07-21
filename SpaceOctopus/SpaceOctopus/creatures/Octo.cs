@@ -13,7 +13,7 @@ namespace SpaceOctopus.Creatures
         public bool isFiring; //was bFire
 
         public static int DefaultROF = 6000;
-        public static float DefaultSpeed = (Window.Width / 6000f); //0.05f
+        public static float DefaultSpeed = (GameWindow.Width / 6000f); //0.05f
         public static SoundEffect DefaultShootSound;
 
         private static int DistanceAtEdge = 5;
@@ -70,12 +70,12 @@ namespace SpaceOctopus.Creatures
                 }
                 else if (Direction == 1)
                 { //Right
-                    if (Position.X > Window.Width - DistanceAtEdge - Width)
+                    if (Position.X > GameWindow.Width - DistanceAtEdge - Width)
                     {
                         Direction = 2;
                         //redirect excess movement
-                        Position.Y += (Position.X - (Window.Width - DistanceAtEdge - Width));
-                        Position.X = Window.Width - DistanceAtEdge - Width;
+                        Position.Y += (Position.X - (GameWindow.Width - DistanceAtEdge - Width));
+                        Position.X = GameWindow.Width - DistanceAtEdge - Width;
                     }
                 }
                 else if (Direction == 2)
@@ -85,7 +85,7 @@ namespace SpaceOctopus.Creatures
                     {
                         Row++;
                         //Left, or right?
-                        if (Position.X < Window.Width / 2)
+                        if (Position.X < GameWindow.Width / 2)
                         {
                             Direction = 1;
                         }

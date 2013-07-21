@@ -10,10 +10,6 @@ namespace SpaceOctopus
 {
     class OptionsMenuScreen : MenuScreen
     {
-    //    MenuEntry soundMenuEntry;
-        MenuEntry musicMenuEntry;
-   //     MenuEntry motionMenuEntry;
-        MenuEntry fullScreenMenuEntry;
 
         public OptionsMenuScreen()
             : base("options") 
@@ -22,17 +18,17 @@ namespace SpaceOctopus
          //   soundMenuEntry.Selected += SoundMenuEntrySelected;
          //   MenuEntries.Add(soundMenuEntry);
 
-            musicMenuEntry = new MenuEntry(MusicText());
+            MenuEntry musicMenuEntry = new MenuEntry(MusicText());
             musicMenuEntry.Selected += MusicMenuEntrySelected;
             MenuEntries.Add(musicMenuEntry);
 
-            fullScreenMenuEntry = new MenuEntry(FullScreenText());
+            MenuEntry fullScreenMenuEntry = new MenuEntry(FullScreenText());
             fullScreenMenuEntry.Selected += FullScreenMenuEntrySelected;
             MenuEntries.Add(fullScreenMenuEntry);
 
-//            motionMenuEntry = new MenuEntry(MotionText());
-//            motionMenuEntry.Selected += MotionMenuEntrySelected;
-//            MenuEntries.Add(motionMenuEntry);
+            MenuEntry mouseMotionMenuEntry = new MenuEntry(MouseMotionText());
+            mouseMotionMenuEntry.Selected += MouseMotionMenuEntrySelected;
+            MenuEntries.Add(mouseMotionMenuEntry);
 
             MenuEntry creditsMenuEntry = new MenuEntry("CREDITS");
             creditsMenuEntry.Selected += CreditsMenuEntrySelected;
@@ -48,9 +44,9 @@ namespace SpaceOctopus
         {
             SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
             int yOff = (int)(TransitionPosition * 160);
-            spriteBatch.DrawString(ScreenManager.Font, "SPACE OCTOPUS MONO       VERSION 1.4", new Vector2(10 + ScreenManager.screenX, Window.Height - 80 + yOff + ScreenManager.screenY), Color.White, 0,
+            spriteBatch.DrawString(ScreenManager.Font, "SPACE OCTOPUS MONO       VERSION 1.4", new Vector2(10 + ScreenManager.screenX, GameWindow.Height - 80 + yOff + ScreenManager.screenY), Color.White, 0,
                                     new Vector2(0, 0), 0.6f, SpriteEffects.None, 0);
-            spriteBatch.DrawString(ScreenManager.Font, "SUPPORT: WWW.NEWNORTHROAD.COM", new Vector2(10 + ScreenManager.screenX, Window.Height - 40 + yOff + ScreenManager.screenY), Color.White, 0,
+            spriteBatch.DrawString(ScreenManager.Font, "SUPPORT: WWW.NEWNORTHROAD.COM", new Vector2(10 + ScreenManager.screenX, GameWindow.Height - 40 + yOff + ScreenManager.screenY), Color.White, 0,
                     new Vector2(0, 0), 0.6f, SpriteEffects.None, 0);
         }
 
@@ -64,44 +60,33 @@ namespace SpaceOctopus
             return "FULL SCREEN " + (Options.Instance.FullScreen ? "ON" : "OFF");
         }
 
-        /*private static string SoundText()
+        private static string MouseMotionText()
         {
-            return "SOUND " + (Options.Instance.EnableSound ? "ON" : "OFF");
+            return ("CONTROLS: " + (Options.Instance.RabbleControls ? "WEIRD" : "KEYBOARD"));
         }
-
-        private static string MotionText()
-        {
-            return (Options.Instance.VerticalMotion ? "4 WAY MOVEMENT" : "CLASSIC MOVEMENT");
-        }*/
 
         void CreditsMenuEntrySelected(object sender, EventArgs e)
         {
             ScreenManager.AddScreen(new CreditsScreen());
         }
 
-     /*   void SoundMenuEntrySelected(object sender, EventArgs e)
-        {
-            Tweaking.EnableSound = !Tweaking.EnableSound;
-            soundMenuEntry.Text = SoundText();
-        }*/
-
         void MusicMenuEntrySelected(object sender, EventArgs e)
         {
             Options.Instance.EnableMusic = !Options.Instance.EnableMusic;
-            musicMenuEntry.Text = MusicText();
+            ((MenuEntry)sender).Text = MusicText();
         }
 
         void FullScreenMenuEntrySelected(object sender, EventArgs e)
         {
             Options.Instance.FullScreen = !Options.Instance.FullScreen;
-            fullScreenMenuEntry.Text = FullScreenText();
+            ((MenuEntry)sender).Text = FullScreenText();
         }
 
-    /*    void MotionMenuEntrySelected(object sender, EventArgs e)
+        void MouseMotionMenuEntrySelected(object sender, EventArgs e)
         {
-            Options.Instance.VerticalMotion = !Options.Instance.VerticalMotion;
-            motionMenuEntry.Text = MotionText();
-        }*/
+            Options.Instance.RabbleControls = !Options.Instance.RabbleControls;
+            ((MenuEntry)sender).Text = MouseMotionText();
+        }
 
     }
 }

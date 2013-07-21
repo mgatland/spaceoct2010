@@ -22,7 +22,6 @@ namespace SpaceOctopus
     {
         GraphicsDeviceManager graphics;
         ScreenManager screenManager;
-        Boolean FullScreen = true;
 
         public SpaceOctGame()
         {
@@ -77,8 +76,7 @@ namespace SpaceOctopus
         //called by Options
         public void SetFullScreen(Boolean value)
         {
-            FullScreen = value;
-            if (FullScreen)
+            if (value)
             {
                 graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
                 graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;

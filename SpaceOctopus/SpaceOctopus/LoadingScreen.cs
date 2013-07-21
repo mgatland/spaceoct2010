@@ -48,7 +48,15 @@ namespace SpaceOctopus
      //       {
       //          backgroundThread = null;
                 this.ExitScreen();
-                ScreenManager.AddScreen(new MainMenuScreen());
+                MainMenuScreen mainMenuScreen = new MainMenuScreen();
+                ScreenManager.AddScreen(mainMenuScreen);
+                if (Options.Instance.RabbleControls)
+                {
+                    Core.Instance.nextGameType = GameType.TwoPlayer;
+                    Core.Instance.Reset();
+                    GameplayScreen screen = new GameplayScreen(mainMenuScreen);
+                    ScreenManager.AddScreen(screen);
+                }
                 ScreenManager.Game.ResetElapsedTime();
        //     }
 

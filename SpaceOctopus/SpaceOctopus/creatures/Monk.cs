@@ -102,7 +102,7 @@ namespace SpaceOctopus.Creatures
             else
             {
                 MoveGun(delta);
-                float distance = ((Window.Width / 2) - (Position.X + Width / 2)) / Window.Width;
+                float distance = ((GameWindow.Width / 2) - (Position.X + Width / 2)) / GameWindow.Width;
                 xA = Math.Sign(distance) * Speed;
                 Position.X += xV * delta;
                 Position.Y += yV * delta;

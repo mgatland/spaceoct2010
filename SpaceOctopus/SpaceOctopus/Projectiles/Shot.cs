@@ -45,7 +45,7 @@ namespace SpaceOctopus.Projectiles
         public int Owner; //TODO: should be a Player object.
         public ParticleType expType;
 
-        protected const float StandardShotSpeed = Window.Height / 1670f;
+        protected const float StandardShotSpeed = GameWindow.Height / 1670f;
 
         public Shot()
             : base(null)
@@ -70,9 +70,9 @@ namespace SpaceOctopus.Projectiles
             Position.Y += YSpeed * delta;
             Position.X += XSpeed * delta;
             if (Position.Y + Height < 0 && YSpeed < 0) IsAlive = false;
-            if (Position.Y > Window.Height && YSpeed > 0) IsAlive = false;
+            if (Position.Y > GameWindow.Height && YSpeed > 0) IsAlive = false;
             if (Position.X + Width < 0 && XSpeed <= 0) IsAlive = false;
-            if (Position.X > Window.Width && XSpeed >= 0) IsAlive = false;
+            if (Position.X > GameWindow.Width && XSpeed >= 0) IsAlive = false;
         }
 
         public void Die()

@@ -154,7 +154,7 @@ namespace SpaceOctopus
 
     // Space Octopus (non tutorial) code follows
 
-    public static class Window
+    public static class GameWindow
     {
         public const int Width = 480; //300 in original SOM
         public const int Height = 800; //500 in original SOM
@@ -242,7 +242,7 @@ namespace SpaceOctopus
                 if (isTwoPlayer)
                 {
                     drawString("Level: " + s.level, 40, yPos, xOff, yOff, screenManager);
-                    drawString("Total score: " + (s.score + s.score2), Window.Width / 2- 30, yPos, xOff, yOff, screenManager);
+                    drawString("Total score: " + (s.score + s.score2), GameWindow.Width / 2- 30, yPos, xOff, yOff, screenManager);
                     //drawString("Player scores: " + s.score + ", " + s.score2, 40, yPos + 40, xOff, yOff, screenManager);
                 }
                 else
@@ -296,8 +296,8 @@ namespace SpaceOctopus
             {
                 Vector2 size = GameFont.MeasureString(text);
                 size *= fontScale;
-                Position.Y = Window.Height / 2 + (row * size.Y) - (size.Y / 2);
-                Position.X = Window.Width / 2 - (size.X / 2);
+                Position.Y = GameWindow.Height / 2 + (row * size.Y) - (size.Y / 2);
+                Position.X = GameWindow.Width / 2 - (size.X / 2);
             }
         }
 
@@ -314,7 +314,7 @@ namespace SpaceOctopus
             Message m = new Message(text, row);
             Vector2 size = GameFont.MeasureString(text);
             size *= m.fontScale;
-            m.Position.Y = Window.Height / 2 + (row * size.Y) - (size.Y / 2);
+            m.Position.Y = GameWindow.Height / 2 + (row * size.Y) - (size.Y / 2);
             m.Position.X = yPos - (size.X / 2);
             m.Row = -1; //exclude from the row management system.
             return m;
@@ -363,7 +363,7 @@ namespace SpaceOctopus
         //no longer used: FASTMOVE, HEIGHTBOOST
         //immediate means it works immediately - it's not a permanent effect that attaches to the ship
 
-        private const float DefaultFallSpeed = Window.Height / 7142f;
+        private const float DefaultFallSpeed = GameWindow.Height / 7142f;
 
         PowerUp NextP;
         PowerUp PrevP;
@@ -601,15 +601,15 @@ namespace SpaceOctopus
 
         public bool isOnScreen()
         {
-            if (Position.X + Width < 0 || Position.X > Window.Width) return false;
-            if (Position.Y + Height < 0 || Position.Y > Window.Height) return false;
+            if (Position.X + Width < 0 || Position.X > GameWindow.Width) return false;
+            if (Position.Y + Height < 0 || Position.Y > GameWindow.Height) return false;
             return true;
         }
 
         public bool isFullyOnScreen()
         {
-            if (Position.X < 0 || Position.X + Width > Window.Width) return false;
-            if (Position.Y < 0 || Position.Y + Height > Window.Height) return false;
+            if (Position.X < 0 || Position.X + Width > GameWindow.Width) return false;
+            if (Position.Y < 0 || Position.Y + Height > GameWindow.Height) return false;
             return true;
         }
 
@@ -1225,13 +1225,13 @@ namespace SpaceOctopus
         public int Score;
         public double Shake;
         public const double MaxShake = 200;
-        double YSpeed = (Window.Height / 50000d);
+        double YSpeed = (GameWindow.Height / 50000d);
         public double DefaultSpeed;
 
         double Shield = 1;
         double SuperShield = 0.7;
         int SuperY;
-        const int DeathY = Window.Height;
+        const int DeathY = GameWindow.Height;
         bool isAI;
         float ShotSpeedMulti = 1;
 
@@ -1280,7 +1280,7 @@ namespace SpaceOctopus
             : base(id == 0? Core.Instance.Art.Player1 : Core.Instance.Art.Player2)
         {
             Art = Core.Instance.Art;
-            Position.X = Window.Width / 2 - Width / 2;
+            Position.X = GameWindow.Width / 2 - Width / 2;
             Position.Y = DefaultDesiredY;
             LastMove.X = 0;
             LastMove.Y = 0;
@@ -1458,20 +1458,32 @@ namespace SpaceOctopus
                 {
                     if (up) Position.Y -= Speed * delta;
                     //downwards movement - note that we cannot fly off the bottom of the screen, but we can otherwise be pushed off.
-                    if (down && Position.Y + Height < Window.Height)
+                    if (down && Position.Y + Height < GameWindow.Height)
                     {
                         Position.Y += Speed * delta;
-                        if (Position.Y + Height > Window.Height) Position.Y = Window.Height - Height;
+                        if (Position.Y + Height > GameWindow.Height) Position.Y = GameWindow.Height - Height;
                     }
                     if (Position.Y < 0) Position.Y = 0;
                 }
 
+                if (Options.Instance.RabbleControls)
+                {
+                    //infinite speed.
+                    MouseState ms = Mouse.GetState();
+                    if (Id == 0)
+                    {
+                        Position.X = ms.X;
+                    }
+                    else
+                    {
+                        Position.X = ms.Y;
+                    }
+                }
+
                 if (Position.X < 0) Position.X = 0;
-                if (Position.X + Width > Window.Width) Position.X = Window.Width - Width;
+                if (Position.X + Width > GameWindow.Width) Position.X = GameWindow.Width - Width;
 
-
-                //if (Core.Instance.EnemyCount > 0 || Upgrades.hasCannon || Core.Instance.InTrialLimbo) //the player is firing
-                if (up || Upgrades.hasCannon)
+                if (up || Upgrades.hasCannon || Options.Instance.RabbleControls && Core.Instance.EnemyCount > 0)
                 {
                     if (RefireTimer == 0)
                     {
@@ -1622,7 +1634,7 @@ namespace SpaceOctopus
         internal void revive()
         {
             IsAlive = true;
-            Position.Y = Window.Height - 1;
+            Position.Y = GameWindow.Height - 1;
             invulnerabilityTimer = RESPAWN_INVULERABILITY_TIME;
         }
     }
@@ -1904,7 +1916,8 @@ namespace SpaceOctopus
         bool enableSound = true;
         bool enableMusic = true;
         bool fullScreen = true;
-        bool verticalMotion = false; //always false
+        bool verticalMotion = false;
+        bool mouseControls = false;
         private SpaceOctGame game;
 
         //public properties
@@ -1954,12 +1967,22 @@ namespace SpaceOctopus
             }
         }
 
+        public bool RabbleControls
+        {
+            get { return mouseControls; }
+            set
+            {
+                mouseControls = value;
+                Save();
+            }
+        }
+
         private void Save()
         {
             Action<StreamWriter> handler = delegate(StreamWriter writer)
             {
                 writer.WriteLine(version);
-                writer.WriteLine(enableSound);
+                writer.WriteLine(mouseControls);
                 writer.WriteLine(enableMusic);
                 writer.WriteLine(FullScreen);
             };
@@ -1977,7 +2000,7 @@ namespace SpaceOctopus
             Action<StreamReader> handler = delegate(StreamReader reader)
             {
                 int version = IOUtil.ReadInt(reader);
-                enableSound = IOUtil.ReadBool(reader);
+                mouseControls = IOUtil.ReadBool(reader);
                 enableMusic = IOUtil.ReadBool(reader);
                 FullScreen = IOUtil.ReadBool(reader);
             };
@@ -2386,9 +2409,9 @@ EndType
         Enemy Parent;
         const int LifeSpan = 1400;
         const int GrowSpan = 900;
-        const float BeamSpeed = Window.Height * 0.67f / 500;
-        const int Width2 = Window.Width * 15 / 300;
-        const int InitialWidth = Window.Width * 2 / 300;
+        const float BeamSpeed = GameWindow.Height * 0.67f / 500;
+        const int Width2 = GameWindow.Width * 15 / 300;
+        const int InitialWidth = GameWindow.Width * 2 / 300;
         const float Damage = 0.25f;
         const float Shake = 0.15f;
 
@@ -2802,8 +2825,8 @@ EndType*/
 
             if (P2 != null)
             {
-                P2.Position.X = Window.Width / 4 * 1 - P2.Width / 2;
-                P.Position.X = Window.Width / 4 * 3 - P.Width / 2;
+                P2.Position.X = GameWindow.Width / 4 * 1 - P2.Width / 2;
+                P.Position.X = GameWindow.Width / 4 * 3 - P.Width / 2;
             }
             GenerateLevel();
             particleDrain = defaultParticleDrain;
@@ -2939,14 +2962,24 @@ EndType*/
                     {
                         scores.AddScoreAndSave(new Score(P.Score, P2.Score, level, GetRank(level, P.Kills), "", true));
                     }
-                    CreateMessage("Press Enter to restart", 6, 0);
+
+                    if (!Options.Instance.RabbleControls)
+                    {
+                        CreateMessage("Press Enter to restart", 6, 0);
+                    }
                     lostMessage = true;
                 }
 
-                if (Tick > lostTick + resetDelay && Input.TappedThisFrame)
+                if (Tick > lostTick + resetDelay && Input.HitEnterThisFrame)
                 {
                     Reset();
                 }
+                else if (Options.Instance.RabbleControls && Tick > lostTick + resetDelay * 4)
+                {
+                    //in Mouse Control mode you can't hit enter so let's just advance
+                    Reset();
+                }
+
             }
 
             if (gameTime.IsRunningSlowly)
@@ -3124,7 +3157,7 @@ EndType*/
                     newEnemyCount++;
                     e.Move(delta);
 
-                    if (e.Position.Y > Window.Height)
+                    if (e.Position.Y > GameWindow.Height)
                     {
                         e.DieWithNoEffects();
                     }
@@ -3145,7 +3178,7 @@ EndType*/
             }
             else
             {
-                lowestEnemyCentreX = Window.Width / 2;
+                lowestEnemyCentreX = GameWindow.Width / 2;
             }
 
             //messages
@@ -3286,7 +3319,7 @@ EndType*/
         //map coordinates to cells in the shot map dictionary lookup whatever i decide to use.
         public static int PositionToIndex(Vector2 pos)
         {
-            //int xCell = (int)(pos.X * 2 / Window.Width);
+            //int xCell = (int)(pos.X * 2 / GameWindow.Width);
             int yCell = (int)(pos.Y / 32);
             //int cell = xCell + (2 * yCell);
             return yCell;
@@ -3308,17 +3341,17 @@ EndType*/
                 }
                 else
                 {
-                    xOff = (Math.Min(Math.Abs(xOff), Window.Width / 4) + Random.Next(1, 2)) * -Math.Sign(xOff);
+                    xOff = (Math.Min(Math.Abs(xOff), GameWindow.Width / 4) + Random.Next(1, 2)) * -Math.Sign(xOff);
                 }
             }
             else
             {
-                xOff = (Math.Min(Math.Abs(xOff), Window.Width / 4) - Random.Next(1, 2)) * -Math.Sign(xOff);
+                xOff = (Math.Min(Math.Abs(xOff), GameWindow.Width / 4) - Random.Next(1, 2)) * -Math.Sign(xOff);
             }
 
             screenManager.SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
 
-            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0 + screenManager.screenX, 0 + screenManager.screenY, Window.Width, Window.Height), Color.Gray);
+            screenManager.SpriteBatch.Draw(Gfx.Pixel, new Rectangle(0 + screenManager.screenX, 0 + screenManager.screenY, GameWindow.Width, GameWindow.Height), Color.Gray);
 
             if (PowerUps != null)
             {
@@ -3361,15 +3394,15 @@ EndType*/
                     //FIXME: uses memory every frame!
                     string msg1 = "Score: " + P.Score;
                     string msg2 = "Score: " + P2.Score;
-                    drawString(msg2, 30, Window.Height - 30, 0, 0, screenManager);
-                    drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
+                    drawString(msg2, 30, GameWindow.Height - 30, 0, 0, screenManager);
+                    drawString(msg1, GameWindow.Width - 190, GameWindow.Height - 30, 0, 0, screenManager);
 
                 }
                 else
                 {
                     //FIXME: uses memory every frame!
                     string msg1 = "Score: " + P.Score;
-                    drawString(msg1, Window.Width - 190, Window.Height - 30, 0, 0, screenManager);
+                    drawString(msg1, GameWindow.Width - 190, GameWindow.Height - 30, 0, 0, screenManager);
                 }
             }
 
@@ -3387,12 +3420,12 @@ EndType*/
                 if (InTrialLimbo)
                 {
                     //In limbo means we tried to advance to a new level, but we were out of trial levels. Instead we advance to an upsell screen.
-                    Input.UpsellBuyButton = DrawUpsell(UPSELL_GET_FULL_VERSION, Window.Height / 5 * 2, 1f, screenManager);
-                    //DrawUpsell("MORE GREAT ADVENTURES", Window.Height / 4 + 60, 1f, screenManager);
-                    //DrawUpsell("1 OR 2 PLAYERS", Window.Height / 4 + 120, 1f, screenManager);
-                    Input.UpsellBackButton = DrawUpsell(UPSELL_BACK, Window.Height / 5 * 2 + 100, 0.5f, screenManager);
+                    Input.UpsellBuyButton = DrawUpsell(UPSELL_GET_FULL_VERSION, GameWindow.Height / 5 * 2, 1f, screenManager);
+                    //DrawUpsell("MORE GREAT ADVENTURES", GameWindow.Height / 4 + 60, 1f, screenManager);
+                    //DrawUpsell("1 OR 2 PLAYERS", GameWindow.Height / 4 + 120, 1f, screenManager);
+                    Input.UpsellBackButton = DrawUpsell(UPSELL_BACK, GameWindow.Height / 5 * 2 + 100, 0.5f, screenManager);
                 }
-                screenManager.SpriteBatch.DrawString(Message.GameFont, trialModeString, new Vector2(Window.Width / 2, 10), Color.White, 0f, new Vector2(trialModeStringWidth/2, 0), 0.5f, SpriteEffects.None, 0f);
+                screenManager.SpriteBatch.DrawString(Message.GameFont, trialModeString, new Vector2(GameWindow.Width / 2, 10), Color.White, 0f, new Vector2(trialModeStringWidth/2, 0), 0.5f, SpriteEffects.None, 0f);
             }
 
             screenManager.SpriteBatch.End();
@@ -3405,9 +3438,9 @@ EndType*/
         {
             Vector2 textSize = Message.GameFont.MeasureString(message);
             int width = (int)(textSize.X);
-            screenManager.SpriteBatch.DrawString(Message.GameFont, message, new Vector2(Window.Width / 2 + 1, yPos + 1), Color.Black, 0f, new Vector2(width / 2, 0), scale, SpriteEffects.None, 0f);
-            screenManager.SpriteBatch.DrawString(Message.GameFont, message, new Vector2(Window.Width / 2, yPos), Color.White, 0f, new Vector2(width / 2, 0), scale, SpriteEffects.None, 0f);
-            Rectangle button = new Rectangle((int)(Window.Width / 2 - (textSize.X * scale / 2)), yPos, (int)(textSize.X * scale), (int)(textSize.Y * scale));
+            screenManager.SpriteBatch.DrawString(Message.GameFont, message, new Vector2(GameWindow.Width / 2 + 1, yPos + 1), Color.Black, 0f, new Vector2(width / 2, 0), scale, SpriteEffects.None, 0f);
+            screenManager.SpriteBatch.DrawString(Message.GameFont, message, new Vector2(GameWindow.Width / 2, yPos), Color.White, 0f, new Vector2(width / 2, 0), scale, SpriteEffects.None, 0f);
+            Rectangle button = new Rectangle((int)(GameWindow.Width / 2 - (textSize.X * scale / 2)), yPos, (int)(textSize.X * scale), (int)(textSize.Y * scale));
             if (Tweaking.DrawUpsellButtons) screenManager.SpriteBatch.Draw(Gfx.Pixel, button, Color.IndianRed);
             return button;
         }
@@ -3756,19 +3789,21 @@ EndType*/
 
         private void ShowInstructions(bool isTwoPlayer)
         {
+            if (Options.Instance.RabbleControls) return;
+
             if (isTwoPlayer)
             {
                 int xOffset = Gfx.KeysP1.Width / 2;
-                int yPos = Window.Height / 10 * 5;
-                CreateKeyboardKeyMessage(Gfx.KeysP2, Window.Width / 4 - xOffset, yPos);
-                CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 4 * 3 - xOffset, yPos);
+                int yPos = GameWindow.Height / 10 * 5;
+                CreateKeyboardKeyMessage(Gfx.KeysP2, GameWindow.Width / 4 - xOffset, yPos);
+                CreateKeyboardKeyMessage(Gfx.KeysP1, GameWindow.Width / 4 * 3 - xOffset, yPos);
 
             }
             else
             {
                 int xOffset = Gfx.KeysP1.Width / 2;
-                int yPos = Window.Height / 10 * 5;
-                CreateKeyboardKeyMessage(Gfx.KeysP1, Window.Width / 2 - xOffset, yPos);
+                int yPos = GameWindow.Height / 10 * 5;
+                CreateKeyboardKeyMessage(Gfx.KeysP1, GameWindow.Width / 2 - xOffset, yPos);
             }
         }
 
@@ -3776,13 +3811,13 @@ EndType*/
         {
             Snail s = new Snail();
             s.Position.X = 0 - s.Picture.Width;
-            s.Position.Y = Window.Height / 2;
+            s.Position.Y = GameWindow.Height / 2;
             //m.SleepTime = i * 1500;
             AlienList.Add(s);
 
             Snail s2 = new Snail();
-            s2.Position.X = Window.Width;
-            s2.Position.Y = Window.Height / 2 - s2.Picture.Height * 3;
+            s2.Position.X = GameWindow.Width;
+            s2.Position.Y = GameWindow.Height / 2 - s2.Picture.Height * 3;
             //m.SleepTime = i * 1500;
             AlienList.Add(s2);
 
@@ -3790,13 +3825,13 @@ EndType*/
             {
                 Snail s3 = new Snail();
                 s3.Position.X = 0 - s3.Picture.Width;
-                s3.Position.Y = Window.Height / 2 - s3.Picture.Height * 1;
+                s3.Position.Y = GameWindow.Height / 2 - s3.Picture.Height * 1;
                 //m.SleepTime = i * 1500;
                 AlienList.Add(s3);
 
                 Snail s4 = new Snail();
-                s4.Position.X = Window.Width;
-                s4.Position.Y = Window.Height / 2 - s4.Picture.Height * 4;
+                s4.Position.X = GameWindow.Width;
+                s4.Position.Y = GameWindow.Height / 2 - s4.Picture.Height * 4;
                 //m.SleepTime = i * 1500;
                 AlienList.Add(s4);
             }
@@ -3819,7 +3854,7 @@ EndType*/
             for (int i = 0; i < numAliens; i++)
             {
                 Monk m = new Monk();
-                m.Position.X = (Window.Width / 5) * Random.Next(1, 5) - m.Width / 2;
+                m.Position.X = (GameWindow.Width / 5) * Random.Next(1, 5) - m.Width / 2;
                 m.Position.Y = -ySpacing;
                 m.SleepTime = i * 1500;
                 AlienList.Add(m);
@@ -3910,7 +3945,7 @@ EndType*/
                 }
                 else
                 {
-                    e.Position.X = Window.Width + (i - rightSquad) * xSpacing; //right side
+                    e.Position.X = GameWindow.Width + (i - rightSquad) * xSpacing; //right side
                     e.Position.Y = ySpacing;
                     e.Row = 1;
                     e.Direction = -1;
@@ -3930,7 +3965,7 @@ EndType*/
                 for (int i = 1; i <= 4 && numAliens > 0; i++) //weird for loop because of blitzmax old ways. TODO: make start from zero...
                 {
                     Frog a = new Frog(waveDelay);
-                    a.Position.X = (Window.Width / 5) * i - a.Width / 2;
+                    a.Position.X = (GameWindow.Width / 5) * i - a.Width / 2;
                     int wave = numAliens / 8;
                     a.Position.Y = -a.Height - 5;
                     AlienList.Add(a);
@@ -3977,7 +4012,7 @@ EndType*/
     public class Inputs
     {
         public bool HasFingerDown;
-        public bool TappedThisFrame;
+        public bool HitEnterThisFrame;
 
         public bool P1HasFingerDown;
         public bool P2HasFingerDown;
@@ -4007,7 +4042,7 @@ EndType*/
 
                 bool wasFingerDown = HasFingerDown;
                 HasFingerDown = false;
-                TappedThisFrame = false;
+                HitEnterThisFrame = false;
                 P1HasFingerDown = false;
                 P2HasFingerDown = false;
 
@@ -4022,7 +4057,7 @@ EndType*/
 
                 if (HasFingerDown && !wasFingerDown)
                 {
-                    TappedThisFrame = true;
+                    HitEnterThisFrame = true;
                 }
 
                 player.left = false;

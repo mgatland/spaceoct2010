@@ -14,7 +14,7 @@ namespace SpaceOctopus.Creatures
         int stillTime;
         static int defaultMaxStillTime = 30;
         public int MaxStillTime;
-        static int maxJumpDist = Window.Width;
+        static int maxJumpDist = GameWindow.Width;
         static int defaultROF = 6000;
         static float defaultSpeed = 0.1f;
         int hops = 0;
@@ -101,7 +101,7 @@ namespace SpaceOctopus.Creatures
                 {
                     //slow mode
                     stillTime = 0;
-                    int destX = Core.Instance.Random.Next(0, Window.Width);
+                    int destX = Core.Instance.Random.Next(0, GameWindow.Width);
                     //make sure destination is in range.
                     destX = (int)Math.Min(destX, Position.X + maxJumpDist / 2);
                     destX = (int)Math.Max(destX, Position.X - maxJumpDist / 2);

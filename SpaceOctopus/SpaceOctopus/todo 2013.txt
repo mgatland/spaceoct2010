@@ -30,10 +30,14 @@
 
 2013-07-21
 
-Tonight I'm adding:
+Tonight I'm adding this for Rabble Room:
 
 [X] Game can run in full screen. This can be toggled in the Options menu.
-[ ] Support mouse input
+	(going from full screen to windows makes Windows 7 display funny; maybe because I'm updating the resolution in Update instead of Draw?)
+[X] Support mouse input
+	This is Rabble Room only - it's for custom controls where one emulates mouseX, one emulates MouseY. No other buttons.
+	MouseX controls P1, MouseY controls P2.
+	Ships auto-fire, the game auto-starts and auto-resets when you lose. No button-presses required.
 
 2013-07-11
 
