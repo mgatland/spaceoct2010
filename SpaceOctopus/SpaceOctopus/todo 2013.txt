@@ -1,4 +1,6 @@
-﻿[ ] Visual effect to make the revive powerup easier to understand
+﻿in Rabble Mode, there's a one frame flicker before the ships move to their mouse positions when the game starts
+
+[ ] Visual effect to make the revive powerup easier to understand
 	a particle trail that zooms to that player? a projectile with a shimmery particle trail?
 
 [ ] always have 2 ships, even in single player (the other is a bot)

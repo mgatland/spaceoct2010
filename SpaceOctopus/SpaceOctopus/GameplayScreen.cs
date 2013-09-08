@@ -24,7 +24,7 @@ namespace SpaceOctopus
 
         //Screen dimension consts
         const float screenScaleFactor = 1.0f;
-        const float screenHeight = 800.0f * screenScaleFactor; // Real screen is 800.0f x 480.0f
+        const float screenHeight = 768.0f * screenScaleFactor; // Real screen is 800.0f x 480.0f
         const float screenWidth = 480.0f * screenScaleFactor;
         const int leftOffset = 25;
         const int topOffset = 50;
@@ -157,7 +157,7 @@ namespace SpaceOctopus
     public static class GameWindow
     {
         public const int Width = 480; //300 in original SOM
-        public const int Height = 800; //500 in original SOM
+        public const int Height = 768; //500 in original SOM
     }
 
     public class HighScores : Drawable

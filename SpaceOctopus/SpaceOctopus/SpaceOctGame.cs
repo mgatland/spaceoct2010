@@ -85,7 +85,7 @@ namespace SpaceOctopus
             else
             {
                 graphics.PreferredBackBufferWidth = 480;
-                graphics.PreferredBackBufferHeight = 800;
+                graphics.PreferredBackBufferHeight = 768;
                 graphics.IsFullScreen = false;
             }
             screenManager.UpdateScreenAfterResize(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);

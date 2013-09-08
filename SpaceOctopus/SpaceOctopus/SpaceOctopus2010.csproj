@@ -13,7 +13,7 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <XnaFrameworkVersion>v4.0</XnaFrameworkVersion>
     <XnaPlatform>Windows</XnaPlatform>
-    <XnaProfile>HiDef</XnaProfile>
+    <XnaProfile>Reach</XnaProfile>
     <XnaCrossPlatformGroupID>724850d0-0f1b-49c9-ba72-a1ee4f470e2d</XnaCrossPlatformGroupID>
     <XnaOutputType>Game</XnaOutputType>
     <XapFilename>$(AssemblyName).xap</XapFilename>
