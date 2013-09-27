@@ -26,7 +26,6 @@ namespace SpaceOctopus
         public SpaceOctGame()
         {
             graphics = new GraphicsDeviceManager(this);
-            this.IsMouseVisible = true;
             Content.RootDirectory = "Content";
             #if DEBUG
                 if (Tweaking.SimulateTrial) Guide.SimulateTrialMode = true;
@@ -81,12 +80,14 @@ namespace SpaceOctopus
                 graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
                 graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
                 graphics.IsFullScreen = true;
+                this.IsMouseVisible = false;
             } 
             else
             {
                 graphics.PreferredBackBufferWidth = 480;
                 graphics.PreferredBackBufferHeight = 768;
                 graphics.IsFullScreen = false;
+                this.IsMouseVisible = true;
             }
             screenManager.UpdateScreenAfterResize(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
             graphics.ApplyChanges();
