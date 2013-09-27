@@ -291,7 +291,7 @@ namespace AlienGameSample
         }
 
         public int screenWidth = 480;
-        public int screenHeight = 800;
+        public int screenHeight = 768;
         public int screenX = 0;
         public int screenY = 0;
     }
