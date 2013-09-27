@@ -1472,11 +1472,12 @@ namespace SpaceOctopus
                     MouseState ms = Mouse.GetState();
                     if (Id == 0)
                     {
-                        Position.X = ms.X;
+                        
+                        Position.X = ms.X * GameWindow.Width / 1366;
                     }
                     else
                     {
-                        Position.X = ms.Y;
+                        Position.X = ms.Y * GameWindow.Width / 768;
                     }
                 }
 

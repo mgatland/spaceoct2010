@@ -408,14 +408,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="pixelated.spritefont">
-      <Name>pixelated</Name>
-      <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
-      <SubType>Designer</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="gfx\frog0.png">
       <Name>frog0</Name>
       <Importer>TextureImporter</Importer>
